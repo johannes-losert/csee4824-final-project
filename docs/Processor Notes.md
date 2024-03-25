@@ -6,7 +6,7 @@
 
 ## Dispatch (D)
 - Take instruction in F/D register and decode it
-- Attempt to allocate a Reservation Station, ROB entry, L/S Queue entry, and 
+- Attempt to allocate a Reservation Station, ROB entry, L/S Queue entry, and
 physical register (unless dest-less instruction like store) for it
     - If any is unavailable, then we have it a structural hazard and must
     stall until all available
@@ -15,7 +15,7 @@ physical register (unless dest-less instruction like store) for it
         2. Allocate new ROB entry at the head of the queue
         2.5. Do we need to allocate entry in L/S queue if it is a load or store?
         3. Copy current Map Table (OR is it Arch Map?) entry mapped to the
-        architectural register that is the instruction's into Told of ROB entry  
+        architectural register that is the instruction's into Told of ROB entry
         4. Populate ROB entry 'T' with tag N
         5. Update Map Table entry for arch register destination, replacing old
         tag with N
@@ -26,14 +26,14 @@ physical register (unless dest-less instruction like store) for it
             nor T2 can be tag N)
 
 ## Issue (S)
-- Check each allocated entry in reservation station if the ready bit 
+- Check each allocated entry in reservation station if the ready bit
 for both opcodes is set (Should we be using CDB instead?)
 - For the first (chose some other way? do multiple?) instruction that is ready,
 retrieve the opcode values from the register file and advance the instruction
-to the execution stage 
+to the execution stage
 
 ## Execute (X)
-- Each issued functional unit performs execution on the operands provided by 
+- Each issued functional unit performs execution on the operands provided by
 the issue stage
 - If a FU result is ready (stored in X/C register) advancd to complete stage
     - if multiple are ready, do they all advance?
@@ -41,24 +41,24 @@ the issue stage
 ## Complete (C)
 - Write result of a (just one?) functional unit
     1. Check RS entry (Or ROB entry? does it matter?) to find result PR tag
-    2. Write result to that tag 
+    2. Write result to that tag
     3. Update CDB to broadcast that tag to any waiting FUs
     4. Update Map Table indicating that PR N is ready
 
 ## Retire (R)
-- Wait for the instruction at the head of the ROB to be completed 
+- Wait for the instruction at the head of the ROB to be completed
 - If instruction is a branch and branch was mispredicted, or if exception
     - clean up each instruction behind in ROB queue:
         - Free RS entry
-        - Return T to freelist 
+        - Return T to freelist
         - Set MapTable at result arch register to Told
         - Free ROB entry
         - what if inst. was store?
     - Set PC to correct value (based on branch output or just before exception?)
-    - do other things? definitely 
-- Store head of L/S queue to data memory? 
+    - do other things? definitely
+- Store head of L/S queue to data memory?
 - Free ROB/LSQ entries
-- Return Told to Free List 
+- Return Told to Free List
 - Record T to arch map of result arch reg
 
 
@@ -71,10 +71,10 @@ empty, but includes 'ready' bit)
 - Tracks either the PR number containing the current (possibly speculated) value
 of each architural register (if ready bit is 1) OR tracks the PR number that
 will eventually be populated with the correct value of that architectural
-register at this moment.  
+register at this moment.
 
 ## Arch Map
-- Mapping updated when instruction is committed/retired 
+- Mapping updated when instruction is committed/retired
 - Holds last 'non-speculative' PR associated with a given architectural name
 - 'Reverse map table' allows retrieving architectural register name from a
 physical register number (never empty)?
@@ -86,7 +86,8 @@ instruction needs
 enter free list when instructions are retired
 
 ## Reservation Stations
-- Tracks instructions that have been dispatched but not yet issued 
+### Notes
+- Tracks instructions that have been dispatched but not yet issued
 - Maps instruction number to functional unit, result PR tag, and both operand
 PR tags
 - Member instructions have a functional unit assigned, but are waiting on the PR
@@ -94,15 +95,52 @@ of one of their operands to be set 'ready' in the map table (and broadcast on
 CDB)
 - Does not hold actual values, instead references physical register
 
-## Load/Store Queue 
+### Components
+    - Compiletime array of RS entry modules, each with index number
+### Inputs
+    - clock, enable, reset bits
+    - [For Reading]
+        - Read bit (enable to search for the RS struct for a given instr number)
+        - Read instruction number
+    - [For Writing]
+        - Write bit (enable to try to add the given RS struct)
+        - Input::RS Entry Struct
+
+### Output
+    - [For Reading]
+        - valid/found bit (raised if enable, read bits raised and RS struct for
+        given instr number found)
+        - Output::RS Entry Struct
+    - [For Writing]
+        - valid/done bit (raised if enabled, write bits raised and a slot was
+        found for the provided RS Entry (i.e. either an empty slot with the
+        given FU enum was found and populated or the given instr number was
+        already stored somewhere and the other non-FU enum values were updated))
+
+## RS Entry
+### Components
+    - Registers: FU enum | busy bit | inst number | result PR Tag | Operand 1 PR
+    Tag | Operand 2 PR Tag
+### Inputs
+    - clock, enable, reset bits
+    - Write bit
+    - Next::RS Entry Struct {FU enum, busy bit, inst number, result PR tag, Op 1 PR
+    tag, Op 2 PR tag}
+    - (alternative, different 'update' methods like 'clear', 'allocate'?)
+    - should we set FU enum at compiletime? Probably
+### Outputs
+    - Curr::RS Entry Struct
+    - valid bit?
+
+## Load/Store Queue
 - ??
 
-## Reorder Buffer 
+## Reorder Buffer
 - Tracks the state of instructions (Maps instruction number to result PR number
  (t) and old result PR number (Told))
-- Structured as queue, in program order (head is oldest instruction not yet 
+- Structured as queue, in program order (head is oldest instruction not yet
 retired, tail is youngest dispatched)
-- Instructions enter when dispatched, leave when retired  
+- Instructions enter when dispatched, leave when retired
 - Does not hold values, now purely for control/tag management
 
 ## Common Data Bus
@@ -121,14 +159,14 @@ hazards 'naturally'
 
 
 # Advanced Feature Notes
-## 2-Way Superscalar 
+## 2-Way Superscalar
 - Processor must be able to move multiple instruction 'bundles' between stages
 in a single clock cycle
 - Most difficult transition will be during dispatch, when PRs are assigned
     - In a single cycle, must resolve dependencies within bundle
     - Approach:
         1. Pre-fetch PRs from free list for all instructions in bundle
-        2. Detect dependencies within bundle, if no depedencies, dispatch 
+        2. Detect dependencies within bundle, if no depedencies, dispatch
         normally with operand PRs from map table
         3. If instruction A in bundle depends on instruction B, don't use
         operand from map table for A, instead use result PR that was just
@@ -136,7 +174,7 @@ in a single clock cycle
 - Must expand CBD to be able to broadcast all instructions in bundle as
 completing execution in a single cycle
 
-# Questions 
+# Questions
 - How do caches work
 - Difference between Arch Table and Map Table
 - Do we get Told from Arch Table or Map Table (does it matter?)
