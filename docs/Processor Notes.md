@@ -204,3 +204,4 @@ instruction is in? Do we do this in the ROB?
     - In IF stage?
 
 - While rolling back, how do we undo a store instruction?
+- Is the size of RS just the sum of the number of functional units?
