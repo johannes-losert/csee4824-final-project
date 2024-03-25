@@ -97,7 +97,7 @@ CDB)
 - Does not hold actual values, instead references physical register
 
 ### Components
-    - Compiletime array of RS entry modules, each with index number
+    - Compiletime array of RS entry modules and busy bits, each with index number
 ### Inputs
     - clock, enable, reset bits
     - [For Allocating]
@@ -116,7 +116,7 @@ CDB)
 
 ## RS Entry
 ### Components
-    - Registers: FU enum | busy bit | operation | result PR Tag | Operand 1 PR
+    - Registers: FU enum | operation | result PR Tag | Operand 1 PR
     Tag | Operand 2 PR Tag
 ### Inputs
     - clock, enable, reset bits
