@@ -24,19 +24,22 @@
 `define N 1
 
 // sizes
-`define ROB_SZ xx
-`define RS_SZ xx
+`define ROB_SZ 1
+`define RS_SZ 1 // TODO should this be num FUs?
 `define PHYS_REG_SZ (32 + `ROB_SZ)
 
 // worry about these later
-`define BRANCH_PRED_SZ xx
-`define LSQ_SZ xx
+`define BRANCH_PRED_SZ 1
+`define LSQ_SZ 1
 
 // functional units (you should decide if you want more or fewer types of FUs)
-`define NUM_FU_ALU xx
-`define NUM_FU_MULT xx
-`define NUM_FU_LOAD xx
-`define NUM_FU_STORE xx
+`define NUM_FU_ALU 1
+`define NUM_FU_MULT 1
+`define NUM_FU_LOAD 1
+`define NUM_FU_STORE 1
+
+// TODO make this automated, should equal clog2(max(NUM_FU_ALU, NUM_FU_MULT, NUM_FU_LOAD, NUM_FU_STORE))
+`define MAX_FU_INDEX 1
 
 // number of mult stages (2, 4, or 8)
 `define MULT_STAGES 4
@@ -355,5 +358,39 @@ typedef struct packed {
 /**
  * No WB output packet as it would be more cumbersome than useful
  */
+
+/* 
+ * Reservation station stuff
+*/
+
+typedef enum logic [1:0] {
+    ALU = 2'b00,
+    MULT = 2'b01,
+    LOAD = 2'b10,
+    STORE = 2'b11
+} FUNIT;
+
+typedef struct packed {
+    logic [`PHYS_REG_SZ:0] reg_num;
+    logic ready;
+} PREG;
+
+/* Output of the reservation station */
+typedef struct packed {
+    FUNIT funit;
+    INST inst;
+    PREG dest_reg;
+    PREG src1_reg;
+    PREG src2_reg;
+} RS_PACKET; // TODO should this have a valid bit?
+
+
+typedef struct packed {
+    RS_PACKET packet;
+    logic busy;
+    logic valid;
+    logic issued;
+} RS_ENTRY;
+
 
 `endif // __SYS_DEFS_SVH__
