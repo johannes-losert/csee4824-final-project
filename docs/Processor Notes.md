@@ -87,7 +87,8 @@ enter free list when instructions are retired
 
 ## Reservation Stations
 ### Notes
-- Tracks instructions that have been dispatched but not yet issued
+- Tracks the status of functional units, assigned to instructions that have been
+ dispatched (but maybe not yet issued)
 - Maps instruction number to functional unit, result PR tag, and both operand
 PR tags
 - Member instructions have a functional unit assigned, but are waiting on the PR
@@ -99,32 +100,28 @@ CDB)
     - Compiletime array of RS entry modules, each with index number
 ### Inputs
     - clock, enable, reset bits
-    - [For Reading]
-        - Read bit (enable to search for the RS struct for a given instr number)
-        - Read instruction number
-    - [For Writing]
-        - Write bit (enable to try to add the given RS struct)
-        - Input::RS Entry Struct
+    - [For Allocating]
+        - Allocate bit (enable to try to add the given op)
+        - Input operation, result PR N, op1 PR N, op2 PR N
+    - [For Updating] (CDB)
+        - Update bit (if high, mark ready if anywhere as opcode)
+        - PR to mark ready (from CDB)
 
 ### Output
-    - [For Reading]
-        - valid/found bit (raised if enable, read bits raised and RS struct for
-        given instr number found)
-        - Output::RS Entry Struct
-    - [For Writing]
-        - valid/done bit (raised if enabled, write bits raised and a slot was
-        found for the provided RS Entry (i.e. either an empty slot with the
-        given FU enum was found and populated or the given instr number was
-        already stored somewhere and the other non-FU enum values were updated))
+    - [Allocating]
+        - done bit 
+    - [Issuing] (To FU)
+        - Ready bit
+        - operation, op1 PR tag, op2 PR tag
 
 ## RS Entry
 ### Components
-    - Registers: FU enum | busy bit | inst number | result PR Tag | Operand 1 PR
+    - Registers: FU enum | busy bit | operation | result PR Tag | Operand 1 PR
     Tag | Operand 2 PR Tag
 ### Inputs
     - clock, enable, reset bits
     - Write bit
-    - Next::RS Entry Struct {FU enum, busy bit, inst number, result PR tag, Op 1 PR
+    - Next::RS Entry Struct {FU enum, busy bit, result PR tag, Op 1 PR
     tag, Op 2 PR tag}
     - (alternative, different 'update' methods like 'clear', 'allocate'?)
     - should we set FU enum at compiletime? Probably
