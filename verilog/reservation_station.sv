@@ -22,9 +22,12 @@ module reservation_station (
 
 
     /* Freeing */
-    input free,
-    input logic [`MAX_FU_INDEX-1:0] free_fu_index,
-    input FUNIT free_funit
+    input [`NUM_FU_ALU-1:0]free_alu,
+    input [`NUM_FU_MULT-1:0]free_mult,
+    input [`NUM_FU_LOAD-1:0]free_load,
+    input [`NUM_FU_STORE-1:0]free_store
+    // input logic [`MAX_FU_INDEX-1:0] free_fu_index,
+    // input FUNIT free_funit
 );
 
     /* Reservation Station Entries */
@@ -136,19 +139,19 @@ module reservation_station (
             // TODO reset packets themeselves
             for (int i = 0; i < `NUM_FU_ALU; i++) begin
                 alu_entries[i].busy <= 1'b0;
-                alu_entries[i].issued <= 1'b0;
+                alu_entries[i].issued <= 1'b1;
             end
             for (int i = 0; i < `NUM_FU_MULT; i++) begin
                 mult_entries[i].busy <= 1'b0;
-                mult_entries[i].issued <= 1'b0;
+                mult_entries[i].issued <= 1'b1;
             end
             for (int i = 0; i < `NUM_FU_LOAD; i++) begin
                 load_entries[i].busy <= 1'b0;
-                load_entries[i].issued <= 1'b0;
+                load_entries[i].issued <= 1'b1;
             end
             for (int i = 0; i < `NUM_FU_STORE; i++) begin
                 store_entries[i].busy <= 1'b0;
-                store_entries[i].issued <= 1'b0;
+                store_entries[i].issued <= 1'b1;
             end
         end else begin 
             
@@ -224,34 +227,38 @@ module reservation_station (
 
 
             // Freeing (TODO figure out of we can allocate and free on the same cycle)
-            if (free) begin 
-                case (free_funit)
-                ALU: 
-                    begin
-                        alu_entries[free_fu_index].busy <= 0;
-                        alu_entries[free_fu_index].valid <= 0;
-                        alu_entries[free_fu_index].issued <= 0;
-                    end
-                MULT:
-                    begin
-                        mult_entries[free_fu_index].busy <= 0;
-                        mult_entries[free_fu_index].valid <= 0;
-                        mult_entries[free_fu_index].issued <= 0;
-                    end
-                LOAD:
-                    begin
-                        load_entries[free_fu_index].busy <= 0;
-                        load_entries[free_fu_index].valid <= 0;
-                        load_entries[free_fu_index].issued <= 0;
-                    end
-                STORE:
-                    begin
-                        store_entries[free_fu_index].busy <= 0;
-                        store_entries[free_fu_index].valid <= 0;
-                        store_entries[free_fu_index].issued <= 0;
-                    end
-                endcase
-            end 
+            for(int i = 0; i < `NUM_FU_ALU; i++) begin
+                if (free_alu[i]) begin
+                    alu_entries[i].busy <= 0;
+                    alu_entries[i].valid <= 0;
+                    alu_entries[i].issued <= 1;
+                end
+            end
+
+            for(int i = 0; i < `NUM_FU_MULT; i++) begin
+                if (free_mult[i]) begin
+                    mult_entries[i].busy <= 0;
+                    mult_entries[i].valid <= 0;
+                    mult_entries[i].issued <= 1;
+                end
+            end
+
+            for(int i = 0; i < `NUM_FU_STORE; i++) begin
+                if (free_store[i]) begin
+                    store_entries[i].busy <= 0;
+                    store_entries[i].valid <= 0;
+                    store_entries[i].issued <= 1;
+                end
+            end
+
+
+            for(int i = 0; i < `NUM_FU_LOAD; i++) begin
+                if (free_load[i]) begin
+                    load_entries[i].busy <= 0;
+                    load_entries[i].valid <= 0;
+                    load_entries[i].issued <= 1;
+                end
+            end
 
 
             // Allocating

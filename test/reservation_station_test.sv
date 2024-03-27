@@ -21,9 +21,10 @@ module testbench;
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
 
 
-    logic free;
-    logic [`MAX_FU_INDEX-1:0] free_fu_index;
-    FUNIT free_funit;
+    logic [`NUM_FU_ALU-1:0] free_alu;
+    logic [`NUM_FU_MULT-1:0] free_mult;
+    logic [`NUM_FU_LOAD-1:0] free_load;
+    logic [`NUM_FU_STORE-1:0] free_store;
 
     reservation_station dut(
         .clock(clock),
@@ -47,9 +48,11 @@ module testbench;
         .issue_fu_index(issue_fu_index),
 
         /* Free */
-        .free(free),
-        .free_fu_index(free_fu_index),
-        .free_funit(free_funit)
+        .free_alu(free_alu),
+        .free_mult(free_mult),
+        .free_load(free_load),
+        .free_store(free_store)
+ 
     );
 
     // CLOCK_PERIOD is defined on the commandline by the makefile
@@ -70,11 +73,11 @@ module testbench;
         $monitor("alloc: %h, input_funit: %h, input_dest: %h, input_src1: %h, input_src2: %h, alloc_done: %h, \
                 issue_en: %h, issue_ready: %h, issued_funit: %h, issued_dest: %h, issued_src1: %h, issued_src2: %h, \
                 update: %h, ready_reg.reg_num: %h, \
-                free: %h, free_fu_index: %h, free_funit: %h", 
+                free_alu: %h, free_mult: %h, free_load: %h, free_store: %h", 
                 allocate, input_packet.funit, input_packet.dest_reg.reg_num, input_packet.src1_reg.reg_num, input_packet.src2_reg.reg_num, alloc_done, 
                 issue_enable, issue_ready, issued_packet.funit, issued_packet.dest_reg.reg_num, issued_packet.src1_reg.reg_num, issued_packet.src2_reg.reg_num,
                 update, ready_reg.reg_num,
-                free, free_fu_index, free_funit);
+                free_alu, free_mult, free_load, free_store);
 
         clock     = 0;
         reset     = 0;
@@ -87,16 +90,17 @@ module testbench;
 
         issue_enable = 0;
 
-        free = 0;
-        free_fu_index = 0;
-        free_funit = ALU;
+        free_alu = 0;
+        free_load = 0;
+        free_mult = 0;
+        free_store = 0;
         
         // Initial Reset
         reset = 1;
         @(negedge clock)
         reset = 0;
 
-
+        // cycle1
         allocate = 1;
         input_packet.funit = LOAD;
         input_packet.inst = 54;
@@ -115,15 +119,16 @@ module testbench;
 
         issue_enable = 1;
 
-        free = 0;
-        free_fu_index = 0;
-        free_funit = ALU;
+        free_alu = 0;
+        free_load = 0;
+        free_store = 0;
+        free_mult = 0;
         
         @(negedge clock)
         assert(alloc_done) else exit_on_error;
         assert(!issue_ready) else exit_on_error;
 
-
+        // cycle2
         allocate = 1;
         input_packet.funit = MULT;
         input_packet.inst = 64;
@@ -142,9 +147,10 @@ module testbench;
 
         issue_enable = 1;
 
-        free = 0;
-        free_fu_index = 0;
-        free_funit = ALU;
+        free_alu = 0;
+        free_load = 0;
+        free_store = 0;
+        free_mult = 0;
 
         @(negedge clock)
         assert(alloc_done) else exit_on_error;
@@ -157,6 +163,8 @@ module testbench;
         assert(issued_packet.src2_reg.reg_num == 4) else exit_on_error;
         assert(issue_fu_index == 0) else exit_on_error;
         
+
+        // cycle3
         allocate = 1;
         input_packet.funit = STORE;
         input_packet.inst = 74;
@@ -175,17 +183,21 @@ module testbench;
 
         issue_enable = 1;
 
-        free = 1;
-        free_fu_index = 0;
-        free_funit = LOAD;
+        free_alu = 0;
+        free_load = 1;
+        free_store = 0;
+        free_mult = 0;
         
         @(negedge clock)
         assert(alloc_done) else exit_on_error;
 
         assert(!issue_ready) else exit_on_error;
+
+        
+        // cycle4
         allocate = 1;
-        input_packet.funit = LOAD;
-        input_packet.inst = 84;
+        input_packet.funit = ALU;
+        input_packet.inst = 34;
         input_packet.dest_reg.reg_num = 7;
         input_packet.dest_reg.ready = 0;
 
@@ -201,23 +213,83 @@ module testbench;
 
         issue_enable = 1;
 
-        free = 0;
-        free_fu_index = 0;
-        free_funit = ALU;
+        free_alu = 0;
+        free_load = 0;
+        free_store = 0;
+        free_mult = 0;
+
+        @(negedge clock)
+
+        assert(alloc_done) else exit_on_error;
+
+        assert(!issue_ready) else exit_on_error;
+
+//slides cycle 5 instruction 
+        allocate = 1;
+        input_packet.funit = LOAD;
+        input_packet.inst = 96;
+        input_packet.dest_reg.reg_num = 8;
+        input_packet.dest_reg.ready = 0;
+
+        input_packet.src1_reg.reg_num = 0;
+        input_packet.src1_reg.ready = 1;
+        
+        input_packet.src2_reg.reg_num = 7;
+        input_packet.src2_reg.ready = 0;
+
+        update = 0;
+        ready_reg.reg_num = 5;
+        ready_reg.ready = 1;
+
+        issue_enable = 1;
+
+        free_alu = 0;
+        free_load = 0;
+        free_store = 0;
+        free_mult = 1;
 
         @(negedge clock)
 
         assert(alloc_done) else exit_on_error;
 
         assert(issue_ready) else exit_on_error;
-        assert(issued_packet.funit == MULT) else exit_on_error;
-        assert(issued_packet.inst == 64) else exit_on_error;
-        assert(issued_packet.dest_reg.reg_num == 6) else exit_on_error;
-        assert(issued_packet.src1_reg.reg_num == 1) else exit_on_error;
-        assert(issued_packet.src2_reg.reg_num == 5) else exit_on_error;
-        assert(issue_fu_index == 1) else exit_on_error;
+        assert(issued_packet.funit == ALU) else exit_on_error;
+        assert(issued_packet.inst == 34) else exit_on_error;
+        assert(issued_packet.dest_reg.reg_num == 7) else exit_on_error;
+        assert(issued_packet.src1_reg.reg_num == 4) else exit_on_error;
+        assert(issued_packet.src2_reg.reg_num == 0) else exit_on_error;
+        assert(issue_fu_index == 0) else exit_on_error;
+        
+//slides cycle 6 instruction 
+        allocate = 0;
+        input_packet.funit = LOAD;
+        input_packet.inst = 96;
+        input_packet.dest_reg.reg_num = 8;
+        input_packet.dest_reg.ready = 0;
 
+        input_packet.src1_reg.reg_num = 0;
+        input_packet.src1_reg.ready = 1;
+        
+        input_packet.src2_reg.reg_num = 7;
+        input_packet.src2_reg.ready = 0;
 
+        update = 0;
+        ready_reg.reg_num = 5;
+        ready_reg.ready = 1;
+
+        issue_enable = 0;
+
+        free_alu = 1;
+        free_load = 1;
+        free_store = 1;
+        free_mult = 1;
+
+        @(negedge clock)
+
+        assert(!alloc_done) else exit_on_error;
+
+        assert(!issue_ready) else exit_on_error;
+        assert(issued_packet.funit == ALU) else exit_on_error;
         
         
         $display("@@@Passed");
