@@ -27,6 +27,8 @@
 `define ROB_SZ 1
 `define RS_SZ 1 // TODO should this be num FUs?
 `define PHYS_REG_SZ (32 + `ROB_SZ)
+`define PHYS_REG_IDX_SZ (clog2(`PHYS_REG_SZ-1))
+
 
 // worry about these later
 `define BRANCH_PRED_SZ 1
