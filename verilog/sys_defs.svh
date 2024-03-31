@@ -373,7 +373,7 @@ typedef enum logic [1:0] {
 } FUNIT;
 
 typedef struct packed {
-    logic [`PHYS_REG_SZ:0] reg_num;
+    logic [`PHYS_REG_IDX_SZ:0] reg_num;
     logic ready;
 } PREG;
 
