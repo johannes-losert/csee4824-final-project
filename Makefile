@@ -163,7 +163,7 @@ GREP = grep -E --color=auto
 # - with dependencies: 'rob.simv', 'rob.cov', and 'synth/rob.vg'
 
 # TODO: add more modules here
-TESTED_MODULES = mult rob reservation_station
+TESTED_MODULES = mult rob reservation_station stage_ex
 
 # TODO: add verilog module dependencies here:
 # (do not include header files)
