@@ -1,7 +1,7 @@
 
 `include "verilog/sys_defs.svh"
 
-
+// TODO add assertions to test peeking at the tail
 module testbench;
 
     logic clock, reset;
