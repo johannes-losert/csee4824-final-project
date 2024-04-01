@@ -26,7 +26,15 @@
 // sizes
 `define ROB_SZ 8
 `define RS_SZ 1 // TODO should this be num FUs?
-`define PHYS_REG_SZ (32 + `ROB_SZ)
+
+`define REG_SZ 32
+`define REG_IDX_SZ ($clog2(`REG_SZ-1))
+`define PHYS_REG_SZ (`REG_SZ + `ROB_SZ)
+`define PHYS_REG_IDX_SZ ($clog2(`PHYS_REG_SZ-1))
+
+`define FREE_LIST_SIZE `PHYS_REG_SZ+1 /* One additional 'always free' slot */
+
+
 
 // worry about these later
 `define BRANCH_PRED_SZ 1
@@ -42,7 +50,7 @@
 `define MAX_FU_INDEX 1
 
 // number of mult stages (2, 4, or 8)
-`define MULT_STAGES 4
+`define MULT_STAGES 8
 
 ///////////////////////////////
 // ---- Basic Constants ---- //
@@ -371,7 +379,7 @@ typedef enum logic [1:0] {
 } FUNIT;
 
 typedef struct packed {
-    logic [`PHYS_REG_SZ:0] reg_num;
+    logic [`PHYS_REG_IDX_SZ:0] reg_num;
     logic ready;
 } PREG;
 
@@ -400,8 +408,8 @@ typedef struct packed {
 
 
 typedef struct packed {
-    logic [4:0] rd;
-    PREG T;
+    logic [`REG_IDX_SZ:0] rd; /* Architectural register */
+    PREG T; /* Could switch with index to not carry ready bit */
 } ROB_PACKET;
 
 

@@ -72,6 +72,16 @@ empty, but includes 'ready' bit)
 of each architural register (if ready bit is 1) OR tracks the PR number that
 will eventually be populated with the correct value of that architectural
 register at this moment.
+- Operations to handle:
+    - get status of architectural register 1 (PR number and ready bit)
+    - get status of architectural register 2 (PR number and ready bit)
+    - get status of architectural register 3 (PR number and ready bit)
+    - update the PR of arch register (new dest)
+        - if this happens at the same as a read, the read should return the old value
+        - resets the ready bit bv
+    - update the ready bit of arch register (CDB)
+        - if this happens at the same time as a read, the read should return the new ready bit
+        - if this happens at the same time as a update PR, the read should return the old ready bit
 
 ## Arch Map
 - Mapping updated when instruction is committed/retired
@@ -84,6 +94,19 @@ physical register number (never empty)?
 instruction needs
 - PRs exit free list when allocated for a newly dispatched instruction, and
 enter free list when instructions are retired
+- Possible operations
+    1. read from head
+        - input: dequeue_en
+        - output: did_dequeue, output_pr_idx
+        - edge cases:
+            - if empty and writing, forward
+            - if empty and not writing, lower did_dequeue
+    2. write to tail
+        - input: input_pr_idx, enqueue_en
+        - output: did_enqueue
+        - edge cases:
+            - if full and reading, raise did_enqueue and push
+            - if full and not reading, lower did_enqueue
 
 ## Reservation Stations
 ### Notes
@@ -140,6 +163,11 @@ retired, tail is youngest dispatched)
 - Instructions enter when dispatched, leave when retired
 - Does not hold values, now purely for control/tag management
 
+### Implementation notes
+    - need some way to stall ROB if no free regs AND instruction needs a dest (set free_reg to ZERO_REG to stall ROB)
+
+
+
 ## Common Data Bus
 - Broadcasts that FU has completed instruction and stored result in PR number
 - Triggers update of 'ready' bit in Map Table AND issuing of any instructions
@@ -179,7 +207,7 @@ completing execution in a single cycle
     - In general, how do load/store ops fit into pipeline
 - In issue stage, if multiple instructions ready, how do I chose which one to
 issue? Or can I advance more than the superscalar number of instructions during
-a single issue stage?
+a single issue stage?   
     - If I chose to not issue one, how do I 'remember' to do so on the next
     cycle?
 - Why do we need the CDB if we can just check the map table for every allocated
@@ -202,3 +230,15 @@ instruction is in? Do we do this in the ROB?
 
 - While rolling back, how do we undo a store instruction?
 - Is the size of RS just the sum of the number of functional units?
+
+- How to indicate to the reservation station that the ROB couldn't be allocated?
+    - use 'allocated' bit based on whether or not ROB allocation succeeded? (long critical path)
+
+- How to do instruction cache?
+
+
+# OH Notes
+    - Dispatch is 'Sequential'
+        1. try to add to ROB
+        2. based on state of ROB, try to add something to reservation station
+        3. etc.
