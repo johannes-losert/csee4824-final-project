@@ -408,8 +408,8 @@ typedef struct packed {
 
 
 typedef struct packed {
-    logic [4:0] rd;
-    PREG T;
+    logic [`REG_IDX_SZ:0] rd; /* Architectural register */
+    PREG T; /* Could switch with index to not carry ready bit */
 } ROB_PACKET;
 
 

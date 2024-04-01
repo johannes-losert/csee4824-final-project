@@ -5,22 +5,59 @@
 module reorder_buffer(
     input clock,
     input reset,
+
+    /* New instruction from fetch */
     input INST inst,
+
+    /* Enable to write to ROB */
     input write,
+
+    /* Complete stage, indicates instruction has finished (is in complete stage) */
     input finish,
     input logic [$clog2(`ROB_SZ)-1:0] finish_index,
-    input logic [4:0] free_reg,
+
+    /* Signal from free list, indicating which register is ready (PREG) */
+    // TODO switch to is_empty rather than free_reg = ZERO_REG
+    input logic [`PHYS_REG_IDX_SZ:0] free_reg,
+
+    /* If undo, rollback to former index */
     input undo,
     input [$clog2(`ROB_SZ)-1:0] undo_index,
+
+    /* Signal to indicate we should stop fetching */
     output logic stall,
+
+    /* Tell free list we need a reg (TODO connect to dequeue_en) */
     output logic used_free_reg,
+
+    /* Signal to indicate we should update free list (TODO connect enqueue_en in free list) */
     output logic update_free_list,
+    /* Index of reg in the free list, indicating it's now free (TODO connect to enqueue_pr) */
+    output PREG free_index,
+
+    /* Signal to indicate we should update map table and send packet( reg and corresponding tag) to map table */
     output logic update_map_table,
-    output ROB_PACKET rob_mt_packet,
+    output ROB_PACKET rob_mt_packet, /* Unpack ROB packet and pass to GET/SET operation of map table */
+
+    // TODO add input/output from arch table; send an arch register num, and get a preg num back
+    // TODO this will be used to set Told
+
+    // TODO add input/output for each FU including 
+    // input 'alu_do_dispatch' signal to indicate we will put the instruction in an RS
+    // output 'alu_inst' INST/packet of some kind to be passed to RS 
+
+    /* Instruction corresponds to entry in ROB */
+    // Pass thru pipeline so during branch mispredict, we can roll back to inst_index
+    // Index of currently written instruction 
     output logic [$clog2(`ROB_SZ)-1:0] inst_index,
+
+    /* Signal to indicate we should update arch map and send packet( reg and corresponding old tag) to arch table */
+    // Same as the MAP table 
     output logic update_arch_map,
     output ROB_PACKET rob_am_packet,
-    output PREG free_index,
+
+    /* Signal to indicate the ROB is full */
+    // TODO pass this to instruction fetch stall
     output logic full
 );
 
@@ -30,11 +67,8 @@ module reorder_buffer(
     logic [$clog2(`ROB_SZ)-1:0] tail_h;
     logic [$clog2(`ROB_SZ)-1:0] next_head;
     logic [$clog2(`ROB_SZ)-1:0] next_tail;
-    // logic [$clog2(`ROB_SZ)-1:0] next_inst_index;
     logic next_full;
-    // logic [$clog2(`ROB_SZ):0] counter;
-    // logic [$clog2(`ROB_SZ):0] next_counter;
-   // logic count_down, count_up;
+
     
     assign tail_h = tail + 1;
 
@@ -46,14 +80,6 @@ module reorder_buffer(
             next_full = 0;
         end
     end
-
-    // always_comb begin
-    //     if (counter == `ROB_SZ + 1) begin
-    //         full = 1;
-    //     end else begin
-    //         full = 0;
-    //     end
-    // end
 
     
 
