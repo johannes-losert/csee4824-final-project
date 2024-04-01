@@ -3,16 +3,17 @@ module free_list (
     input logic reset,
 
     // READ from head operation
+    output logic [`PHYS_REG_IDX_SZ:0] tail_pr, /* Always points to the next element to be dequeued, unless is_empty */
+    output logic is_empty, /* IF is_empty, tail_pr is undefined */
+
     input logic dequeue_en,
-    output logic [`PHYS_REG_IDX_SZ:0] dequeue_pr,
-    output logic was_dequeued,
+    output logic was_dequeued, /* Probably don't need this */
+    output logic [`PHYS_REG_IDX_SZ:0] dequeue_pr, /* Probably don't need this either */
 
     // WRITE to tail operation
     input logic enqueue_en,
     input logic [`PHYS_REG_IDX_SZ:0] enqueue_pr,
     output logic was_enqueued,
-
-    output logic is_empty,
     output logic is_full,
 
     output logic [`PHYS_REG_IDX_SZ+1:0] head_ptr,
@@ -36,6 +37,7 @@ module free_list (
 
     assign is_empty = (head_ptr == tail_ptr);
     assign is_full = ( (head_ptr + 1) % (`FREE_LIST_SIZE) == tail_ptr);
+    assign tail_pr = free_list[tail_ptr];
 
 
 /* Ex. 3 physical registers, requires 4 slots (one always empty)
