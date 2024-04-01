@@ -167,19 +167,23 @@ module pipeline (
     );
 
 
+    // TODO IF/ID register (sequential)
+
     //////////////////////////////////////////////////
     //                                              //
     //               Instruction Dispatch (D)       //
     //                                              //
     //////////////////////////////////////////////////
-    // 1. Take instruction in if_id register and decode it
-        // Generate opa, opb, dest, and valid bits for each
-    // 2. Remove PR for dest from free list unless no dest (if free list empty, then stall)
-    // 2. Try to allocate new ROB entry (if ROB full, then stall)
-    // 3. 
-    // Attempt to allocate ROB entry, if can't then stall
-    // Attempt to allocate RS entries FROM ROB OUTPUT, if can't then stall
+    /* 1. Take instruction in if_id register and decode it
+        - Generate architectural opa, opb, dest, and valid bits for each
+       2. If decoded instruction destination is valid, dqueue a PR from the free list
+        - If free list is empty, stall fetching
+       3. Try to allocate new ROB entry 
+        a. Provide instruction (from fetch), free_reg (from free list)
+        b. outputs packet for reservation station (indirectly for map table)
+        - If ROB full, then stall fetching
+       4. Get next 
 
-
+    */
 
 endmodule // pipeline
