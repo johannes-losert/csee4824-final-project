@@ -45,7 +45,7 @@ module testbench;
     initial begin
         // Everything preg 1-4 number ready status
         $monitor("clock=%b, reset=%b, dequeue_en=%b, dequeue_pr=%h, was_dequeued=%b, \
-        enqueue_en=%b, enqueue_pr=%h, was_enqueued=%b", clock, reset, dequeue_en, \
+        enqueue_en=%b, enqueue_pr=%h, was_enqueued=%b", clock, reset, dequeue_en, 
         dequeue_pr, was_dequeued, enqueue_en, enqueue_pr, was_enqueued);
 
         clock     = 0;
