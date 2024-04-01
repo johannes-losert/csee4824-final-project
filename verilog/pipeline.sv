@@ -129,4 +129,57 @@ module pipeline (
     assign pipeline_commit_wr_data = wb_regfile_data;
     assign pipeline_commit_NPC     = mem_wb_reg.NPC;
 
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //               Instruction Fetch (F)           //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    // REASONS TO STALL IF
+        // - free list empty (no PR to allocate)
+        // - ROB full (no ROB entry to allocate)
+
+    // Instruction fetch stall state
+    always_ff @(posedge clock) begin
+        next_if_valid <= 1'b1;
+        if (/*something*/) begin
+            next_if_valid <= 1'b0;
+        end
+    end
+
+    // Instantiate instruction fetch module (PLACEHOLDER)
+    instruction_fetch fetcher (
+        .clock(clock),
+        .reset(reset),
+        
+        .next_if_valid(next_if_valid), // input: if lowered, must stall (don't give us more) 
+
+        /* Instruction memory interface */
+        .proc2mem_addr(proc2Imem_addr), // output: address requested
+        .mem2proc_data(mem2proc_data), // input: data recieved
+        
+        /* SOME INPUTS: (branch prediction stuff?) */
+
+        /* OUTPUTS: packet retrieved, enable signal */
+        .fetched_packet(if_packet),
+        .fetch(if_id_enable)    // if lowered, must stall decode (is this needed?)
+    );
+
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //               Instruction Dispatch (D)       //
+    //                                              //
+    //////////////////////////////////////////////////
+    // 1. Take instruction in if_id register and decode it
+        // Generate opa, opb, dest, and valid bits for each
+    // 2. Remove PR for dest from free list unless no dest (if free list empty, then stall)
+    // 2. Try to allocate new ROB entry (if ROB full, then stall)
+    // 3. 
+    // Attempt to allocate ROB entry, if can't then stall
+    // Attempt to allocate RS entries FROM ROB OUTPUT, if can't then stall
+
+
+
 endmodule // pipeline
