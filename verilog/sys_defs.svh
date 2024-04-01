@@ -24,7 +24,7 @@
 `define N 1
 
 // sizes
-`define ROB_SZ 1
+`define ROB_SZ 8
 `define RS_SZ 1 // TODO should this be num FUs?
 `define PHYS_REG_SZ (32 + `ROB_SZ)
 
@@ -391,6 +391,18 @@ typedef struct packed {
     logic valid;
     logic issued;
 } RS_ENTRY;
+
+typedef struct packed {
+    PREG T,Told;
+    INST inst;
+    logic done;
+} ROB_ENTRY;
+
+
+typedef struct packed {
+    logic [4:0] rd;
+    PREG T;
+} ROB_PACKET;
 
 
 `endif // __SYS_DEFS_SVH__
