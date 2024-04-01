@@ -286,10 +286,11 @@ module testbench;
 
         @(negedge clock)
         assert(!full) else exit_on_error;
-        assert(inst_index == 1) else exit_on_error;
+        assert(free_index.reg_num == 5) else exit_on_error;
+        assert(inst_index == 0) else exit_on_error;
         assert(update_map_table == 1) else exit_on_error;
-        assert(update_arch_map == 0) else exit_on_error;
-        assert(update_free_list == 0) else exit_on_error;
+        assert(update_arch_map == 1) else exit_on_error;
+        assert(update_free_list == 1) else exit_on_error;
         assert(rob_mt_packet.rd == 3) else exit_on_error;
         assert(rob_mt_packet.T.reg_num == 8) else exit_on_error;
         assert(used_free_reg == 1);
