@@ -26,7 +26,15 @@
 // sizes
 `define ROB_SZ 8
 `define RS_SZ 1 // TODO should this be num FUs?
-`define PHYS_REG_SZ (32 + `ROB_SZ)
+
+`define REG_SZ 32
+`define REG_IDX_SZ ($clog2(`REG_SZ-1))
+`define PHYS_REG_SZ (`REG_SZ + `ROB_SZ)
+`define PHYS_REG_IDX_SZ ($clog2(`PHYS_REG_SZ-1))
+
+`define FREE_LIST_SIZE `PHYS_REG_SZ+1 /* One additional 'always free' slot */
+
+
 
 // worry about these later
 `define BRANCH_PRED_SZ 1
@@ -371,7 +379,7 @@ typedef enum logic [1:0] {
 } FUNIT;
 
 typedef struct packed {
-    logic [`PHYS_REG_SZ:0] reg_num;
+    logic [`PHYS_REG_IDX_SZ:0] reg_num;
     logic ready;
 } PREG;
 

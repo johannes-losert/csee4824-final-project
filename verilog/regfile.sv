@@ -21,7 +21,7 @@ module regfile (
     output logic [`XLEN-1:0] read_out_1, read_out_2
 );
 
-    logic [31:1] [`XLEN-1:0] registers; // 31 XLEN-length Registers (0 is known)
+    logic [`PHYS_REG_SZ:1] [`XLEN-1:0] registers; // 31 XLEN-length Registers (0 is known)
 
     // Read port 1
     always_comb begin
