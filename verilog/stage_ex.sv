@@ -16,16 +16,17 @@
 
 // ALU: computes the result of FUNC applied with operands A and B
 // This module is purely combinational
+// TODO: remove multiplication logic, or ensure that the module only runs if alu_en is set
 module alu (
-    input clock, 
-    input reset,
-    input [`XLEN-1:0] opa,
-    input [`XLEN-1:0] opb,
-    input ALU_FUNC    func,
-    input logic       alu_en,
+    input               clock, 
+    input               reset,
+    input [`XLEN-1:0]   opa,
+    input [`XLEN-1:0]   opb,
+    input ALU_FUNC      func,
+    input logic         alu_en,
 
-    output logic [`XLEN-1:0] result,
-    output logic             alu_done
+    output logic [`XLEN-1:0]        result,
+    output logic [`NUM_FU_ALU-1:0]  alu_done
 );
 
     logic signed [`XLEN-1:0]   signed_opa, signed_opb;
@@ -65,15 +66,48 @@ module alu (
 
     always_ff @(posedge clock) begin
         if(reset) begin
-            alu_done = 1'b0;
+            alu_done[0] = 1'b0;
         end else if (alu_en) begin
-            alu_done = 1'b1;
+            alu_done[0] = 1'b1;
         end else begin
-            alu_done = 1'b0;
+            alu_done[0] = 1'b0;
         end
     end
 
 endmodule // alu
+
+module branch_calculation (
+    input clock, 
+    input reset,
+    input [`XLEN-1:0] opa,
+    input [`XLEN-1:0] opb,
+    input ALU_FUNC    func,
+    input logic       branch_en,
+
+    output logic [`XLEN-1:0] result
+);
+
+    assign signed_opa   = opa;
+    assign signed_opb   = opb;
+
+    always_comb begin
+        case (func)
+            ALU_ADD:    result = opa + opb;
+            ALU_SUB:    result = opa - opb;
+            ALU_AND:    result = opa & opb;
+            ALU_SLT:    result = signed_opa < signed_opb;
+            ALU_SLTU:   result = opa < opb;
+            ALU_OR:     result = opa | opb;
+            ALU_XOR:    result = opa ^ opb;
+            ALU_SRL:    result = opa >> opb[4:0];
+            ALU_SLL:    result = opa << opb[4:0];
+            ALU_SRA:    result = signed_opa >>> opb[4:0]; // arithmetic from logical shift
+
+            default:    result = `XLEN'hfacebeec;  // here to prevent latches
+        endcase
+    end
+
+endmodule
 
 module multiply (
     input clock,
@@ -83,12 +117,15 @@ module multiply (
     ALU_FUNC          func,
     input logic       mult_en,
 
-    output logic [`XLEN-1:0] product,
-    output logic             mult_done
+    output logic [`XLEN-1:0]         product,
+    output logic [`NUM_FU_MULT-1:0]  mult_done
 );
 
     logic signed_input1;
     logic signed_input2; 
+    //logic done; 
+
+    //assign mult_done[0] = done;
 
     // Determine signedness based on which multiplication function is used
     always_comb begin
@@ -127,7 +164,7 @@ module multiply (
         .func           (func),
         .start          (mult_en),
         .product        (product),
-        .done           (mult_done)
+        .done           (mult_done[0])
     );
 
 endmodule
@@ -161,19 +198,21 @@ endmodule // conditional_branch
 
 
 module stage_ex (
-    input clock,
-    input reset,
-    input ID_EX_PACKET id_ex_reg,
-    input FUNIT funit,
-    input mult_en,
-    input alu_en,
+    input                               clock,
+    input                               reset,
+    input ID_EX_PACKET                  id_ex_reg,
+    input FUNIT                         funit,
+    input                               mult_en,
+    input                               alu_en,
+    input logic [`MAX_FU_INDEX-1:0]     issue_fu_index,
 
-    output EX_MEM_PACKET ex_packet,
-    output [`XLEN-1:0] mult_result,
-    output [`NUM_FU_ALU-1:0]free_alu,
-    output [`NUM_FU_MULT-1:0]free_mult,
-    output [`NUM_FU_LOAD-1:0]free_load,
-    output [`NUM_FU_STORE-1:0]free_store
+    output EX_MEM_PACKET        ex_packet,
+    output [`XLEN-1:0]          mult_result,
+    output [`XLEN-1:0]          branch_result,
+    output [`NUM_FU_ALU-1:0]    free_alu,
+    output [`NUM_FU_MULT-1:0]   free_mult,
+    output [`NUM_FU_LOAD-1:0]   free_load,
+    output [`NUM_FU_STORE-1:0]  free_store
 );
 
     logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
@@ -230,11 +269,24 @@ module stage_ex (
         .opa(opa_mux_out),
         .opb(opb_mux_out),
         .func(id_ex_reg.alu_func),
-        .alu_en(funit == ALU && alu_en),
+        .alu_en(funit == ALU && alu_en && issue_fu_index == 0),
 
         // Output
         .result(ex_packet.alu_result),
         .alu_done(free_alu)
+    );
+
+    branch_calculation branch_0 (
+        // Inputs
+        .clock(clock),
+        .reset(reset),
+        .opa(opa_mux_out),
+        .opb(opb_mux_out),
+        .func(id_ex_reg.alu_func),
+        .branch_en(ex_packet.take_branch && issue_fu_index == 0),
+
+        // Output
+        .result(branch_result)
     );
 
     // Instantiate multiply functional unit
@@ -245,7 +297,7 @@ module stage_ex (
         .mcand(opa_mux_out),
         .mplier(opb_mux_out),
         .func(id_ex_reg.alu_func),
-        .mult_en(funit == MULT && mult_en),
+        .mult_en(funit == MULT && mult_en && issue_fu_index == 0),
 
         // Output
         .product(mult_result),

@@ -3,8 +3,10 @@
 
 module testbench;
 
-    logic [`XLEN-1:0] mult_result;
-    logic clock, reset, free_alu, free_mult, free_load, free_store, alu_en, mult_en;
+    logic [`XLEN-1:0] mult_result, branch_result;
+    logic clock, reset, alu_en, mult_en;
+    logic [`NUM_FU_ALU-1:0] free_alu, free_mult, free_load, free_store;
+    logic [`MAX_FU_INDEX-1:0]     issue_fu_index;
     integer i;
     ID_EX_PACKET id_ex_reg;
     FUNIT funit;
@@ -18,8 +20,10 @@ module testbench;
         .funit(funit),
         .alu_en(alu_en),
         .mult_en(mult_en),
+        .issue_fu_index(issue_fu_index),
         .ex_packet(ex_packet),
         .mult_result(mult_result),
+        .branch_result(branch_result),
         .free_alu(free_alu),
         .free_mult(free_mult),
         .free_load(free_load), 
@@ -37,9 +41,9 @@ module testbench;
     // prevents that by making sure "done" is high at the clock edge.
     task wait_until_done;
         forever begin : wait_loop
-            @(posedge free_mult);
+            @(posedge free_mult[0]);
             @(negedge clock);
-            if (free_mult) begin
+            if (free_mult[0]) begin
                 disable wait_until_done;
             end
         end
@@ -54,8 +58,8 @@ module testbench;
 
     initial begin
         // NOTE: monitor starts using 5-digit decimal values for printing
-        $monitor("Time:%4.0f opa:%d opb:%d function:%d alu_result:%d mult_result:%d funit:%2h free_alu:%h free_mult:%h",
-                 $time, $signed(id_ex_reg.rs1_value), $signed(id_ex_reg.rs2_value), id_ex_reg.alu_func, $signed(ex_packet.alu_result), $signed(mult_result), funit, free_alu, free_mult);
+        $monitor("Time:%4.0f opa:%d opb:%d function:%d alu_result:%d mult_result:%d funit:%2h free_alu:%h free_mult:%b",
+                 $time, $signed(id_ex_reg.rs1_value), $signed(id_ex_reg.rs2_value), id_ex_reg.alu_func, $signed(ex_packet.alu_result), $signed(mult_result), funit, free_alu[0], free_mult[0]);
 
         $display("\nBeginning edge-case testing:");
 
@@ -96,11 +100,13 @@ module testbench;
         funit = MULT;
         id_ex_reg.alu_func = ALU_MUL;
         mult_en = 1;
+        issue_fu_index = 0;
         @(negedge clock);
         mult_en = 0;
+        //@(negedge free_mult[0]);
         wait_until_done();
         assert(mult_result == 6) else exit_on_error;
-        assert(free_mult == 1) else exit_on_error;
+        assert(free_mult[0] == 1'b1) else exit_on_error;
 
         // Test that basic alu operations work
         id_ex_reg.rs1_value = 6;
@@ -110,10 +116,11 @@ module testbench;
         funit = ALU;
         id_ex_reg.alu_func = ALU_SUB;
         alu_en = 1;
+        issue_fu_index = 0;
         @(negedge clock);
         alu_en = 0;
         assert(ex_packet.alu_result == 3) else exit_on_error;
-        assert(free_alu == 1) else exit_on_error;
+        assert(free_alu[0] == 1) else exit_on_error;
 
         @(negedge clock);
 
@@ -129,7 +136,7 @@ module testbench;
         mult_en = 0;
         wait_until_done();
         assert(mult_result == 32'b11111111111111111111111111110110) else exit_on_error;
-        assert(free_mult == 1) else exit_on_error;
+        assert(free_mult[0] == 1) else exit_on_error;
 
         // Test multiplication with upper bits (MULH)
         id_ex_reg.rs1_value = 123456789;
@@ -143,7 +150,7 @@ module testbench;
         mult_en = 0;
         wait_until_done();
         assert(mult_result == 32'b00000000001101100010011000100010) else exit_on_error;
-        assert(free_mult == 1) else exit_on_error;
+        assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MULHSU (mixed sign and unsigned) ASK
         id_ex_reg.rs1_value = -34343434;
@@ -157,7 +164,7 @@ module testbench;
         mult_en = 0;
         wait_until_done();
         // assert(mult_result == 32'b11111111111110100111010000111000) else exit_on_error;
-        assert(free_mult == 1) else exit_on_error;
+        assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MULHU (unsigned)
         id_ex_reg.rs1_value = 34343434;
@@ -171,7 +178,7 @@ module testbench;
         mult_en = 0;
         wait_until_done();
         assert(mult_result == 32'b00000000000001101110011011010110) else exit_on_error;
-        assert(free_mult == 1) else exit_on_error;
+        assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MULHU on very very large values
         id_ex_reg.rs1_value = 32'hffff_ffff;
@@ -185,7 +192,7 @@ module testbench;
         mult_en = 0;
         wait_until_done();
         assert(mult_result == 32'b11111111111111111111111111111110) else exit_on_error;
-        assert(free_mult == 1) else exit_on_error;
+        assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MUL on where inputs are the same binary as ^ but should give different product
         id_ex_reg.rs1_value = -1;
@@ -199,7 +206,7 @@ module testbench;
         mult_en = 0;
         wait_until_done();
         assert(mult_result == 1) else exit_on_error;
-        assert(free_mult == 1) else exit_on_error;
+        assert(free_mult[0] == 1) else exit_on_error;
 
         /*start = 1;
         a = 5;
