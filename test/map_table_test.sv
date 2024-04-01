@@ -21,7 +21,7 @@ module testbench;
     logic [`PHYS_REG_IDX_SZ:0] ready_preg_idx;
 
     map_table dut(
-        .clock(clock),
+        .clk(clock),
         .reset(reset),
         
         .arch_reg1_idx(opa_areg_idx),
