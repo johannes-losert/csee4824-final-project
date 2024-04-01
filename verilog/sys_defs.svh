@@ -42,7 +42,7 @@
 `define MAX_FU_INDEX 1
 
 // number of mult stages (2, 4, or 8)
-`define MULT_STAGES 4
+`define MULT_STAGES 8
 
 ///////////////////////////////
 // ---- Basic Constants ---- //

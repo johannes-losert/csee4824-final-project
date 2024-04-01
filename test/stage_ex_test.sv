@@ -3,7 +3,7 @@
 
 module testbench;
 
-    logic [63:0] mult_result;
+    logic [`XLEN-1:0] mult_result;
     logic clock, reset, free_alu, free_mult, free_load, free_store, alu_en, mult_en;
     integer i;
     ID_EX_PACKET id_ex_reg;
@@ -54,8 +54,8 @@ module testbench;
 
     initial begin
         // NOTE: monitor starts using 5-digit decimal values for printing
-        $monitor("Time:%4.0f opa:%5d opb:%5d alu_result:%5d mult_result:%5d funit:%2h free_alu:%h free_mult:%h",
-                 $time, id_ex_reg.rs1_value, id_ex_reg.rs2_value, ex_packet.alu_result, mult_result, funit, free_alu, free_mult);
+        $monitor("Time:%4.0f opa:%d opb:%d function:%d alu_result:%d mult_result:%d funit:%2h free_alu:%h free_mult:%h",
+                 $time, $signed(id_ex_reg.rs1_value), $signed(id_ex_reg.rs2_value), id_ex_reg.alu_func, $signed(ex_packet.alu_result), $signed(mult_result), funit, free_alu, free_mult);
 
         $display("\nBeginning edge-case testing:");
 
@@ -94,6 +94,7 @@ module testbench;
         id_ex_reg.opa_select = OPA_IS_RS1;
         id_ex_reg.opb_select = OPB_IS_RS2;
         funit = MULT;
+        id_ex_reg.alu_func = ALU_MUL;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
@@ -114,18 +115,91 @@ module testbench;
         assert(ex_packet.alu_result == 3) else exit_on_error;
         assert(free_alu == 1) else exit_on_error;
 
-        /*// Test that multiplication with negative numbers works
+        @(negedge clock);
+
+        // Test that multiplication with negative numbers works (MUL)
         id_ex_reg.rs1_value = -5;
         id_ex_reg.rs2_value = 2;
         id_ex_reg.opa_select = OPA_IS_RS1;
         id_ex_reg.opb_select = OPB_IS_RS2;
         funit = MULT;
+        id_ex_reg.alu_func = ALU_MUL;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
         wait_until_done();
-        assert(mult_result == -10) else exit_on_error;
-        assert(free_mult == 1) else exit_on_error;*/
+        assert(mult_result == 32'b11111111111111111111111111110110) else exit_on_error;
+        assert(free_mult == 1) else exit_on_error;
+
+        // Test multiplication with upper bits (MULH)
+        id_ex_reg.rs1_value = 123456789;
+        id_ex_reg.rs2_value = 123456789;
+        id_ex_reg.opa_select = OPA_IS_RS1;
+        id_ex_reg.opb_select = OPB_IS_RS2;
+        funit = MULT;
+        id_ex_reg.alu_func = ALU_MULH;
+        mult_en = 1;
+        @(negedge clock);
+        mult_en = 0;
+        wait_until_done();
+        assert(mult_result == 32'b00000000001101100010011000100010) else exit_on_error;
+        assert(free_mult == 1) else exit_on_error;
+
+        // Test MULHSU (mixed sign and unsigned) ASK
+        id_ex_reg.rs1_value = -34343434;
+        id_ex_reg.rs2_value = 45454545;
+        id_ex_reg.opa_select = OPA_IS_RS1;
+        id_ex_reg.opb_select = OPB_IS_RS2;
+        funit = MULT;
+        id_ex_reg.alu_func = ALU_MULHSU;
+        mult_en = 1;
+        @(negedge clock);
+        mult_en = 0;
+        wait_until_done();
+        // assert(mult_result == 32'b11111111111110100111010000111000) else exit_on_error;
+        assert(free_mult == 1) else exit_on_error;
+
+        // Test MULHU (unsigned)
+        id_ex_reg.rs1_value = 34343434;
+        id_ex_reg.rs2_value = 56565656;
+        id_ex_reg.opa_select = OPA_IS_RS1;
+        id_ex_reg.opb_select = OPB_IS_RS2;
+        funit = MULT;
+        id_ex_reg.alu_func = ALU_MULHU;
+        mult_en = 1;
+        @(negedge clock);
+        mult_en = 0;
+        wait_until_done();
+        assert(mult_result == 32'b00000000000001101110011011010110) else exit_on_error;
+        assert(free_mult == 1) else exit_on_error;
+
+        // Test MULHU on very very large values
+        id_ex_reg.rs1_value = 32'hffff_ffff;
+        id_ex_reg.rs2_value = 32'hffff_ffff;
+        id_ex_reg.opa_select = OPA_IS_RS1;
+        id_ex_reg.opb_select = OPB_IS_RS2;
+        funit = MULT;
+        id_ex_reg.alu_func = ALU_MULHSU;
+        mult_en = 1;
+        @(negedge clock);
+        mult_en = 0;
+        wait_until_done();
+        assert(mult_result == 32'b11111111111111111111111111111110) else exit_on_error;
+        assert(free_mult == 1) else exit_on_error;
+
+        // Test MUL on where inputs are the same binary as ^ but should give different product
+        id_ex_reg.rs1_value = -1;
+        id_ex_reg.rs2_value = -1;
+        id_ex_reg.opa_select = OPA_IS_RS1;
+        id_ex_reg.opb_select = OPB_IS_RS2;
+        funit = MULT;
+        id_ex_reg.alu_func = ALU_MUL;
+        mult_en = 1;
+        @(negedge clock);
+        mult_en = 0;
+        wait_until_done();
+        assert(mult_result == 1) else exit_on_error;
+        assert(free_mult == 1) else exit_on_error;
 
         /*start = 1;
         a = 5;

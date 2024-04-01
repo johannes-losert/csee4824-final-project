@@ -87,15 +87,47 @@ module multiply (
     output logic             mult_done
 );
 
+    logic signed_input1;
+    logic signed_input2; 
+
+    // Determine signedness based on which multiplication function is used
+    always_comb begin
+        case (func)
+            ALU_MUL: begin
+                signed_input1 = 1;
+                signed_input2 = 1;
+            end
+            ALU_MULH: begin
+                signed_input1 = 1;
+                signed_input2 = 1;
+            end
+            ALU_MULHSU: begin
+                signed_input1 = 1;
+                signed_input2 = 0;
+            end
+            ALU_MULHU: begin
+                signed_input1 = 0;
+                signed_input2 = 0;
+            end
+            default: begin
+                signed_input1 = 0;
+                signed_input2 = 0;
+            end
+        endcase
+    end
+
     // declaration of mult module
     mult mult_mod_0 (
-        .clock       (clock),
-        .reset       (reset),
-        .mcand       (mcand),
-        .mplier      (mplier),
-        .start       (mult_en),
-        .product     (product),
-        .done        (mult_done)
+        .clock          (clock),
+        .reset          (reset),
+        .mcand          ({32'b0, mcand}),
+        .mplier         ({32'b0, mplier}),
+        .signed_input1  (signed_input1),
+        .signed_input2  (signed_input2),
+        .func           (func),
+        .start          (mult_en),
+        .product        (product),
+        .done           (mult_done)
     );
 
 endmodule
