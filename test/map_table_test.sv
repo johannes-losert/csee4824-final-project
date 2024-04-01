@@ -93,7 +93,7 @@ module testbench;
         assert(old_dest_preg.ready == 1) else exit_on_error;
 
 
-        // Test0: write to MT (no CDB)
+        // Test0: write to MT 1 (no CDB)
         opa_areg_idx = 0; 
         opb_areg_idx = 0; /* Read from zero reg */
 
@@ -111,6 +111,95 @@ module testbench;
         assert(preg1_out.ready == 1) else exit_on_error;
         assert(preg2_out.reg_num == 0) else exit_on_error;
         assert(preg2_out.ready == 1) else exit_on_error;
+
+        // Test1:  Read MT 1, Write to MT 2 (no CDB)
+        opa_areg_idx = 1; /* Read from areg 1 */
+        opb_areg_idx = 0; /* Read from zero reg */
+
+        
+        dest_areg_idx = 2; /* Update areg 2 to map to preg 2 */
+        
+        set_dest_enable = 1;
+        new_dest_preg_idx = 6; /* Set to preg 6 */
+
+        set_ready_enable = 0;
+        ready_preg_idx = 0;
+    
+        @(negedge clock)
+        assert(preg1_out.reg_num == 1) else exit_on_error;
+        assert(preg1_out.ready == 0) else exit_on_error;
+        assert(preg2_out.reg_num == 0) else exit_on_error;
+        assert(preg2_out.ready == 1) else exit_on_error;
+
+        // Test2:  Read MT 2, Write to MT 3 (CDB on MT 1, CDB->read 1 forwarding)
+        opa_areg_idx = 1; /* Read from areg 1 */
+        opb_areg_idx = 2; /* Read from zero reg */
+
+        
+        dest_areg_idx = 3; /* Update areg 2 to map to preg 2 */
+        
+        set_dest_enable = 1;
+        new_dest_preg_idx = 5; /* Set to preg 5 */
+
+        set_ready_enable = 1;
+        ready_preg_idx = 1;
+    
+        @(negedge clock)
+        assert(preg1_out.reg_num == 1) else exit_on_error;
+        assert(preg1_out.ready == 1) else exit_on_error;
+        assert(preg2_out.reg_num == 6) else exit_on_error;
+        assert(preg2_out.ready == 0) else exit_on_error;
+
+        // Test3: Read MT 3, Write to MT 3 (CDB on MT 3, CDB->new dest no forwarding)
+        opa_areg_idx = 1; /* Read from areg 1 */
+        opb_areg_idx = 2; /* Read from zero reg */
+
+        
+        dest_areg_idx = 3; /* Update areg 2 to map to preg 2 */
+        
+        set_dest_enable = 1;
+        new_dest_preg_idx = 3; /* Set to preg 1 */
+
+        set_ready_enable = 1;
+        ready_preg_idx = 3;
+    
+        @(negedge clock)
+        assert(preg1_out.reg_num == 1) else exit_on_error;
+        assert(preg1_out.ready == 1) else exit_on_error;
+        assert(preg2_out.reg_num == 6) else exit_on_error;
+        assert(preg2_out.ready == 0) else exit_on_error;
+
+        // Should get OLD dest register value, and it shouldn't be ready
+        assert(old_dest_preg.reg_num == 5) else exit_on_error;
+        assert(old_dest_preg.ready == 0) else exit_on_error;
+
+
+        // Test3: Write to MT 2 (CDB on MT 6, CDB->old dest forwarding)
+        opa_areg_idx = 0; /* Read from areg 1 */
+        opb_areg_idx = 1; /* Read from zero reg */
+
+        
+        dest_areg_idx = 2; /* Update areg 2 to map to preg 2 */
+        
+        set_dest_enable = 1;
+        new_dest_preg_idx = 2; /* Set to preg 1 */
+
+        set_ready_enable = 1;
+        ready_preg_idx = 6;
+    
+        @(negedge clock)
+        assert(preg1_out.reg_num == 0) else exit_on_error;
+        assert(preg1_out.ready == 1) else exit_on_error;
+        assert(preg2_out.reg_num == 1) else exit_on_error;
+        assert(preg2_out.ready == 1) else exit_on_error;
+
+        // Should get OLD dest register value, and it shouldn't be ready
+        assert(old_dest_preg.reg_num == 6) else exit_on_error;
+        assert(old_dest_preg.ready == 1) else exit_on_error;
+
+
+
+
 
         /* Old dest reg undefined */ 
 
