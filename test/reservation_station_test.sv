@@ -1,6 +1,7 @@
 
 `include "verilog/sys_defs.svh"
 
+// TODO add test cases to exercise the 'full' output
 
 module testbench;
 

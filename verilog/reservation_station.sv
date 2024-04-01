@@ -20,6 +20,11 @@ module reservation_station (
     output RS_PACKET issued_packet,
     output logic [`MAX_FU_INDEX-1:0] issue_fu_index,
 
+    /* Output indicating whether each type of functional unit entry is full */
+    output logic alu_entries_full,
+    output logic mult_entries_full,
+    output logic load_entries_full,
+    output logic store_entries_full,
 
     /* Freeing */
     input [`NUM_FU_ALU-1:0]free_alu,
@@ -61,7 +66,12 @@ module reservation_station (
         // TODO better logic for picking packet to issue 
         alu_issuable = 1'b0;
         alu_issue_index = 0; // TODO this is really undefined
+
+        alu_entries_full = 1'b1;
         for (int i = 0; i < `NUM_FU_ALU; i++) begin
+            if (!alu_entries[i].busy) begin
+                alu_entries_full = 1'b0;
+            end
             if (~alu_entries[i].issued && alu_entries[i].packet.src1_reg.ready && alu_entries[i].packet.src2_reg.ready) begin
                 alu_issuable = 1'b1;
                 alu_issue_index = i;
@@ -69,7 +79,14 @@ module reservation_station (
         end
         mult_issuable = 1'b0;
         mult_issue_index = 0; // TODO this is really undefined
+
+        mult_entries_full = 1'b1;
         for (int i = 0; i < `NUM_FU_MULT; i++) begin
+
+            if (!mult_entries[i].busy) begin
+                mult_entries_full = 1'b0;
+            end
+
             if (~mult_entries[i].issued && mult_entries[i].packet.src1_reg.ready && mult_entries[i].packet.src2_reg.ready) begin
                 mult_issuable = 1'b1;
                 mult_issue_index = i;
@@ -77,15 +94,27 @@ module reservation_station (
         end
         load_issuable = 1'b0;
         load_issue_index = 0; // TODO this is really undefined
+
+        load_entries_full = 1'b1;
         for (int i = 0; i < `NUM_FU_LOAD; i++) begin
             if (~load_entries[i].issued && load_entries[i].packet.src1_reg.ready && load_entries[i].packet.src2_reg.ready) begin
                 load_issuable = 1'b1;
                 load_issue_index = i;
             end
+
+            if (!load_entries[i].busy) begin
+                load_entries_full = 1'b0;
+            end
         end
+
         store_issuable = 1'b0;
         store_issue_index = 0; // TODO this is really undefined
+
+        store_entries_full = 1'b1;
         for (int i = 0; i < `NUM_FU_STORE; i++) begin
+            if (!store_entries[i].busy) begin
+                store_entries_full = 1'b0;
+            end
             if (~store_entries[i].issued && store_entries[i].packet.src1_reg.ready && store_entries[i].packet.src2_reg.ready) begin
                 store_issuable = 1'b1;
                 store_issue_index = i;
