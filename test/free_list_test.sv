@@ -16,6 +16,11 @@ module testbench;
     logic [`PHYS_REG_IDX_SZ:0] enqueue_pr;
     logic was_enqueued;
 
+    logic is_empty;
+    logic is_full;  
+
+    logic [`PHYS_REG_IDX_SZ:0] free_list_raw[`PHYS_REG_SZ+1];
+
     free_list dut(
         .clk(clock),
         .reset(reset),
@@ -26,7 +31,12 @@ module testbench;
 
         .enqueue_en(enqueue_en),
         .enqueue_pr(enqueue_pr),
-        .was_enqueued(was_enqueued)       
+        .was_enqueued(was_enqueued),
+
+        .is_empty(is_empty),
+        .is_full(is_full),
+
+        .free_list(free_list_raw)
     );
 
     // CLOCK_PERIOD is defined on the commandline by the makefile
@@ -45,8 +55,8 @@ module testbench;
     initial begin
         // Everything preg 1-4 number ready status
         $monitor("clock=%b, reset=%b, dequeue_en=%b, dequeue_pr=%h, was_dequeued=%b, \
-        enqueue_en=%b, enqueue_pr=%h, was_enqueued=%b", clock, reset, dequeue_en, 
-        dequeue_pr, was_dequeued, enqueue_en, enqueue_pr, was_enqueued);
+        enqueue_en=%b, enqueue_pr=%h, was_enqueued=%b, is_empty=%b, is_full=%b", clock, reset, dequeue_en, 
+        dequeue_pr, was_dequeued, enqueue_en, enqueue_pr, was_enqueued, is_empty, is_full);
 
         clock     = 0;
         reset     = 0;
@@ -64,7 +74,7 @@ module testbench;
        assert (was_enqueued == 0) else exit_on_error;
 
 
-        // Test3: Enqueue 2, Dequeue 1, Enqueue 3
+        // Test3: Enqueue 5, Dequeue 1, Enqueue 3 (empty forwarding)
         dequeue_en = 1;
         enqueue_en = 1;
         enqueue_pr = 2;
@@ -74,36 +84,52 @@ module testbench;
         assert (was_dequeued == 1) else exit_on_error;
         assert (dequeue_pr == 2) else exit_on_error;
 
-        // dequeue_en = 1;
-        // enqueue_en = 1;
-        // enqueue_pr = 3;
-        
-        // @(negedge clock)
-        // assert (was_enqueued == 1) else exit_on_error;
-        // assert (was_dequeued == 1) else exit_on_error;
+        // Test enqueuing until full
+        for (int i = 0; i < `PHYS_REG_SZ; i++) begin
+            dequeue_en = 0;
+            enqueue_en = 1;
+            enqueue_pr = i;
+            @(negedge clock)
+            assert (was_enqueued == 1) else exit_on_error;
+            assert (was_dequeued == 0) else exit_on_error;
+            // for (int i = 0; i <= `FREE_LIST_SIZE; i++) begin
+            //     $display("free_list[%0d] = %h", i, free_list_raw[i]);
+            // end
+        end
 
-        // // Test4: Enqueue 4, Enqueue 5, Dequeue 2
-        // dequeue_en = 0;
-        // enqueue_en = 1;
-        // enqueue_pr = 4;
-        
-        // @(negedge clock)
-        // assert (was_enqueued == 1) else exit_on_error;
-        // assert (was_dequeued == 0) else exit_on_error;
+        // Test enqueueing while full (should fail)
+        dequeue_en = 0;
+        enqueue_en = 1;
+        enqueue_pr = 5;
+        @(negedge clock)
+        assert (was_enqueued == 0) else exit_on_error;
+        assert (was_dequeued == 0) else exit_on_error;
 
-        // enqueue_en = 1;
-        // enqueue_pr = 5;
-        
-        // @(negedge clock)
-        // assert (was_enqueued == 1) else exit_on_error;
-        // assert (was_dequeued == 0) else exit_on_error;
+        // Test enqueuing and dequeuing while full (should work)
+        dequeue_en = 1;
+        enqueue_en = 1;
+        enqueue_pr = `PHYS_REG_SZ;
+        @(negedge clock)
+        assert (was_enqueued == 1) else exit_on_error;
+        assert (was_dequeued == 1) else exit_on_error;
+        assert (dequeue_pr == 0) else exit_on_error; /* Dequeued the first value */
 
-        // dequeue_en = 1;
-        
-        // @(negedge clock)
-        // assert (was_enqueued == 0) else exit_on_error;
-        // assert (was_dequeued == 1) else exit_on_error;
+        // Test dequuing until empty
+        for (int i = 1; i <= `PHYS_REG_SZ; i++) begin
+            dequeue_en = 1;
+            enqueue_en = 0;
+            @(negedge clock)
+            assert (was_enqueued == 0) else exit_on_error;
+            assert (was_dequeued == 1) else exit_on_error;
+            assert (dequeue_pr == i) else exit_on_error;
+        end
 
+        // Test dequeuing while empty (should fail)
+        dequeue_en = 1;
+        enqueue_en = 0;
+        @(negedge clock)
+        assert (was_enqueued == 0) else exit_on_error;
+        assert (was_dequeued == 0) else exit_on_error;
 
         $display("@@@Passed");
         $finish;

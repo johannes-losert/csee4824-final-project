@@ -32,6 +32,9 @@
 `define PHYS_REG_SZ (`REG_SZ + `ROB_SZ)
 `define PHYS_REG_IDX_SZ ($clog2(`PHYS_REG_SZ-1))
 
+`define FREE_LIST_SIZE `PHYS_REG_SZ+1 /* One additional 'always free' slot */
+
+
 
 // worry about these later
 `define BRANCH_PRED_SZ 1
