@@ -87,6 +87,79 @@ module pipeline (
 
     //////////////////////////////////////////////////
     //                                              //
+    //                  Valid Bit                   //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    // This state controls the stall signal that artificially forces IF
+    // to stall until the previous instruction has completed.
+    // For project 3, start by setting this to always be 1
+
+    logic next_if_valid;
+
+    // synopsys sync_set_reset "reset"
+    always_ff @(posedge clock) begin
+        if (reset) begin
+            // start valid, other stages (ID,EX,MEM,WB) start as invalid
+            next_if_valid <= 1;
+        end else begin
+            // valid bit will cycle through the pipeline and come back from the wb stage
+            next_if_valid <= mem_wb_reg.valid;
+        end
+    end
+
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //                Instruction Fetch             //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    logic [`XLEN-1:0] proc2Icache_addr;
+    logic [63:0] Icache_data_out;
+    logic Icache_valid_out; 
+
+    icache icache_0 (
+        .clock(clock)
+        .reset(reset)
+
+        // MEMORY RESPONSE
+        .Imem2proc_response(mem2proc_response), // Should be zero unless there is a response
+        .Imem2proc_data(mem2proc_data), 
+        .Imem2proc_tag(mem2proc_tag),
+
+        // This wire comes from the ifetch module.  
+        // The main challenge here 
+        .proc2Icache_addr(proc2Icache_addr),
+        .proc2Imem_command(proc2mem_command),
+        
+
+        // OUTPUTS
+        .proc2Imem_addr(proc2Imem_addr), // Cache Fetching Address From Mem
+
+        .Icache_data_out(Icache_data_out), // Data From Mem to Cache to Fetch
+        .Icache_valid_out(Icache_valid_out) 
+    )   
+
+
+    ifetch ifetch_0 (
+        .clock(clock)
+        .reset(reset)
+        .if_valid(next_if_valid),       // only go to next PC when true
+
+        
+        .branch_target(),  // target pc: use if take_branch is TRUE
+    
+        .Icache2proc_data(Icache_data_out), // data coming back from Instruction memory
+        .Icache2proc_data_valid()
+ 
+        if_packet(),    
+        proc2Icache_addr(proc2Icache_addr),  
+    )
+
+
+    //////////////////////////////////////////////////
+    //                                              //
     //                Memory Outputs                //
     //                                              //
     //////////////////////////////////////////////////
