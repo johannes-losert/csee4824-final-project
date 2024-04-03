@@ -41,11 +41,32 @@ module testbench;
         .proc2Icache_addr(proc2Icache_addr)
     );
 
+    // CLOCK_PERIOD is defined on the commandline by the makefile
+    always begin
+        #(`CLOCK_PERIOD/2.0);
+        clock = ~clock;
+    end
+
+    task exit_on_error;
+        begin
+            $display("@@@Failed at time %d", $time);
+            $finish;
+        end
+    endtask
+
+    initial begin  
+        $monitor(
+            $display("if_valid = %b, certain_branch_pc = %h, certain_branch_req = %b, rob_target_pc = %h, rob_target_req = %b, rob_stall = %b, branch_pred_pc = %h, branch_pred_req = %b, Icache2proc_data = %h, Icache2proc_data_valid = %b", 
+            if_valid, certain_branch_pc, certain_branch_req, rob_target_pc, rob_target_req, rob_stall, branch_pred_pc, branch_pred_req, Icache2proc_data, Icache2proc_data_valid)
+        );
+
+    
     // PC+4 Test
 
     // Certain Branch Test 
 
     // Priority test
 
-
+    end 
+endmodule 
 
