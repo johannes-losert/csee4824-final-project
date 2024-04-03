@@ -23,12 +23,12 @@ module ifetch (
     
     // FROM ICACHE
     input [63:0]      Icache2proc_data, // data coming back from Instruction memory
-    input logic Icache2proc_data_valid, 
+    input Icache2proc_data_valid, 
 
     //OUTPUTS 
     // To decode
     output IF_ID_PACKET      if_packet,    
-    output logic [`XLEN-1:0] proc2Icache_addr,  
+    output [`XLEN-1:0] proc2Icache_addr,  
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
