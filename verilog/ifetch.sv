@@ -1,6 +1,6 @@
 `include "verilog/sys_defs.svh"
 
-// ROB_Target + Branch_Predictor + (PC+4) + EX_Branch = 4
+// 1. EX_Branch 2. ROB_Target 3. Branch_Predictor 3. (PC+4)  = 4
 `define REQ 4 
 
 module ifetch (
@@ -51,10 +51,13 @@ module ifetch (
 
     always_comb begin
         unique case (gnt) :
-        
-        // TODO fill in the selector logic
+            4'b1000 : n_PC_reg = certain_branch_pc;
+            4'b0100 : n_PC_reg = rob_target_pc;
+            4'b0010 : n_PC_reg = branch_pred_pc;
+            4'b0001 : n_PC_reg = PC_reg + 4;
 
-        default: n_PC_reg = PC_reg + 4 
+            default: n_PC_reg = PC_reg + 4; 
+        endcase
     end
         
 
