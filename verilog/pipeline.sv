@@ -151,9 +151,9 @@ module pipeline (
         .branch_target(),  // target pc: use if take_branch is TRUE
     
         .Icache2proc_data(Icache_data_out), // data coming back from Instruction memory
-        .Icache2proc_data_valid()
+        .Icache2proc_data_valid(Icache_valid_out)
  
-        if_packet(),    
+        if_packet(if_id_reg),    
         proc2Icache_addr(proc2Icache_addr),  
     )
 
