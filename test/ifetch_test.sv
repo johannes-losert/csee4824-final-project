@@ -60,13 +60,31 @@ module testbench;
             if_valid, certain_branch_pc, certain_branch_req, rob_target_pc, rob_target_req, rob_stall, branch_pred_pc, branch_pred_req, Icache2proc_data, Icache2proc_data_valid)
         );
 
-    
-    // PC+4 Test
+        clock     = 0;
+        reset     = 0;
+        if_valid = 1;
 
-    // Certain Branch Test 
+        // Initial Reset
+        reset = 1;
+        @(negedge clock)
+        reset = 0;
+        
+        // cycle 1
+        $display("Starting Certain Branch Test");
+        
+        certain_branch_pc = 32'h1111_1111;
+        certain_branch_req = 1;
+        rob_target_pc = 32'h2222_2222;
+        rob_target_req = 1;
+        branch_pred_pc = 32'h3333_3333;
+        branch_pred_req = 1;
+        
+        assert(proc2Icache_addr[3] == 1 & ~|proc2Icache_addr[2:0]) else exit_on_error;
 
-    // Priority test
-
+        // Wait until Icache2proc_data_valid is high
+        @(posedge Icache2proc_data_valid);
+        $display("Icache2proc_data = %h", Icache2proc_data);
+        
+        $display("Certain Branch Test Completed");
     end 
 endmodule 
-
