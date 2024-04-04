@@ -1,3 +1,4 @@
+// TODO switch head and tail names
 module free_list (
     input logic clk,
     input logic reset,
