@@ -25,14 +25,22 @@ module ifetch (
     //OUTPUTS 
     // To decode
     output IF_ID_PACKET      if_packet,    
-    output [`XLEN-1:0] proc2Icache_addr
+    output [`XLEN-1:0] proc2Icache_addr,
+    output [3:0] req_debug,
+    output [3:0] gnt_debug
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
     logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching
 
     logic [3:0] req;
+    
+    assign req = {certain_branch_req, rob_target_req, branch_pred_req, 1'b1};
+
     logic [3:0] gnt; 
+
+    assign req_debug = req;
+    assign gnt_debug = gnt;
 
     psel_gen #(.WIDTH(4), .REQS(1)) 
     if_psel (
