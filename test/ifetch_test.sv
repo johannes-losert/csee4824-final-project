@@ -8,6 +8,8 @@ module testbench;
 
     logic if_valid; 
 
+    IF_ID_PACKET if_packet;
+
     logic [`XLEN-1:0] certain_branch_pc;  // target pc: use if take_branch is TRUE
     logic certain_branch_req;    // taken-branch signal ONLY FROM EX
 
@@ -18,9 +20,13 @@ module testbench;
     logic [`XLEN-1:0] branch_pred_pc;
     logic branch_pred_req;
     
+    logic [`XLEN-1:0] proc2Icache_addr;
+
     // FROM ICACHE
     logic [63:0]      Icache2proc_data; // data coming back from Instruction memory
     logic Icache2proc_data_valid;
+
+
 
     ifetch dut(
         .clock(clock),
@@ -78,13 +84,9 @@ module testbench;
         rob_target_req = 1;
         branch_pred_pc = 32'h3333_3333;
         branch_pred_req = 1;
-        
+            
+        @(negedge clock)
+        $display("proc2Icache_addr = %h", proc2Icache_addr);
         assert(proc2Icache_addr == 32'h1111_1111) else exit_on_error;
-
-        // Wait until Icache2proc_data_valid is high
-        @(posedge Icache2proc_data_valid);
-        $display("Icache2proc_data = %h", Icache2proc_data);
-        
-        $display("Certain Branch Test Completed");
     end 
 endmodule 

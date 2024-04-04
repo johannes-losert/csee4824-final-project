@@ -19,7 +19,7 @@ module ifetch (
     input branch_pred_req,
     
     // FROM ICACHE
-    input [63:0]      Icache2proc_data, // data coming back from Instruction memory
+    input [63:0] Icache2proc_data, // data coming back from Instruction memory
     input Icache2proc_data_valid, 
 
     //OUTPUTS 
@@ -34,7 +34,8 @@ module ifetch (
     logic [3:0] req;
     logic [3:0] gnt; 
 
-    psel_gen #(.WIDTH(4), .REQS(1)) (
+    psel_gen #(.WIDTH(4), .REQS(1)) 
+    if_psel (
         .req(req),       
         .gnt(gnt),       
         .gnt_bus(), 
@@ -42,7 +43,7 @@ module ifetch (
     );
 
     always_comb begin
-        unique case (gnt)
+        case (gnt)
             4'b1000 : n_PC_reg = certain_branch_pc;
             4'b0100 : n_PC_reg = rob_target_pc;
             4'b0010 : n_PC_reg = branch_pred_pc;
