@@ -174,16 +174,71 @@ module pipeline (
     //               Instruction Dispatch (D)       //
     //                                              //
     //////////////////////////////////////////////////
+
+    // TODO figure out whether this all happens in a single clock cycle 
+
     /* 1. Take instruction in if_id register and decode it
         - Generate architectural opa, opb, dest, and valid bits for each
        2. If decoded instruction destination is valid, dqueue a PR from the free list
         - If free list is empty, stall fetching
        3. Try to allocate new ROB entry 
-        a. Provide instruction (from fetch), free_reg (from free list)
-        b. outputs packet for reservation station (indirectly for map table)
-        - If ROB full, then stall fetching
-       4. Get next 
-
+        a. Provide instruction (from fetch), free_reg (from free list), and which RS entries are free 
+        b. If ROB full, then stall fetching
+        c. If ANY single ROB entry ready to be dispatched has an FU type that has a free RS entry,
+        then issue the instruction in that ROB entry to the RS (and from the RS to the map table)
+       4. Try to allocate new RS entry
+        a. If ROB issues an instruction to RS, then allocate an RS entry (we better have a slot for it)
+            - Get operands from Map Table, update destination in map table
+        b. If ROB does not issue (stall?) then do not allocate RS entry
     */
+
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //               Issue (S)                      //
+    //                                              //
+    //////////////////////////////////////////////////
+
+
+    // Waiting in an RS entry, and passing to FUs once both operands ready 
+    /* 
+        1. If reservation station is ready to issue an instruction, pass it to the FU
+            - if more than one FU is ready, choose one somehow (done in reservation station)
+            - Should be storing FUs indexed somehow so they can be passed directly (for loop?)
+            a. Convert physical register number for each operand to its value by reading regfile
+    */  
+
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //               Execute (E)                    //
+    //                                              //
+    //////////////////////////////////////////////////
+    // Perform each operation 
+
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //               Complete (C)                   //
+    //                                              //
+    //////////////////////////////////////////////////    
+    // Write register file 
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //               Retire (R)                     //
+    //                                              //
+    ////////////////////////////////////////////////// 
+    // In program order, remove from ROB, update arch table, and free PR
+    // Handle exceptions
+
+    /* 
+        On any given cycle, check if head of ROB is complete
+        If it is, retire it by removing from ROB, updating Arch Map, and freeing PR
+    */
+
+
+
+   
 
 endmodule // pipeline
