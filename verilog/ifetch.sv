@@ -1,24 +1,21 @@
 `include "verilog/sys_defs.svh"
+`include "verilog/psel_gen.sv"
 
 // 1. EX_Branch 2. ROB_Target 3. Branch_Predictor 3. (PC+4)  = 4
-`define REQ 4 
 
 module ifetch (
     input             clock,          // system clock
     input             reset,          // system reset
     input             if_valid,       // only go to next PC when true
     
-    input [`XLEN-1:0] certain_branch_pc,  // target pc: use if take_branch is TRUE
-    input             certain_branch_req,    // taken-branch signal ONLY FROM EX
+    input [`XLEN-1:0] certain_branch_pc, 
+    input certain_branch_req,
 
-    // Question for Tanvir: take branch forces the change of the program counter and should only be high
-    // when we are absolutely confident that the branch will be taken - i.e. in the commit stage. 
-
-    input rob_target_pc,
+    input [`XLEN-1:0] rob_target_pc,
     input rob_target_req,
     input rob_stall, 
 
-    input branch_pred_pc,
+    input [`XLEN-1:0] branch_pred_pc,
     input branch_pred_req,
     
     // FROM ICACHE
@@ -28,34 +25,28 @@ module ifetch (
     //OUTPUTS 
     // To decode
     output IF_ID_PACKET      if_packet,    
-    output [`XLEN-1:0] proc2Icache_addr,  
+    output [`XLEN-1:0] proc2Icache_addr
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
     logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching
 
+    logic [3:0] req;
+    logic [3:0] gnt; 
 
-    logic ['REQ-1:0] req;
-    logic ['REQ-1:0] gnt; 
-
-    psel_gen #(
-        .REQS(1),     // This is internal
-        .WIDTH(REQ)    // Custom width
-    ) psel_gen_instance (
+    psel_gen #(.WIDTH(4), .REQS(1)) (
         .req(req),       
-        
         .gnt(gnt),       
         .gnt_bus(), 
         .empty()  
     );
 
     always_comb begin
-        unique case (gnt) :
+        unique case (gnt)
             4'b1000 : n_PC_reg = certain_branch_pc;
             4'b0100 : n_PC_reg = rob_target_pc;
             4'b0010 : n_PC_reg = branch_pred_pc;
             4'b0001 : n_PC_reg = PC_reg + 4;
-
             default: n_PC_reg = PC_reg + 4; 
         endcase
     end
@@ -78,7 +69,7 @@ module ifetch (
 
     // this mux is because the Imem gives us 64 bits not 32 bits
     assign if_packet.inst = (~if_valid) ? `NOP :
-                            PC_reg[2] ? Imem2proc_data[63:32] : Imem2proc_data[31:0];
+                            PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
 
     assign if_packet.PC  = PC_reg;
     assign if_packet.NPC = PC_reg + 4; // pass PC+4 down pipeline w/instruction
