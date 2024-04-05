@@ -10,16 +10,13 @@
 `include "verilog/sys_defs.svh"
 
 
-module psel_gen (
+module psel_gen #(parameter WIDTH, REQS)
+(
     input wire [WIDTH-1:0]       req,
     output wor [WIDTH-1:0]       gnt,
     output wand [WIDTH*REQS-1:0] gnt_bus,
-    output wire                  empty,
+    output wire                  empty
 );
-
-    // synopsys template
-    parameter REQS  = 3;
-    parameter WIDTH = 128;
 
     // Internal stuff
     wire  [WIDTH*REQS-1:0]  tmp_reqs;

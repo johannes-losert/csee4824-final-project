@@ -412,5 +412,23 @@ typedef struct packed {
     PREG T; /* Could switch with index to not carry ready bit */
 } ROB_PACKET;
 
+/**
+ * Branch Target Buffer:
+ * 
+ * TODO ADD DESCRIPTION
+ * 
+ */
+
+// entries are written to using the write_entry struct
+typedef struct packed {
+    logic [`XLEN-1:0] branch_pc;
+    logic [`XLEN-1:0] target_pc;
+} BTB_WRITE;
+
+// entries are accessed using index
+typedef struct packed {
+    logic [`XLEN-1:0] target_pc;
+    logic valid;
+} BTB_ENTRY;
 
 `endif // __SYS_DEFS_SVH__
