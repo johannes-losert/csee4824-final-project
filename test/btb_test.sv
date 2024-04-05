@@ -72,6 +72,7 @@ module testbench;
 
         @(negedge clock)
         
+        
         $display("Test 2: Write to all entries and check if they are valid.");
         write_enable = 1;
         for (int i = 0; i < `BTB_ENTRIES; i = i + 1) begin
@@ -91,7 +92,7 @@ module testbench;
             assert(target_pc == 420 + i) else exit_on_error;
         end
 
-
+        $display("Test 2 Passed.");
 
         $display("@@@Passed");
         $finish;
