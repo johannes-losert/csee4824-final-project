@@ -1,7 +1,7 @@
 `include "verilog/sys_defs.svh"
 `include "verilog/psel_gen.sv"
 
-// 1. EX_Branch 2. ROB_Target 3. Branch_Predictor 3. (PC+4)  = 4
+// 1. EX_Branch 2. ROB_Target 3. Branch_Predictor 4. (PC+4)  = 4
 
 module ifetch (
     input             clock,          // system clock
@@ -34,11 +34,10 @@ module ifetch (
     logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching
 
     logic [3:0] req;
-    
     assign req = {certain_branch_req, rob_target_req, branch_pred_req, 1'b1};
-
     logic [3:0] gnt; 
 
+    // DEBUG SIGNALS
     assign req_debug = req;
     assign gnt_debug = gnt;
 

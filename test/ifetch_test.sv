@@ -133,7 +133,9 @@ module testbench;
         branch_pred_req = 1;
             
         @(negedge clock)
-        $display("proc2Icache_addr = %h", proc2Icache_addr);
-        assert(proc2Icache_addr == 32'h1111_1110) else exit_on_error;
+        $display("proc2Icache_addr = %h", proc2Icache_addr);  
+        @(posedge Icache2proc_data_valid)
+        $display("if_packet.inst = %h", if_packet.inst);  
+        assert(if_packet.inst == 32'h1111_1110) else exit_on_error;
     end 
 endmodule 
