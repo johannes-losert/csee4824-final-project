@@ -59,17 +59,39 @@ module testbench;
         reset = 1;
         @(negedge clock)
         reset = 0;
-        @(negedge clock)
         // cycle 1
         $display("Test 1: At restart all entries should be invalid.");
 
         for (int i = 0; i < `BTB_ENTRIES; i = i + 1) begin
             query_pc = i; 
             @(negedge clock)
-            $display("hit = %b", hit);  
-            assert(hit == 0) else exit_on_error;;    
+            assert(hit == 0) else exit_on_error;    
         end
+
+        $display("Test 1 Passed.");
+
+        @(negedge clock)
         
+        $display("Test 2: Write to all entries and check if they are valid.");
+        write_enable = 1;
+        for (int i = 0; i < `BTB_ENTRIES; i = i + 1) begin
+            @(negedge clock)
+            write_source_pc = i;
+            write_dest_pc = 420 + i;
+        end
+        #2; // give the last write time to pass through
+        write_enable = 0;
+
+        for (int i = 0; i < `BTB_ENTRIES; i = i + 1) begin
+            @(negedge clock)
+            query_pc = i;
+            #2; // give enough time for value to stabilize
+            $display("hit = %b, target_pc = %d", hit, target_pc);  
+            assert(hit) else exit_on_error;
+            assert(target_pc == 420 + i) else exit_on_error;
+        end
+
+
 
         $display("@@@Passed");
         $finish;
