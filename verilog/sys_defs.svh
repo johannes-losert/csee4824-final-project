@@ -404,15 +404,32 @@ typedef struct packed {
 `define BTB_TAG_LEN 4
 `define BTB_ENTRIES 16 // 2^`BTB_TAG_LEN
 
-typedef struct packed {
-    logic [`XLEN-1:0] branch_pc;
-    logic [`XLEN-1:0] target_pc;
-} BTB_WRITE;
-
 // entries are accessed using index
 typedef struct packed {
     logic [`XLEN-1:0] target_pc;
     logic valid;
 } BTB_ENTRY;
+
+/**
+ * Branch Predictor:
+ * 
+ * TODO ADD DESCRIPTION
+ * 
+ */
+
+`define BP_TAG_LEN 4
+`define BP_ENTRIES 16 // 2^`BP_TAG_LEN
+
+typedef enum logic [1:0] {
+    SNT  = 2'b00, // strongly not taken
+    WNT  = 2'b01, // weakly not taken
+    WT = 2'b11, // weakly taken
+    ST = 2'b10 // strongly taken
+} BP_ENTRY_STATE;
+
+typedef struct packed {
+    BP_ENTRY_STATE state; 
+    logic valid;
+} BP_ENTRY;
 
 `endif // __SYS_DEFS_SVH__
