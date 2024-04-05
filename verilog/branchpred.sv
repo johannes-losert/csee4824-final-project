@@ -1,1 +1,0 @@
-// Simple bimodal branch predictor
