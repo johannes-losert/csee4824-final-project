@@ -1,6 +1,9 @@
 // Simple bimodal branch predictor
 `include "verilog/sys_defs.svh"
 
+
+// simply bimodal branch predictor
+// At initialization all branches are predicted to be strongly not taken
 module branch_predictor (
     input logic clock, 
     input logic reset, 
@@ -9,7 +12,6 @@ module branch_predictor (
 
     // update the branch 
     input logic [`XLEN-1:0] ex_pc,
-    input logic ex_branch_taken,
     input logic ex_is_branch_taken,
     input logic ex_is_branch_not_taken,
 
@@ -25,7 +27,10 @@ module branch_predictor (
     assign ex_tag = ex_pc[`BTB_TAG_LEN:0];
 
     logic [3:0] if_tag;
-    assign if_tag = if_pc[`BTB_TAG_LEN:0];    
+    assign if_tag = if_pc[`BTB_TAG_LEN:0];
+
+    assign hit = buffer[if_tag].valid;
+
 
     always_comb begin
         if (reset) begin
@@ -50,6 +55,13 @@ module branch_predictor (
                 ST  : n_buffer[ex_tag].state = WT;
             endcase 
         end
+
+        case (buffer[if_tag].state)
+            SNT : predict_branch_taken = 0;
+            WNT : predict_branch_taken = 0;
+            WT  : predict_branch_taken = 1;
+            ST  : predict_branch_taken = 1;
+        endcase 
     end
 
     always_ff @(posedge clock) begin

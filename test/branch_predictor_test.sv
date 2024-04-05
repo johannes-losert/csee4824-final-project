@@ -7,9 +7,10 @@ module testbench;
     logic [`XLEN-1:0] if_pc;
 
     logic [`XLEN-1:0] ex_pc;
-    logic ex_branch_taken;
+    logic ex_is_branch_taken, ex_is_branch_not_taken;
 
-    logic predict_branch_taken; 
+    // outputs
+    logic predict_branch_taken, hit;
 
     branch_predictor dut (
         .clock(clock), 
@@ -18,9 +19,12 @@ module testbench;
         .if_pc(if_pc),
 
         .ex_pc(ex_pc),
-        .ex_branch_taken(ex_branch_taken),
-
-        .predict_branch_taken(predict_branch_taken)
+        .ex_is_branch_taken(ex_is_branch_taken),
+        .ex_is_branch_not_taken(ex_is_branch_not_taken),
+        
+        //outputs
+        .predict_branch_taken(predict_branch_taken),
+        .hit(hit)
     );
 
     always begin       
@@ -43,6 +47,67 @@ module testbench;
         @(negedge clock)
         reset = 0;
 
+        $display("Test 1: All branches predictions are no hit in beginning.");
+            for (int i = 0; i < `BP_ENTRIES; i = i + 1) begin
+                if_pc = i;
+                @(negedge clock)
+                #2;
+                assert(predict_branch_taken == 0) else exit_on_error();
+                assert(hit == 0) else exit_on_error();
+            end
+        $display("Test 1 Passed.");
+
+        $display("Test 2: Some random branches, tracking multiple branches.");
+
+        for (int i = 0; i < `BP_ENTRIES; i = i + 1) begin
+            ex_pc = i;
+            ex_is_branch_taken = 1;
+            ex_is_branch_not_taken = 0;
+            if_pc = i;
+            
+            @(negedge clock)
+            #2;
+            assert(predict_branch_taken == 0) else exit_on_error();
+            assert(hit == 1) else exit_on_error();
+
+            @(negedge clock)
+            #2;
+            assert(predict_branch_taken == 1) else exit_on_error();
+            assert(hit == 1) else exit_on_error();
+
+            ex_pc = i;
+            ex_is_branch_taken = 0;
+            ex_is_branch_not_taken = 1;
+            
+            @(negedge clock)
+            #2;
+            assert(predict_branch_taken == 0) else exit_on_error();
+            assert(hit == 1) else exit_on_error();
+
+            ex_pc = i;
+            ex_is_branch_taken = 1;
+            ex_is_branch_not_taken = 0;
+            @(negedge clock)
+            @(negedge clock)
+            @(negedge clock)
+            #2;
+            assert(predict_branch_taken == 1) else exit_on_error();
+            assert(hit == 1) else exit_on_error();
+
+            ex_pc = i;
+            ex_is_branch_taken = 0;
+            ex_is_branch_not_taken = 1;
+            #2;
+            assert(predict_branch_taken == 1) else exit_on_error();
+            assert(hit == 1) else exit_on_error();
+
+        end
+
+        $display("Test 2 Passed.");
+
+
+        $display("@@@Passed");
+        $finish;
     end 
 
 
