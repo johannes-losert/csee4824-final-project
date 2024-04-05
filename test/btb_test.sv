@@ -71,7 +71,7 @@ module testbench;
         $display("Test 1 Passed.");
 
         @(negedge clock)
-        
+
         
         $display("Test 2: Write to all entries and check if they are valid.");
         write_enable = 1;
@@ -87,7 +87,6 @@ module testbench;
             @(negedge clock)
             query_pc = i;
             #2; // give enough time for value to stabilize
-            $display("hit = %b, target_pc = %d", hit, target_pc);  
             assert(hit) else exit_on_error;
             assert(target_pc == 420 + i) else exit_on_error;
         end

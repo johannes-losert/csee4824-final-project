@@ -59,9 +59,4 @@ module btb (
         buffer <= n_buffer;
     end
 
-
-    
-
-
-
 endmodule
