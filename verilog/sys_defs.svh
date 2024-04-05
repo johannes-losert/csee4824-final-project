@@ -400,6 +400,10 @@ typedef struct packed {
  */
 
 // entries are written to using the write_entry struct
+
+`define BTB_TAG_LEN 4
+`define BTB_ENTRIES 16 // 2^`BTB_TAG_LEN
+
 typedef struct packed {
     logic [`XLEN-1:0] branch_pc;
     logic [`XLEN-1:0] target_pc;

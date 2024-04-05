@@ -55,6 +55,22 @@ module testbench;
     initial begin 
         // $monitor();
 
+        clock     = 0;
+        reset = 1;
+        @(negedge clock)
+        reset = 0;
+        @(negedge clock)
+        // cycle 1
+        $display("Test 1: At restart all entries should be invalid.");
+
+        for (int i = 0; i < `BTB_ENTRIES; i = i + 1) begin
+            query_pc = i; 
+            @(negedge clock)
+            $display("hit = %b", hit);  
+            assert(hit == 0) else exit_on_error;;    
+        end
+        
+
         $display("@@@Passed");
         $finish;
     end

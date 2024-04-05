@@ -7,9 +7,6 @@
 
 `include "verilog/sys_defs.svh"
 
-`define BTB_TAG_LEN 4
-`define BTB_ENTRIES 16 // 2^`BTB_TAG_LEN
-
 module btb (
     input logic clock, 
     input logic reset, 
@@ -32,7 +29,6 @@ module btb (
     assign target_pc = buffer[query_tag].target_pc;
 
     always_comb begin
-
         if (reset) begin
             for (int i = 0; i < `BTB_ENTRIES; i = i + 1) begin
                 n_buffer[i].target_pc = 0;
