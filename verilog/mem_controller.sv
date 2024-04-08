@@ -14,7 +14,7 @@ module mem_controller (
 
     // To memory
     output BUS_COMMAND       proc2mem_command,
-    output logic [63:0] proc2mem_addr,
+    output logic [`XLEN-1:0] proc2mem_addr,
     
     // From memory
     input logic [3:0]  mem2proc_response, // Should be zero unless there is a response
