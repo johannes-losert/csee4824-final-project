@@ -446,6 +446,14 @@ typedef enum logic [1:0] {
     DCACHE  = 2'b01
 } DEST_CACHE;
 
+// dcache and icache should be ready to receive the tag of the next request
+typedef enum logic [1:0] {
+    NO_REQUEST = 2'b00,
+    AWAIT_TAG_ICACHE = 2'b10,
+    AWAIT_TAG_DCACHE = 2'b01,
+    TAG_AVAILABLE = 2'b11
+} REQ_STATUS;
+
 typedef union packed {
     logic [7:0][7:0]  byte_level;
     logic [3:0][15:0] half_level;

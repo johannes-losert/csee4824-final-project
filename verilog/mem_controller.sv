@@ -1,5 +1,24 @@
 `include "verilog/sys_defs.svh"
 
+/*
+    Memory Controller by Johannes Losert (johannes.losert@columbia.edu)
+
+    This module is responsible for deliberating between memory requests from caches
+    and forwarding satisfied requests to the correct location. The purpose of this 
+    module is to remove complexity from our final pipeline by providing a more natural 
+    interface for the caches to interact with memory. 
+
+    The controller is responsible for the following:
+        - Ensuring that dcache requests get priority over icache requests
+        - Forwarding requests to memory
+        - Forwarding responses to the correct cache
+        - Managing the state of memory tags
+
+    IMPORTANT: The controller does not currently output whether memory can accept more requests
+    I want to implement it soon.
+
+*/ 
+
 module mem_controller (
     input clock, 
     input reset, 
@@ -21,6 +40,8 @@ module mem_controller (
     input logic [63:0] mem2proc_data,
     input logic [3:0]  mem2proc_tag,
 
+    output REQ_STATUS current_request_status,
+
     // to caches (both are connected)
     output logic [3:0]  control2cache_response, // Should be zero unless there is a response
     output DEST_CACHE control2cache_response_which, // always either ICACHE, or DCACHE
@@ -30,20 +51,28 @@ module mem_controller (
 ); 
 
     // we index by tracking number
-    logic [3:0] [1:0] controller_table; 
-    logic [3:0] [1:0] n_controller_table; 
+    DEST_CACHE controller_table [3:0]; 
+    DEST_CACHE n_controller_table [3:0]; 
+
+    REQ_STATUS next_request_status;
     
     /* Memory Request Response (Tag Acquisition) */ 
     logic no_grant, dcache_req_granted, icache_req_granted;
 
-    assign no_grant = ~&mem2proc_response; // all zeros, no tag granted
-    assign dcache_req_granted = (dcache_command != BUS_NONE) && !no_grant; 
-    assign icache_req_granted = (icache_command == BUS_LOAD) && (dcache_command == BUS_NONE) && !no_grant;
+    /* logic no_grant_possible: This is a future feature */ 
+
+    assign dcache_req_granted = (dcache_command != BUS_NONE); 
+    assign icache_req_granted = (icache_command == BUS_LOAD) && (dcache_command == BUS_NONE);
+    assign no_grant = !dcache_req_granted || !icache_req_granted; // all zeros, no tag granted
+    
 
     /* Memory Data Response (Data Acquisition, Tag Freed) */ 
     // has the memory responded with data? 
     logic mem_has_data;
     assign mem_has_data = |mem2proc_tag; 
+
+    logic mem_has_tag;
+    assign mem_has_tag = |mem2proc_response;
 
     // in each cycle we get AT MOST one response from memory 
     always_comb begin
@@ -51,7 +80,7 @@ module mem_controller (
             for (int i = 0; i < 16; i = i + 1) begin
                 n_controller_table[i] = NONE;
             end
-        end
+        end   
         
         if (icache_req_granted) begin
             n_controller_table[mem2proc_response] = ICACHE;
@@ -74,9 +103,20 @@ module mem_controller (
             control2cache_data = 0;
             control2cache_tag_which = NONE;
         end
+
+        if (dcache_req_granted) begin
+            next_request_status = AWAIT_TAG_DCACHE;
+        end else if (icache_req_granted) begin 
+            next_request_status = AWAIT_TAG_ICACHE;
+        end else if (mem_has_tag) begin
+            next_request_status = TAG_AVAILABLE;
+        end else begin
+            next_request_status = NO_REQUEST;
+        end
     end
 
     always_ff @(posedge clock) begin
         controller_table <= n_controller_table;
+        current_request_status <= next_request_status;
     end
 endmodule 

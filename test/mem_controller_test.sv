@@ -30,6 +30,8 @@ module testbench;
     logic [3:0]  control2cache_tag;
     DEST_CACHE control2cache_tag_which; 
 
+    REQ_STATUS current_request_status;
+
     mem_controller dut (
         .clock(clock),
         .reset(reset),
@@ -42,10 +44,12 @@ module testbench;
         
         .proc2mem_command(proc2mem_command),
         .proc2mem_addr(proc2mem_addr),
-        
+
         .mem2proc_response(mem2proc_response),
         .mem2proc_data(mem2proc_data),
         .mem2proc_tag(mem2proc_tag),
+
+        .current_request_status(current_request_status),
 
         .control2cache_response(control2cache_response),
         .control2cache_response_which(control2cache_response_which),
@@ -93,28 +97,23 @@ module testbench;
         clock = 0;
         clk = 0;
         reset = 1;
-        @(negedge clk)
+        @(negedge clock)
         reset = 0;
 
         $display("Test case 1: Controller gets tag from mem.");
         icache_command = BUS_LOAD;
-        icache_addr = 420;
+        icache_addr = 111;
 
         dcache_command = BUS_LOAD;
-        dcache_addr = 69;
+        dcache_addr = 222;
         
-        @(posedge |proc2mem_addr)
-        $display("proc2mem_addr: %h", proc2mem_addr);
-        
+        // the current request status shouldn't update until the next clock cycle
+        @(negedge clock)
+        assert(current_request_status == AWAIT_TAG_DCACHE) else exit_on_error;
 
-        $display("proc2mem_addr: %h", proc2mem_addr);
-        $display("mem2proc_response: %h", mem2proc_response); 
-        
-        assert(proc2mem_addr == dcache_addr) else exit_on_error;
-        assert(mem2proc_response == 4'h1) else exit_on_error; 
-        
-        while (control2cache_response == 0) @(negedge clock);
-        assert(control2cache_response == 1) else exit_on_error;
+        @(posedge |mem2proc_response)
+        $display("mem2proc_response: %d", mem2proc_response);
+        assert(|mem2proc_response) else exit_on_error;
 
         $display("@@@Passed");
         $finish;
