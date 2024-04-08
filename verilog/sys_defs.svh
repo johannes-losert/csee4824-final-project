@@ -432,4 +432,24 @@ typedef struct packed {
     logic valid;
 } BP_ENTRY;
 
+
+/**
+ * Mem Controller:
+ * 
+ * TODO ADD DESCRIPTION
+ * 
+ */
+
+typedef enum logic [1:0] {
+    NONE = 2'b00,
+    ICACHE  = 2'b10,
+    DCACHE  = 2'b01
+} DEST;
+
+typedef union packed {
+    logic [7:0][7:0]  byte_level;
+    logic [3:0][15:0] half_level;
+    logic [1:0][31:0] word_level;
+} MEM_RETURN;
+
 `endif // __SYS_DEFS_SVH__
