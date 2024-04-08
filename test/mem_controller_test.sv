@@ -30,4 +30,56 @@ module testbench;
     logic [3:0]  control2cache_tag;
     logic [1:0] control2cache_tag_which; 
 
+    mem_controller dut (
+        .clock(clock),
+        .reset(reset),
+        .icache_command(icache_command),
+        .icache_addr(icache_addr),
+        .icache_is_miss(icache_is_miss),
+        .dcache_command(dcache_command),
+        .dcache_addr(dcache_addr),
+        .proc2mem_command(proc2mem_command),
+        .proc2mem_addr(proc2mem_addr),
+        .mem2proc_response(mem2proc_response),
+        .mem2proc_data(mem2proc_data),
+        .mem2proc_tag(mem2proc_tag),
+        .control2cache_response(control2cache_response),
+        .control2cache_response_which(control2cache_response_which),
+        .control2cache_data(control2cache_data),
+        .control2cache_tag(control2cache_tag),
+        .control2cache_tag_which(control2cache_tag_which)
+    );
+
+    always begin       
+        #(`CLOCK_PERIOD/2.0);
+        clock = ~clock;
+        // counter_edges = counter_edges + 1; 
+
+        // if (counter_edges == mem_latency_edges) begin
+        //     clk = ~clk;
+        //     counter_edges = 0; 
+        // end
+
+    end
+
+    task exit_on_error;
+        begin
+            $display("@@@Failed at time %d", $time);
+            $finish;
+        end
+    endtask
+
+    initial begin 
+        // $monitor();
+
+        clock     = 0;
+        reset = 1;
+        @(negedge clock)
+        reset = 0;
+
+
+        $display("@@@Passed");
+        $finish;
+    end
+
 endmodule

@@ -444,7 +444,7 @@ typedef enum logic [1:0] {
     NONE = 2'b00,
     ICACHE  = 2'b10,
     DCACHE  = 2'b01
-} DEST;
+} DEST_CACHE;
 
 typedef union packed {
     logic [7:0][7:0]  byte_level;

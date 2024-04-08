@@ -18,16 +18,16 @@ module mem_controller (
     output logic [63:0] proc2mem_addr,
     
     // From memory
-    input [3:0]  mem2proc_response, // Should be zero unless there is a response
-    input [63:0] mem2proc_data,
-    input [3:0]  mem2proc_tag,
+    input logic [3:0]  mem2proc_response, // Should be zero unless there is a response
+    input logic [63:0] mem2proc_data,
+    input logic [3:0]  mem2proc_tag,
 
     // to caches (both are connected)
-    output [3:0]  control2cache_response, // Should be zero unless there is a response
-    output [3:0] control2cache_response_which, // always either ICACHE, or DCACHE
-    output [63:0] control2cache_data, 
-    output [3:0]  control2cache_tag,
-    output [1:0] control2cache_tag_which
+    output logic [3:0]  control2cache_response, // Should be zero unless there is a response
+    output DEST_CACHE control2cache_response_which, // always either ICACHE, or DCACHE
+    output logic [63:0] control2cache_data, 
+    output logic [3:0]  control2cache_tag,
+    output DEST_CACHE control2cache_tag_which
 ); 
 
     // we index by tracking number
@@ -37,7 +37,7 @@ module mem_controller (
     /* Memory Request Response (Tag Acquisition) */ 
     logic no_grant, dcache_req_granted, icache_req_granted;
 
-    assign no_grant = ~&mem2proc_response // all zeros, no tag granted
+    assign no_grant = ~&mem2proc_response; // all zeros, no tag granted
     assign dcache_req_granted = (dcache_command != BUS_NONE) && !no_grant; 
     assign icache_req_granted = (icache_command == BUS_LOAD) && (dcache_command == BUS_NONE) && !no_grant;
 
@@ -57,23 +57,23 @@ module mem_controller (
         if (icache_req_granted) begin
             n_controller_table[mem2proc_response] = ICACHE;
             proc2mem_command = icache_command;
-            proc2Dmem_addr = icache_addr;
+            proc2mem_addr = icache_addr;
             control2cache_response_which = ICACHE; 
         end else if (dcache_req_granted) begin
             n_controller_table[mem2proc_response] = DCACHE;
             proc2mem_command = dcache_command;
-            proc2Dmem_addr = dcache_addr;
+            proc2mem_addr = dcache_addr;
             control2cache_response_which = DCACHE; 
         end 
 
         if (mem_has_data) begin
             control2cache_tag = mem2proc_tag;
             control2cache_data = mem2proc_data;
-            control2cache_which = controller_table[mem2proc_tag];
+            control2cache_tag_which = controller_table[mem2proc_tag];
         end else begin 
             control2cache_tag = 0;
             control2cache_data = 0;
-            control2cache_which = NONE;
+            control2cache_tag_which = NONE;
         end
     end
 
