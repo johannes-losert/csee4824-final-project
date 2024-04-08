@@ -3,6 +3,12 @@
 
 // 1. EX_Branch 2. ROB_Target 3. Branch_Predictor 4. (PC+4)  = 4
 
+/* 
+
+        MOST OF THIS CODE IS TRASH RN, DISREGARD
+
+*/
+
 module ifetch (
     input             clock,          // system clock
     input             reset,          // system reset

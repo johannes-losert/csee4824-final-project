@@ -5,16 +5,15 @@ module mem_controller (
     input reset, 
 
     // icache request
-    input logic [1:0]       icache_command,
+    input BUS_COMMAND       icache_command,
     input logic [`XLEN-1:0] icache_addr,
-    input logic icache_is_miss,
     
     // dcache request
-    input logic [1:0]       dcache_command,
+    input BUS_COMMAND       dcache_command,
     input logic [`XLEN-1:0] dcache_addr,
 
     // To memory
-    output logic [1:0]       proc2mem_command,
+    output BUS_COMMAND       proc2mem_command,
     output logic [63:0] proc2mem_addr,
     
     // From memory
