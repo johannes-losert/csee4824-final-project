@@ -46,13 +46,13 @@ module ifetch (
     logic n_fetch_busy; // if we will be fetching an instruction next cycle
     logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching
 
-    logic insn_buffer [`INSN_BUF_SIZE-1:0][63:0];
-    logic n_insn_buffer [`INSN_BUF_SIZE-1:0][63:0];
+    logic [`INSN_BUF_SIZE-1:0][63:0] inst_buffer;
+    logic [`INSN_BUF_SIZE-1:0][63:0] n_inst_buffer;
 
     logic [`XLEN-1:0] if_packet_inst; 
     logic [`XLEN-1:0] n_if_packet_inst; // This should be a copy of the buffer head  
     assign  n_if_packet_inst = (~if_valid) ? `NOP :
-                            PC_reg[2] ? insn_buffer[`INSN_BUF_SIZE-1][63:32] : insn_buffer[`INSN_BUF_SIZE-1][31:0];
+                            PC_reg[2] ? inst_buffer[`INSN_BUF_SIZE-1][63:32] : inst_buffer[`INSN_BUF_SIZE-1][31:0];
 
     logic [3:0] req;
     assign req = {certain_branch_req, rob_target_req, branch_pred_req, 1'b1};
@@ -74,23 +74,23 @@ module ifetch (
 
         // Select the next PC based four possible sources if we are not busy
         case ({gnt, fetch_busy})
-            4'b10000 : n_PC_reg = certain_branch_pc;
-            4'b01000 : n_PC_reg = rob_target_pc;
-            4'b00100 : n_PC_reg = branch_pred_pc;
-            4'b00010 : n_PC_reg = PC_reg + 4;
-            4'bxxxx1 : n_PC_reg = PC_reg;
+            5'b10000 : n_PC_reg = certain_branch_pc;
+            5'b01000 : n_PC_reg = rob_target_pc;
+            5'b00100 : n_PC_reg = branch_pred_pc;
+            5'b00010 : n_PC_reg = PC_reg + 4;
+            5'bxxxx1 : n_PC_reg = PC_reg;
             default: n_PC_reg = PC_reg + 4; 
         endcase
     
         // Perform the FIFO shift and load the next fetched instruction into the buffer 
         if (Icache2proc_data_valid) begin
-            n_insn_buffer[0] = Icache2proc_data;
+            n_inst_buffer[0] = Icache2proc_data;
         end else begin
-            n_insn_buffer[0] = 0;
+            n_inst_buffer[0] = 0;
         end
 
         for (int i = 0; i < `INSN_BUF_SIZE; i++) begin
-            n_insn_buffer[i+1] = insn_buffer[i];
+            n_inst_buffer[i+1] = inst_buffer[i];
         end
 
         // Update the fetch busy signal
@@ -102,12 +102,12 @@ module ifetch (
     always_ff @(posedge clock) begin
         if (reset) begin
             PC_reg <= 0;
-            insn_buffer <= 0;
+            inst_buffer <= 0;
             if_packet_inst <= `NOP; 
             fetch_busy <= 0; // the first cycle should be a fetch
         end else begin
             PC_reg <= n_PC_reg;
-            insn_buffer <= n_insn_buffer;
+            inst_buffer <= n_inst_buffer;
             if_packet_inst <= n_if_packet_inst;
             fetch_busy <= n_fetch_busy;
         end

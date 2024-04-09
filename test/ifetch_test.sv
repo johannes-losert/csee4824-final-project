@@ -72,6 +72,23 @@ module testbench;
         .mem2proc_tag(mem2proc_tag)
     );
 
+    icache icache_0 (
+        .clock(clock),
+        .reset(reset),
+
+        .Imem2proc_response(mem2proc_response),
+        .Imem2proc_data(mem2proc_data),
+        .Imem2proc_tag(mem2proc_tag),
+
+        .proc2Icache_addr(proc2Icache_addr),
+
+        .proc2Imem_command(proc2mem_command),
+        .proc2Imem_addr(proc2mem_addr),
+
+        .Icache_data_out(Icache2proc_data),
+        .Icache_valid_out(Icache2proc_data_valid)
+    );
+
     
     // The latency of memory accesses in clock edges 
     integer mem_latency_edges = `MEM_LATENCY_IN_CYCLES * 2;

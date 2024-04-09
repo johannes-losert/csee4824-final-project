@@ -57,12 +57,12 @@ module icache (
     input [`XLEN-1:0] proc2Icache_addr,
 
     // To memory
-    output logic [1:0]       proc2Imem_command,
-    output logic [`XLEN-1:0] proc2Imem_addr,
+    output [1:0]       proc2Imem_command,
+    output [`XLEN-1:0] proc2Imem_addr,
 
     // To fetch stage
-    output logic [63:0] Icache_data_out, // Data is mem[proc2Icache_addr]
-    output logic        Icache_valid_out // When valid is high
+    output [63:0] Icache_data_out, // Data is mem[proc2Icache_addr]
+    output Icache_valid_out // When valid is high
 );
 
     // ---- Cache data ---- //
