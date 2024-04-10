@@ -4,8 +4,8 @@ module free_list (
     input logic reset,
 
     // READ from head operation
-    output logic [`PHYS_REG_IDX_SZ:0] tail_pr, /* Always points to the next element to be dequeued, unless is_empty */
-    output logic is_empty, /* IF is_empty, tail_pr is undefined */
+    output logic [`PHYS_REG_IDX_SZ:0] front_head_pr, /* Always points to the next element to be dequeued, unless is_empty */
+    output logic is_empty, /* IF is_empty, front_head_pr is undefined */
 
     input logic dequeue_en,
     output logic was_dequeued, /* Probably don't need this */
@@ -17,8 +17,8 @@ module free_list (
     output logic was_enqueued,
     output logic is_full,
 
-    output logic [`PHYS_REG_IDX_SZ+1:0] head_ptr,
-    output logic [`PHYS_REG_IDX_SZ+1:0] tail_ptr,
+    output logic [`PHYS_REG_IDX_SZ+1:0] back_tail_ptr,
+    output logic [`PHYS_REG_IDX_SZ+1:0] front_head_ptr,
 
     output logic [`PHYS_REG_IDX_SZ:0] free_list[`FREE_LIST_SIZE]
 );
@@ -28,17 +28,17 @@ module free_list (
     plus 1. 
     */
     // logic [`PHYS_REG_IDX_SZ+1:0] [`PHYS_REG_IDX_SZ:0] free_list;
-
-    // // Head pointer points to first free slot
+// WRONG, swithc head and tail names
+    // // Tail pointer points to first free slot
     // logic [`PHYS_REG_SZ+1:0] head_ptr;
     // // Tail pointer points to last filled slot
     // logic [`PHYS_REG_SZ+1:0] tail_ptr;
 
     // logic is_full, is_empty, do_enqueue, do_dequeue;
 
-    assign is_empty = (head_ptr == tail_ptr);
-    assign is_full = ( (head_ptr + 1) % (`FREE_LIST_SIZE) == tail_ptr);
-    assign tail_pr = free_list[tail_ptr];
+    assign is_empty = (back_tail_ptr == front_head_ptr);
+    assign is_full = ( (back_tail_ptr + 1) % (`FREE_LIST_SIZE) == front_head_ptr);
+    assign front_head_pr = free_list[front_head_ptr];
 
 
 /* Ex. 3 physical registers, requires 4 slots (one always empty)
@@ -80,8 +80,8 @@ module free_list (
 
     always @(posedge clk) begin
         if (reset) begin
-            head_ptr <= 0;
-            tail_ptr <= 0;
+            back_tail_ptr <= 0;
+            front_head_ptr <= 0;
             was_dequeued <= 0;
             was_enqueued <= 0;
             dequeue_pr <= 0;
@@ -97,8 +97,8 @@ module free_list (
                         was_dequeued <= 0;
                         dequeue_pr <= 0;
                     end else begin
-                        dequeue_pr <= free_list[tail_ptr];
-                        tail_ptr <= (tail_ptr + 1) % (`FREE_LIST_SIZE);
+                        dequeue_pr <= free_list[front_head_ptr];
+                        front_head_ptr <= (front_head_ptr + 1) % (`FREE_LIST_SIZE);
                         was_dequeued <= 1;
                     end        
                 end else begin
@@ -110,8 +110,8 @@ module free_list (
                     if (is_full && !dequeue_en) begin
                         was_enqueued <= 0;
                     end else begin
-                        free_list[head_ptr] <= enqueue_pr;
-                        head_ptr <= (head_ptr + 1) % (`FREE_LIST_SIZE);
+                        free_list[back_tail_ptr] <= enqueue_pr;
+                        back_tail_ptr <= (back_tail_ptr + 1) % (`FREE_LIST_SIZE);
                         was_enqueued <= 1;
                     end
                 end else begin
