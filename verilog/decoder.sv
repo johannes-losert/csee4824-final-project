@@ -55,25 +55,28 @@ module decoder (
                     opa_select    = OPA_IS_PC;
                     opb_select    = OPB_IS_J_IMM;
                     uncond_branch = `TRUE;
+                    function_type = `BRANCH;
                 end
                 `RV32_JALR: begin
                     has_dest      = `TRUE;
                     opa_select    = OPA_IS_RS1;
                     opb_select    = OPB_IS_I_IMM;
                     uncond_branch = `TRUE;
+                    function_type = `BRANCH;
                 end
                 `RV32_BEQ, `RV32_BNE, `RV32_BLT, `RV32_BGE,
                 `RV32_BLTU, `RV32_BGEU: begin
                     opa_select  = OPA_IS_PC;
                     opb_select  = OPB_IS_B_IMM;
                     cond_branch = `TRUE;
+                    function_type = `BRANCH;
                 end
                 `RV32_LB, `RV32_LH, `RV32_LW,
                 `RV32_LBU, `RV32_LHU: begin
                     has_dest   = `TRUE;
                     opb_select = OPB_IS_I_IMM;
                     rd_mem     = `TRUE;
-                    function_type = `LOAD
+                    function_type = `LOAD;
                 end
                 `RV32_SB, `RV32_SH, `RV32_SW: begin
                     opb_select = OPB_IS_S_IMM;
