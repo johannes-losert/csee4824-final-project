@@ -216,6 +216,19 @@ module pipeline (
     // - figure out where there are intermediate registers
     // - define each module: reservation station, rob, free list, map table, stage_if, stage_id, stage_is, ??
 
+
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //               CDB Broadcast                  //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    logic cdb_broadcast_en; // whether or not the cdb is currently broadcasting
+    logic [`PHYS_REG_IDX_SZ:0] cdb_phys_idx; // the physical register index to broadcast
+    logic [`XLEN-1:0] cdb_data; // the data to write to the register
+
+
     //////////////////////////////////////////////////
     //                                              //
     //               Regfile Stuff                  //
@@ -488,14 +501,54 @@ module pipeline (
             - Get operands from Map Table, update destination in map table
         b. If ROB does not issue (stall?) then do not allocate RS entry
     */
-    logic rob_stall;
+      logic rob_stall;
     logic rob_full;
+    logic head;
+    logic [$clog2(`ROB_SZ)-1:0] inst_index;// need to pass to retire stage
     logic dispatch_stall;
     logic alu_entries_full;
     logic mult_entries_full;
     logic load_entries_full;
     logic store_entries_full;
+    logic branch_entries_full;
     ID_IS_PACKET id_packet;
+    
+
+
+    //define signals for reorder buffer
+    logic move_head;
+    logic [`PHYS_REG_SZ:0] free_reg;
+    logic undo_rob;
+    logic [$clog2(`ROB_SZ)-1:0] undo_index_rob;
+    // logic rob_stall;
+    logic used_free_reg;
+    logic update_free_list;
+    PREG free_index;
+    logic update_map_table;
+    logic [`PHYS_REG_SZ-1:0] mt_update_tag;
+    logic [4:0] mt_target_reg;
+    logic update_arch_map;
+    logic [`REG_IDX_SZ:0] update_arch_told;
+    logic [`PHYS_REG_SZ-1:0] update_phys_told;
+    logic [`REG_IDX_SZ:0] arch_told;
+    logic [`PHYS_REG_SZ-1:0] phys_told;
+    // logic rob_full;
+    // logic head;
+
+
+    //define signals for reservation station
+    RS_PACKET rs_input_packet;
+    logic alloc_done;
+    logic issue_enable;
+    logic issue_ready;
+    logic free_alu;
+    logic free_mult;
+    logic free_load;
+    logic free_store;
+    logic free_branch;
+
+    RS_PACKET rs_issued_packet;
+    logic [`MAX_FU_INDEX-1:0] issue_fu_index;
     
 
     dispatch dispatch_0 (
@@ -506,20 +559,29 @@ module pipeline (
         .mult_entries_full(mult_entries_full),
         .load_entries_full(load_entries_full),
         .store_entries_full(store_entries_full),
+        .branch_entries_full(ranch_entries_full),
 
+        //dispatch's outputs
         .id_packet(id_packet),
         .stall(dispatch_stall)                
     );
+
+
     reorder_buffer reorder_buffer_0(
         .clock(clock),
         .reset(reset),
-        .inst(inst),
-        .write(write),
+        .inst(id_packet.inst),
+        .write(id_packet.valid),
         .move_head(move_head),
         .free_reg(free_reg),
-        .undo(undo),
-        .undo_index(undo_index),
+        .undo(undo_rob),
+        .undo_index(undo_index_rob),
+
+
+        // rob's outputs
         .stall(rob_stall),
+
+        //TODO: need to denfine following wires
         .used_free_reg(used_free_reg),
         .update_free_list(update_free_list),
         .free_index(free_index),
@@ -534,32 +596,51 @@ module pipeline (
         .arch_told(arch_told),
         .phys_told(phys_told),
         
+        // following wires are defined
         .inst_index(inst_index),
         .full(rob_full),
         .head(head)
     );
     
+    assign rs_input_packet.funit = id_packet.function_type;
+    assign rs_input_packet.inst = id_packet.inst;
+    assign rs_input_packet.dest_reg = id_packet.dest_reg_idx;
+    assign rs_input_packet.src1_reg = id_packet.opa_select;
+    assign rs_input_packet.src2_reg = id_packet.opb_select;
+    assign issue_enable = 1;
+
     
+    //Yet to be connected to complete stage
+    logic update_from_complete;
+    PREG ready_reg_from_complete;
+
     reservation_station reservation_station_0(
         .clock(clock),
         .reset(reset),
         
         /* Allocate */
-        .allocate(allocate),
-        .input_packet(input_packet),
+        .allocate(id_packet.valid),
+        .input_packet(rs_input_packet),
 
         .done(alloc_done),
 
-        /* Update */
+        /* Update 
+           TODO: need to define based on CDB*/
         .update(update),
         .ready_reg(ready_reg),
 
         /* Issue */
         .issue_enable(issue_enable),
-
         .ready(issue_ready),
-        .issued_packet(issued_packet),
+        .issued_packet(rs_issued_packet),
         .issue_fu_index(issue_fu_index),
+
+        // if func free
+        .alu_entries_full(alu_entries_full),
+        .mult_entries_full(mult_entries_full),
+        .load_entries_full(load_entries_full),
+        .store_entries_full(store_entries_full),
+        .branch_entries_full(branch_entries_full),
 
         /* Free */
         .free_alu(free_alu),
@@ -569,7 +650,6 @@ module pipeline (
         .free_branch(free_branch)
  
     );
-
 
     //////////////////////////////////////////////////
     //                                              //
@@ -633,12 +713,14 @@ module pipeline (
     /* SIGNALS */
 
     IS_EX_PACKET is_packet;
+    RS_PACKET issued_packet;
 
+    assign issued_packet = is_packet.rs_packet; // TODO add this component to is_ex_packet and integrate into stage_issue
 
     issue stage_issue (
         // Inputs
-        .rs_packet(issued_packet), 
-        .id_is_reg(id_packet),
+        .rs_packet(issued_packet), // TODO put issued packet in id_is_reg?
+        .id_is_reg(id_is_reg),
 
         // Outputs
         .is_packet(is_packet)
@@ -648,7 +730,7 @@ module pipeline (
 
     //////////////////////////////////////////////////
     //                                              //
-    //            ID/EX Pipeline Register           //
+    //            IS/EX Pipeline Register           //
     //                                              //
     //////////////////////////////////////////////////
     // TODO this probably needs a lot more thought
@@ -680,7 +762,7 @@ module pipeline (
                 1'b0  // valid
             };
         end else if (id_is_enable) begin
-            is_ex_reg <= id_packet;
+            is_ex_reg <= is_packet;
         end
     end
 
@@ -690,12 +772,14 @@ module pipeline (
     //assign id_ex_valid_dbg = id_ex_reg.valid;
 
 
-
     //////////////////////////////////////////////////
     //                                              //
     //               Execute (E)                    //
     //                                              //
     //////////////////////////////////////////////////
+    
+    EX_CO_PACKET ex_packet;
+
     // Perform each operation 
     stage_ex stage_ex0 (
         .clock(clock),
@@ -711,6 +795,29 @@ module pipeline (
         output [`NUM_FU_BRANCH-1:0] free_branch
     );
 
+    //////////////////////////////////////////////////
+    //                                              //
+    //           EX/CO Pipeline Register             //
+    //                                              //
+    //////////////////////////////////////////////////
+    // TODO this probably needs a lot more thought
+    EX_CO_PACKET ex_co_reg;
+
+    assign ex_co_enable = 1'b1; // always enabled
+    // synopsys sync_set_reset "reset"
+    always_ff @(posedge clock) begin
+        if (reset) begin
+            ex_co_inst_dbg <= `NOP; // debug output
+            ex_co_reg      <= 0;    // TODO can the defaults all be zero?
+        end else if (ex_co_enable) begin
+      //      ex_co_inst_dbg <= id_ex_inst_dbg; // debug output, just forwarded from ID
+            ex_co_reg      <= ex_packet;
+        end
+    end
+
+    // debug outputs
+  //  assign ex_mem_NPC_dbg   = ex_mem_reg.NPC;
+   // assign ex_mem_valid_dbg = ex_mem_reg.valid;
 
     //////////////////////////////////////////////////
     //                                              //
@@ -718,15 +825,18 @@ module pipeline (
     //                                              //
     //////////////////////////////////////////////////    
     
+    complete complete_0 (
+        // input packet 
+        .ex_co_reg(ex_co_reg),
 
-    module complete(
-    input EX_CO_PACKAGE ex_co_reg; //need to add type
-    output CO_RE_PACKAGE co_package;
-    output logic             regfile_en,  // register write enable
-    output logic [4:0]       regfile_idx, // register write index
-    output logic [`XLEN-1:0] regfile_data // register write data 
-);
+        // output packet 
+        .co_package(co_package),
 
+        // CDB output
+        .regfile_en(cdb_broadcast_en),
+        .regfile_idx(cdb_phys_idx),
+        .regfile_data(cdb_data)
+    );
 
     //////////////////////////////////////////////////
     //                                              //
