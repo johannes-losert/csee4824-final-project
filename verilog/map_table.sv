@@ -1,3 +1,6 @@
+
+// TODO figure out what to do on conflicts with restore operation (what happens if set CDB and restore?)
+
 module map_table (
     input logic clk,
     input logic reset,
