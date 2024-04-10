@@ -14,7 +14,14 @@ module map_table (
     input logic set_dest_enable, /* Enable to overwrite dest with new pr */
     input logic [`PHYS_REG_IDX_SZ:0] new_dest_pr,
     output PREG old_dest_pr,
+
+    // Retire operation (copies this preg to retired_preg)
+    input logic [`REG_IDX_SZ:0] retire_arch_reg,
+    input logic retire_enable,
     
+    // Restore operation (copies all retired_pregs back to preg)
+    input logic restore_enable,
+
     // SET READY operation (CDB)
     input logic set_ready_enable,
     input logic [`PHYS_REG_IDX_SZ:0] ready_phys_idx
@@ -22,6 +29,7 @@ module map_table (
 
     // One PREG per arch reg, always ready
     PREG [`REG_IDX_SZ:1] preg_entries;
+    PREG [`REG_IDX_SZ:1] retired_preg_entries;
     PREG temp_old_dest_pr;
 
     // Read port 1
@@ -81,6 +89,9 @@ module map_table (
                 // TODO make sure this is right
                 preg_entries[i].reg_num <= 0;
                 preg_entries[i].ready <= 0;
+
+                retired_preg_entries[i].reg_num <= 0;
+                retired_preg_entries[i].ready <= 0;
             end
         end else begin 
             // Store for forwarding (in case new dest overwrites)
@@ -97,6 +108,20 @@ module map_table (
             if (set_ready_enable) begin
                 preg_entries[ready_phys_idx].ready <= 1;
             end
+
+
+            // If retiring, copy preg to retired_pre
+            if (retire_enable) begin
+                retired_preg_entries[retire_arch_reg] <= preg_entries[retire_arch_reg];
+            end
+
+            // If restoring, copy all retired_pregs back to preg
+            if (restore_enable) begin
+                for (int i = 0; i < `PHYS_REG_SZ; i++) begin
+                    preg_entries[i] <= retired_preg_entries[i];
+                end
+            end
+
         end
     end
 endmodule
