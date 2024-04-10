@@ -2,8 +2,11 @@ module complete(
     input EX_CO_PACKAGE ex_co_reg; //need to add type
     output CO_RE_PACKAGE co_package;
     output logic             regfile_en,  // register write enable
-    output logic [4:0]       regfile_idx, // register write index
+    output logic [`PHYS_REG_IDX_SZ:0] regfile_idx, // register write index
     output logic [`XLEN-1:0] regfile_data // register write data 
+
+
+
 );
 
     assign co_package = ex_co_reg;
@@ -13,7 +16,7 @@ module complete(
     // the valid check is also somewhat redundant
     assign regfile_en = ex_co_reg.valid && (ex_co_reg.dest_reg_idx != `ZERO_REG);
 
-    assign regfile_idx = ex_co_reg.dest_reg_idx;
+    assign regfile_idx = ex_co_reg.dest_reg_idx; // PHYSICAL register index 
 
     // Select register writeback data:
     // ALU/MEM result, unless taken branch, in which case we write
