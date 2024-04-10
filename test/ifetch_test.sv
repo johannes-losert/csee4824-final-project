@@ -28,6 +28,7 @@ module testbench;
 
     logic [3:0] req_debug; 
     logic [3:0] gnt_debug; 
+    logic [`XLEN-1:0] PC_reg_debug;
 
     ifetch dut(
         .clock(clock),
@@ -45,8 +46,10 @@ module testbench;
 
         .if_packet(if_packet),
         .proc2Icache_addr(proc2Icache_addr),
+        
         .req_debug(req_debug),
-        .gnt_debug(gnt_debug)
+        .gnt_debug(gnt_debug),
+        .PC_reg_debug(PC_reg_debug)
     );
 
     logic clk; // Memory clock
@@ -117,31 +120,33 @@ module testbench;
     endtask
 
     initial begin  
-        $monitor(
-            "certain_branch_pc = %h, certain_branch_req = %b,\
-            rob_target_pc = %h, rob_target_req = %b, \
-            rob_stall = %b, branch_pred_pc = %h,\
-            branch_pred_req = %b, Icache2proc_data = %h,\
-            Icache2proc_data_valid = %b", 
-            certain_branch_pc, certain_branch_req,
-            rob_target_pc, rob_target_req,
-            rob_stall, branch_pred_pc,
-            branch_pred_req, 
-            Icache2proc_data,
-            Icache2proc_data_valid);
+        // $monitor(
+        //     "certain_branch_pc = %h, certain_branch_req = %b,\
+        //     rob_target_pc = %h, rob_target_req = %b, \
+        //     rob_stall = %b, branch_pred_pc = %h,\
+        //     branch_pred_req = %b, Icache2proc_data = %h,\
+        //     Icache2proc_data_valid = %b, PC_reg_debug = %h", 
+        //     certain_branch_pc, certain_branch_req,
+        //     rob_target_pc, rob_target_req,
+        //     rob_stall, branch_pred_pc,
+        //     branch_pred_req, 
+        //     Icache2proc_data,
+        //     Icache2proc_data_valid, PC_reg_debug);
 
-        clock     = 0;
-        reset     = 0;
+        clock = 0;
+        clk = 0;
+        reset = 0;
         if_valid = 1;
         rob_stall = 0;
 
         // Initial Reset
         reset = 1;
-        @(negedge clock)
+        @(negedge clk)
         reset = 0;
+        @(negedge clock)
         
         // cycle 1
-        $display("Starting Certain Branch Test");
+        $display("Priority Selector: Test 1");
         
         certain_branch_pc = 32'h1111_1111;
         certain_branch_req = 1;
@@ -149,11 +154,21 @@ module testbench;
         rob_target_req = 1;
         branch_pred_pc = 32'h3333_3333;
         branch_pred_req = 1;
-            
-        @(negedge clock)
-        $display("proc2Icache_addr = %h", proc2Icache_addr);  
-        @(posedge Icache2proc_data_valid)
-        $display("if_packet.inst = %h", if_packet.inst);  
-        assert(if_packet.inst == 32'h1111_1110) else exit_on_error;
+        
+        @(posedge proc2Icache_addr)
+        
+        $display("if_packet.PC = %h", if_packet.PC);
+        assert(if_packet.PC == 32'h1111_1111) else exit_on_error;
+        assert(if_packet.valid == 0) else exit_on_error;
+        $display("Priority Selector: Test 1 Passed!");
+
+        $display("Memory Retrieval: Test 1");
+        @(posedge if_packet.valid)
+        $display("if_packet.inst = %h", if_packet.inst);
+        $display("Memory Retrieval: Test 1 Passed!");
+        
+
+        $display("@@@Passed");
+        $finish;
     end 
 endmodule 

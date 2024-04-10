@@ -38,21 +38,19 @@ module ifetch (
     
     //          *** DEBUG ***
     output [3:0] req_debug,
-    output [3:0] gnt_debug
+    output [3:0] gnt_debug,
+    output [`XLEN-1:0] PC_reg_debug
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
-    logic fetch_busy; // if we are currently fetching an instruction in current cycle
-    logic n_fetch_busy; // if we will be fetching an instruction next cycle
     logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching
+    
+    logic fetch_available; // if we are currently fetching an instruction in current cycle
+    logic n_fetch_available; // if we will be fetching an instruction next cycle
 
-    logic [`INSN_BUF_SIZE-1:0][63:0] inst_buffer;
-    logic [`INSN_BUF_SIZE-1:0][63:0] n_inst_buffer;
-
-    logic [`XLEN-1:0] if_packet_inst; 
-    logic [`XLEN-1:0] n_if_packet_inst; // This should be a copy of the buffer head  
-    assign  n_if_packet_inst = (~if_valid) ? `NOP :
-                            PC_reg[2] ? inst_buffer[`INSN_BUF_SIZE-1][63:32] : inst_buffer[`INSN_BUF_SIZE-1][31:0];
+    IF_ID_PACKET inst_buffer [`INSN_BUF_SIZE-1:0];
+    IF_ID_PACKET n_inst_buffer [`INSN_BUF_SIZE-1:0];
+    IF_ID_PACKET n_if_packet;
 
     logic [3:0] req;
     assign req = {certain_branch_req, rob_target_req, branch_pred_req, 1'b1};
@@ -61,40 +59,49 @@ module ifetch (
     // DEBUG SIGNALS
     assign req_debug = req;
     assign gnt_debug = gnt;
-
+    assign PC_reg_debug = PC_reg;
+    
+    logic gnt_empty;
     psel_gen #(.WIDTH(4), .REQS(1)) 
     if_psel (
         .req(req),       
         .gnt(gnt),       
         .gnt_bus(), 
-        .empty()  
+        .empty(gnt_empty)  
     );
 
     always_comb begin
 
         // Select the next PC based four possible sources if we are not busy
-        case ({gnt, fetch_busy})
-            5'b10000 : n_PC_reg = certain_branch_pc;
-            5'b01000 : n_PC_reg = rob_target_pc;
-            5'b00100 : n_PC_reg = branch_pred_pc;
-            5'b00010 : n_PC_reg = PC_reg + 4;
-            5'bxxxx1 : n_PC_reg = PC_reg;
-            default: n_PC_reg = PC_reg + 4; 
-        endcase
+
+        if (if_valid && fetch_available && !gnt_empty) begin 
+            unique case (gnt)
+                4'b1000 : n_PC_reg = certain_branch_pc;
+                4'b0100 : n_PC_reg = rob_target_pc;
+                4'b0010 : n_PC_reg = branch_pred_pc;
+                4'b0001 : n_PC_reg = PC_reg + 4;
+            endcase
+        end else begin 
+            n_PC_reg = PC_reg;
+        end
     
         // Perform the FIFO shift and load the next fetched instruction into the buffer 
+        
+        n_if_packet = inst_buffer[`INSN_BUF_SIZE-1];
+        
         if (Icache2proc_data_valid) begin
-            n_inst_buffer[0] = Icache2proc_data;
+            n_inst_buffer[0].inst = PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
+            n_inst_buffer[0].valid = 1;
+            n_fetch_available = 1;
         end else begin
-            n_inst_buffer[0] = 0;
+            n_inst_buffer[0].inst = `NOP;
+            n_inst_buffer[0].valid = 0;
+            n_fetch_available = 0;
         end
 
-        for (int i = 0; i < `INSN_BUF_SIZE; i++) begin
+        for (int i = 1; i < `INSN_BUF_SIZE - 1; i++) begin
             n_inst_buffer[i+1] = inst_buffer[i];
         end
-
-        // Update the fetch busy signal
-        n_fetch_busy = !Icache2proc_data_valid; // we will be busy until this signal is valid again 
     end
         
 
@@ -102,14 +109,14 @@ module ifetch (
     always_ff @(posedge clock) begin
         if (reset) begin
             PC_reg <= 0;
-            inst_buffer <= 0;
-            if_packet_inst <= `NOP; 
-            fetch_busy <= 0; // the first cycle should be a fetch
+            fetch_available <= 1;
+            // inst_buffer <= 0;
+            // if_packet <= 0;
         end else begin
             PC_reg <= n_PC_reg;
             inst_buffer <= n_inst_buffer;
-            if_packet_inst <= n_if_packet_inst;
-            fetch_busy <= n_fetch_busy;
+            fetch_available <= n_fetch_available;
+            if_packet <= n_if_packet;
         end
     end
 
@@ -117,13 +124,7 @@ module ifetch (
 
     // // address of the instruction we're fetching (64 bit memory lines)
     // // mem always gives us 8=2^3 bytes, so ignore the last 3 bits
-    // assign proc2Icache_addr = {PC_reg[`XLEN-1:3], 3'b0};
-
-    assign if_packet.inst = if_packet_inst;   
-    assign if_packet.PC  = PC_reg;
-    assign if_packet.NPC = PC_reg + 4; // pass PC+4 down pipeline w/instruction
-    assign if_packet.valid = if_valid;
-
+    assign proc2Icache_addr = {PC_reg[`XLEN-1:3], 3'b0};
 endmodule
 
 
