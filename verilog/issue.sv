@@ -24,17 +24,4 @@ module issue (
     assign is_packet.function_type = id_is_reg.function_type;
     assign is_packet.valid = id_is_reg.valid;
 
-    // Instantiate the register file
-    regfile regfile_0 (
-        .clock      (clock),
-        .read_idx_1 (rs_packet.src1_reg),
-        .read_idx_2 (rs_packet.src2_reg),
-        .write_idx  (regfile_idx),
-        .write_en   (regfile_en),
-        .write_data (regfile_data),
-
-        .read_out_1 (is_packet.rs1_value),
-        .read_out_2 (is_packet.rs2_value)
-    );
-
 endmodule
