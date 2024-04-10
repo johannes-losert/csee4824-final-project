@@ -1,9 +1,3 @@
-`ifndef DECODER_SV
-`define DECODER_SV
-`include "./decoder.sv"
-`endif
-
-
 module dispatch (
     input IF_ID_PACKET if_id_packet,    // passed from ifetch stage
     input rob_stall,                    // indicates if rob is stalled due to no empty free list
