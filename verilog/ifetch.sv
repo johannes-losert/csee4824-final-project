@@ -20,7 +20,6 @@ module ifetch (
 
     input [`XLEN-1:0] rob_target_pc,
     input rob_target_req,
-    input rob_stall, 
 
     input [`XLEN-1:0] branch_pred_pc,
     input branch_pred_req,
@@ -131,10 +130,8 @@ module ifetch (
         end
     end
 
-    // Below is copied from P3
-
-    // // address of the instruction we're fetching (64 bit memory lines)
-    // // mem always gives us 8=2^3 bytes, so ignore the last 3 bits
+    // address of the instruction we're fetching (64 bit memory lines)
+    // mem always gives us 8=2^3 bytes, so ignore the last 3 bits
     assign proc2Icache_addr = {PC_reg[`XLEN-1:3], 3'b0};
 endmodule
 
