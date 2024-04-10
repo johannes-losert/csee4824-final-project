@@ -164,7 +164,6 @@ GREP = grep -E --color=auto
 
 # TODO: add more modules here
 TESTED_MODULES = mult rob reservation_station map_table free_list stage_ex ifetch btb 
-TESTED_MODULES = mult rob reservation_station ifetch btb
 
 # TODO: add verilog module dependencies here:
 # (do not include header files)
