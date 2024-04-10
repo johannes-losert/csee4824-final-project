@@ -12,7 +12,7 @@ module testbench;
     logic [`NUM_FU_BRANCH-1:0] free_branch;
     logic [`MAX_FU_INDEX-1:0]     issue_fu_index;
     integer i;
-    IS_EX_PACKET is_ex_reg;
+    IS_EX_PACKET is_ex_reg, alu_packet, mult_packet, branch_packet;
     EX_CO_PACKET ex_packet;
 
 
@@ -31,7 +31,10 @@ module testbench;
         .free_mult(free_mult),
         .free_load(free_load), 
         .free_store(free_store),
-        .free_branch(free_branch)
+        .free_branch(free_branch),
+        .tmp_alu_packet(alu_packet),
+        .tmp_mult_packet(mult_packet),
+        .tmp_branch_packet(branch_packet)
     );
 
     // CLOCK_PERIOD is defined on the commandline by the makefile
@@ -213,6 +216,7 @@ module testbench;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test that doing mult -> alu will still allow the output of mult to be present (+packet)
+        // also test that the correct packet is outputted
         is_ex_reg.rs1_value = 6;
         is_ex_reg.rs2_value = 3;
         is_ex_reg.opa_select = OPA_IS_RS1;
@@ -236,14 +240,17 @@ module testbench;
         alu_en = 0;
         assert(ex_packet.result == 13) else exit_on_error;
         assert(free_alu[0] == 1) else exit_on_error;
+        assert(alu_packet.function_type == ALU) else exit_on_error;
 
         //@(negedge free_mult[0]);
         wait_until_done();
-        $display(ex_packet);
         assert(mult_result == 18) else exit_on_error;
         assert(free_mult[0] == 1'b1) else exit_on_error;
+        $display(mult_packet.rs1_value);
+        assert(mult_packet.function_type == MULT) else exit_on_error;
+        assert(mult_packet.rs1_value == 6) else exit_on_error;
 
-        
+
 
         // Add tests for branch... low priority since it should be the same as alu
         

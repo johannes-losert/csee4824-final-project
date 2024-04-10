@@ -216,12 +216,14 @@ module multiply (
             mult_func <= 0;
             mult_packet <= 0;
             tmp_mult_en <= 0;
+            out_packet <= 0;
         end else if (mult_en) begin
             mult_mcand <= mcand;
             mult_mplier <= mplier;
             mult_func <= func; 
             mult_packet <= in_packet;
             tmp_mult_en <= 1;
+            out_packet <= in_packet;
         end else begin
             tmp_mult_en <= 0;
         end
@@ -292,15 +294,20 @@ module stage_ex (
     output [`NUM_FU_MULT-1:0]   free_mult,
     output [`NUM_FU_LOAD-1:0]   free_load,
     output [`NUM_FU_STORE-1:0]  free_store,
-    output [`NUM_FU_BRANCH-1:0] free_branch
+    output [`NUM_FU_BRANCH-1:0] free_branch,
+
+    // debug outputs
+    output IS_EX_PACKET tmp_alu_packet,
+    output IS_EX_PACKET tmp_mult_packet,
+    output IS_EX_PACKET tmp_branch_packet
 );
 
     logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
     logic take_conditional;
 
-    IS_EX_PACKET tmp_alu_packet;
+    /*IS_EX_PACKET tmp_alu_packet;
     IS_EX_PACKET tmp_mult_packet;
-    IS_EX_PACKET tmp_branch_packet;
+    IS_EX_PACKET tmp_branch_packet;*/
 
     // Pass-throughs
     assign ex_packet.NPC          = is_ex_reg.NPC;
