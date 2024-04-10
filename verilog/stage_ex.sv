@@ -24,41 +24,35 @@ module alu (
     input [`XLEN-1:0]   opb,
     input ALU_FUNC      func,
     input logic         alu_en,
+    input IS_EX_PACKET in_packet,
 
     output logic [`XLEN-1:0]        result,
-    output logic [`NUM_FU_ALU-1:0]  alu_done
+    output logic [`NUM_FU_ALU-1:0]  alu_done,
+    output IS_EX_PACKET out_packet
 );
 
+    logic [`XLEN-1:0] alu_opa;
+    logic [`XLEN-1:0] alu_opb;
+    logic ALU_FUNC alu_func; 
+    logic IS_EX_PACKET alu_packet;
+
     logic signed [`XLEN-1:0]   signed_opa, signed_opb;
-    logic signed [2*`XLEN-1:0] signed_mul, mixed_mul;
-    logic        [2*`XLEN-1:0] unsigned_mul;
 
-    assign signed_opa   = opa;
-    assign signed_opb   = opb;
-
-    // We let verilog do the full 32-bit multiplication for us.
-    // This gives a large clock period.
-    // You will replace this with your pipelined multiplier in project 4.
-    assign signed_mul   = signed_opa * signed_opb;
-    assign unsigned_mul = opa * opb;
-    assign mixed_mul    = signed_opa * opb;
+    assign signed_opa   = alu_opa;
+    assign signed_opb   = alu_opb;
 
     always_comb begin
         case (func)
-            ALU_ADD:    result = opa + opb;
-            ALU_SUB:    result = opa - opb;
-            ALU_AND:    result = opa & opb;
+            ALU_ADD:    result = alu_opa + alu_opb;
+            ALU_SUB:    result = alu_opa - alu_opb;
+            ALU_AND:    result = alu_opa & alu_opb;
             ALU_SLT:    result = signed_opa < signed_opb;
-            ALU_SLTU:   result = opa < opb;
-            ALU_OR:     result = opa | opb;
-            ALU_XOR:    result = opa ^ opb;
-            ALU_SRL:    result = opa >> opb[4:0];
-            ALU_SLL:    result = opa << opb[4:0];
-            ALU_SRA:    result = signed_opa >>> opb[4:0]; // arithmetic from logical shift
-            ALU_MUL:    result = signed_mul[`XLEN-1:0];
-            ALU_MULH:   result = signed_mul[2*`XLEN-1:`XLEN];
-            ALU_MULHSU: result = mixed_mul[2*`XLEN-1:`XLEN];
-            ALU_MULHU:  result = unsigned_mul[2*`XLEN-1:`XLEN];
+            ALU_SLTU:   result = alu_opa < alu_opb;
+            ALU_OR:     result = alu_opa | alu_opb;
+            ALU_XOR:    result = alu_opa ^ alu_opb;
+            ALU_SRL:    result = alu_opa >> alu_opb[4:0];
+            ALU_SLL:    result = alu_opa << alu_opb[4:0];
+            ALU_SRA:    result = signed_opa >>> alu_opb[4:0]; // arithmetic from logical shift
 
             default:    result = `XLEN'hfacebeec;  // here to prevent latches
         endcase
@@ -66,11 +60,22 @@ module alu (
 
     always_ff @(posedge clock) begin
         if(reset) begin
-            alu_done[0] = 1'b0;
+            alu_done[0] <= 1'b0;
+            out_packet <= 0;
+            alu_opa <= 0;
+            alu_opb <= 0;
+            alu_func <= 0;
+            alu_packet <= 0;
         end else if (alu_en) begin
-            alu_done[0] = 1'b1;
+            alu_done[0] <= 1'b1;
+            out_packet <= in_packet;
+            alu_opa <= opa;
+            alu_opb <= opb;
+            alu_func <= func;
+            alu_packet <= in_packet;
         end else begin
-            alu_done[0] = 1'b0;
+            alu_done[0] <= 1'b0;
+            out_packet <= 0;
         end
     end
 
@@ -210,7 +215,7 @@ endmodule // conditional_branch
 
 module stage_ex (
     // Test cases work with these inputs and outputs
-    input                               clock,
+    /* input                               clock,
     input                               reset,
     input ID_EX_PACKET                  id_ex_reg,
     input FUNIT                         funit,
@@ -226,11 +231,27 @@ module stage_ex (
     output [`NUM_FU_MULT-1:0]   free_mult,
     output [`NUM_FU_LOAD-1:0]   free_load,
     output [`NUM_FU_STORE-1:0]  free_store,
+    output [`NUM_FU_BRANCH-1:0] free_branch*/ 
+
+    input clock,
+    input reset,
+    input IS_EX_PACKET is_ex_packet,
+    input logic [`MAX_FU_INDEX-1:0] issue_fu_index,
+
+    output EX_CO_PACKET ex_packet,
+    output [`NUM_FU_ALU-1:0]    free_alu,
+    output [`NUM_FU_MULT-1:0]   free_mult,
+    output [`NUM_FU_LOAD-1:0]   free_load,
+    output [`NUM_FU_STORE-1:0]  free_store,
     output [`NUM_FU_BRANCH-1:0] free_branch
 );
 
     logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
     logic take_conditional;
+
+    logic IS_EX_PACKET tmp_alu_packet;
+    logic IS_EX_PACKET tmp_mult_packet;
+    logic IS_EX_PACKET tmp_branch_packet;
 
     // Pass-throughs
     assign ex_packet.NPC          = id_ex_reg.NPC;
@@ -275,6 +296,10 @@ module stage_ex (
         endcase
     end
 
+    always_comb begin
+
+    end
+
     // Instantiate the ALU
     alu alu_0 (
         // Inputs
@@ -284,10 +309,12 @@ module stage_ex (
         .opb(opb_mux_out),
         .func(id_ex_reg.alu_func),
         .alu_en(funit == ALU && alu_en && issue_fu_index == 0),
+        .in_packet(is_ex_packet)
 
         // Output
         .result(ex_packet.alu_result),
-        .alu_done(free_alu)
+        .alu_done(free_alu),
+        .out_packet(tmp_alu_packet)
     );
 
     branch_calculation branch_0 (
