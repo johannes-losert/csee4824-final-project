@@ -235,6 +235,39 @@ module pipeline (
     //                                              //
     //////////////////////////////////////////////////
 
+    /* regifle signals */
+
+    logic rf_read_idx_1;
+    logic rf_read_idx_2;
+
+    logic [`XLEN-1:0] rf_read_data_1;
+    logic [`XLEN-1:0] rf_read_data_2;
+
+    logic rf_write_en;
+    logic [`PHYS_REG_IDX_SZ:0] rf_write_idx;
+    logic [`XLEN-1:0] rf_write_data;
+
+    // Writes come from the CDB
+
+    assign rf_write_en = cdb_broadcast_en;
+    assign rf_write_idx = cdb_phys_idx;
+    assign rf_write_data = cdb_data;
+
+
+    // Instantiate the register file
+    regfile regfile_0 (
+        .clock      (clock),
+        .read_idx_1 (rf_read_idx_1),
+        .read_idx_2 (rf_read_idx_2),
+
+        .write_idx  (regfile_idx),
+        .write_en   (regfile_en),
+        .write_data (regfile_data),
+
+        .read_out_1 (rf_read_data_1),
+        .read_out_2 (rf_read_data_2)
+    );
+
     // Read from head operation
     logic fl_dequeue_en;
     logic [`PHYS_REG_IDX_SZ:0] fl_head_pr;
@@ -501,7 +534,7 @@ module pipeline (
             - Get operands from Map Table, update destination in map table
         b. If ROB does not issue (stall?) then do not allocate RS entry
     */
-      logic rob_stall;
+    logic rob_stall;
     logic rob_full;
     logic head;
     logic [$clog2(`ROB_SZ)-1:0] inst_index;// need to pass to retire stage
@@ -517,11 +550,9 @@ module pipeline (
 
     //define signals for reorder buffer
     logic move_head;
-    logic [`PHYS_REG_SZ:0] free_reg;
     logic undo_rob;
     logic [$clog2(`ROB_SZ)-1:0] undo_index_rob;
     // logic rob_stall;
-    logic used_free_reg;
     logic update_free_list;
     PREG free_index;
     logic update_map_table;
@@ -541,16 +572,23 @@ module pipeline (
     logic alloc_done;
     logic issue_enable;
     logic issue_ready;
+    PREG  rs_ready_reg;
+    
+    //TODO: assign these to functional units' outputs
     logic free_alu;
     logic free_mult;
     logic free_load;
     logic free_store;
     logic free_branch;
 
+
     RS_PACKET rs_issued_packet;
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
     
+    logic [`PHYS_REG_IDX_SZ:0] rob_free_reg_pr;
 
+    assign rob_free_reg_pr = (fl_is_empty) ? `ZERO_REG : fl_head_pr;
+    
     dispatch dispatch_0 (
         .if_id_packet(if_id_packet),
         .rob_stall(rob_stall), 
@@ -573,7 +611,7 @@ module pipeline (
         .inst(id_packet.inst),
         .write(id_packet.valid),
         .move_head(move_head),
-        .free_reg(free_reg),
+        .free_reg(rob_free_reg_pr),
         .undo(undo_rob),
         .undo_index(undo_index_rob),
 
@@ -581,15 +619,13 @@ module pipeline (
         // rob's outputs
         .stall(rob_stall),
 
-        //TODO: need to denfine following wires
-        .used_free_reg(used_free_reg),
+        //TODO: need to connect the actual interconnects
+        .used_free_reg(fl_dequeue_en),
         .update_free_list(update_free_list),
         .free_index(free_index),
-
         .update_map_table(update_map_table),
         .mt_update_tag(mt_update_tag),
         .mt_target_reg(mt_target_reg),
-
         .update_arch_map(update_arch_map),
         .update_arch_told(update_arch_told),
         .update_phys_told(update_phys_told),
@@ -608,7 +644,8 @@ module pipeline (
     assign rs_input_packet.src1_reg = id_packet.opa_select;
     assign rs_input_packet.src2_reg = id_packet.opb_select;
     assign issue_enable = 1;
-
+    assign rs_ready_reg.reg_num = cdb_phys_idx;
+    assign rs_ready_reg.ready = 1;
     
     //Yet to be connected to complete stage
     logic update_from_complete;
@@ -626,8 +663,8 @@ module pipeline (
 
         /* Update 
            TODO: need to define based on CDB*/
-        .update(update),
-        .ready_reg(ready_reg),
+        .update(cdb_broadcast_en),
+        .ready_reg(rs_ready_reg),
 
         /* Issue */
         .issue_enable(issue_enable),

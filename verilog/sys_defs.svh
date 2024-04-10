@@ -334,6 +334,7 @@ typedef struct packed {
 //     logic       valid;
 // } ID_EX_PACKET;
 
+// TODO change all the 4s to `PHYS_REG_IDX_SZ
 
 /**
  * ID_IS Packet:
