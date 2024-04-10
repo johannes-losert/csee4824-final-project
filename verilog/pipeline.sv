@@ -202,6 +202,144 @@ module pipeline (
     assign pipeline_commit_wr_data = wb_regfile_data;
     assign pipeline_commit_NPC     = mem_wb_reg.NPC;
 
+// ABOVE TTHIS LINE IS OLD STUFF 
+// 
+//
+//
+//
+//
+//
+// BELOW THIS LINE IS NEW STUFF 
+
+    /* Big integration todos */
+    // - figure out how ROB/RS/Free list communicate stalls to ROB
+    // - figure out where there are intermediate registers
+    // - define each module: reservation station, rob, free list, map table, stage_if, stage_id, stage_is, ??
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //               Regfile Stuff                  //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    // Read from head operation
+    logic fl_dequeue_en;
+    logic [`PHYS_REG_IDX_SZ:0] fl_head_pr;
+    logic fl_is_empty;
+
+    // write to tail operation
+    logic fl_enqueue_en;
+    logic [`PHYS_REG_IDX_SZ:0] fl_enqueue_pr;
+    logic fl_is_full;
+
+    // debug 
+    logic fl_was_dequeued;
+    logic [`PHYS_REG_IDX_SZ:0] fl_dequeue_pr;
+    logic fl_was_enqueued;
+    logic [`PHYS_REG_IDX_SZ+1:0] fl_back_tail_ptr, fl_front_head_ptr;
+    logic [`PHYS_REG_IDX_SZ:0] fl_free_list[`FREE_LIST_SIZE];
+ 
+    free_list free_list_0 (
+        .clk(clock),
+        .reset(reset),
+
+        /* READ from head operation */
+
+        // inputs 
+        .dequeue_en(fl_dequeue_en), // If raised, will actually deuqueue from the head
+        
+        // outputs
+        .front_head_pr(fl_head_pr), // Always points to the next element to be dequeued, unless is_empty
+        .is_empty(fl_is_empty), // IF is_empty, front_head_pr is undefined
+
+        // debug outputs
+        .was_dequeued(fl_was_dequeued),
+        .dequeue_pr(fl_dequeue_pr),
+
+
+        /* WRITE to tail operation */
+        // inputs
+        .enqueue_en(fl_enqueue_en), // If raised, will enqueue fl_enqueue_pr at the tail
+        .enqueue_pr(fl_enqueue_pr), // PR to enqueue if fl_enqueue_en raised
+        
+        // outputs
+        .is_full(fl_is_full), // raised if free list is currently full (TODO not sure why this would happen, currently max is greater than num PRs)
+
+        // debug outputs
+        .was_enqueued(fl_was_enqueued),
+
+        /* misc debug outputs */
+        .back_tail_ptr(fl_back_tail_ptr),
+        .front_head_ptr(fl_front_head_ptr),
+        .free_list(fl_free_list)
+    );
+
+
+    // GET operation 1 (opa)
+    logic [`REG_IDX_SZ:0] mt_arch_reg1_idx;
+    PREG mt_preg1_out;
+
+    // GET operation 2 (opb)
+    logic [`REG_IDX_SZ:0] mt_arch_reg2_idx;
+    PREG mt_preg2_out;
+
+    // GET/SET operation (get old dest, replace with new dest)
+    logic mt_set_dest_enable; /* Enable to overwrite dest with new pr */
+    logic [`REG_IDX_SZ:0] mt_arch_dest_idx;
+    logic [`PHYS_REG_IDX_SZ:0] mt_new_dest_pr;
+
+    PREG mt_old_dest_pr;
+
+    // retire operation 
+    logic mt_retire_enable;
+    logic [`REG_IDX_SZ:0] mt_retire_arch_reg;
+
+    // restore operation
+    logic mt_restore_enable;
+
+    // set ready operation (CDB)
+    logic mt_set_ready_enable;
+    logic [`PHYS_REG_IDX_SZ:0] mt_ready_phys_idx;
+
+
+    map_table map_table_0 (
+        .clk(clk),
+        .reset(reset),
+        
+        /* GET operation 1 (opa) */
+        // input
+        .arch_reg1_idx(mt_arch_reg1_idx),
+        //output
+        .preg1_out(mt_preg1_out),
+
+        /* GET operation 2 (opb) */
+        // input
+        .arch_reg2_idx(mt_arch_reg2_idx),
+        // output
+        .preg2_out(mt_preg2_out),
+
+        /* GET/SET operation (get old dest, replace with new dest) */
+        // inputs
+        .arch_dest_idx(mt_arch_dest_idx),
+        .set_dest_enable(mt_set_dest_enable),
+        .new_dest_pr(mt_new_dest_pr),
+        // output
+        .old_dest_pr(mt_old_dest_pr),
+
+        /* Retire operation */
+        // inputs
+        .retire_arch_reg(mt_retire_arch_reg),
+        .retire_enable(mt_retire_enable),stall
+
+        /* Restore operation */
+        // inputs
+        .restore_enable(mt_restore_enable),
+
+        /* SET READY operation (CDB) */
+        // inputs
+        .set_ready_enable(mt_set_ready_enable),
+        .ready_phys_idx(mt_ready_phys_idx)
+    );
 
     //////////////////////////////////////////////////
     //                                              //
@@ -209,38 +347,124 @@ module pipeline (
     //                                              //
     //////////////////////////////////////////////////
 
-    // REASONS TO STALL IF
-        // - free list empty (no PR to allocate)
-        // - ROB full (no ROB entry to allocate)
 
-    // Instruction fetch stall state
+    /* SIGNALS */
+    logic next_if_valid; // stall signal for IF stage
+    
+    logic certain_branch_req, rob_target_req, branch_pred_req; // TODO what are these?
+    logic [63:0] certain_branch_pc, rob_target_pc, branch_pred_pc; // TODO program counters outputed at different stages, for branch prediction
+
+    // data output from icache/memory TODO move closer to memory definition
+    logic [63:0] Icache2proc_data;  // data coming back from Instruction memory
+    logic Icache2proc_data_valid; // data coming back from Instruction memory
+    
+    logic [`XLEN-1:0] proc2Icache_addr; // address to fetch from memory
+
+    IF_ID_PACKET if_packet; // instruction packet to pass to decode
+
+    //DEBUG
+    logic [3:0] req_debug, gnt_debug;
+    logic [`XLEN-1:0] PC_reg_debug;
+    logic fetch_available_debug;
+    IF_ID_PACKET inst_buffer_debug [`INSN_BUF_SIZE-1:0];
+
+
+
+    // TODO Instruction fetch stall logic 
     always_ff @(posedge clock) begin
-        next_if_valid <= 1'b1;
+        next_if_valid <= ~dispatch_stall;
         if (/*something*/) begin
             next_if_valid <= 1'b0;
         end
     end
 
-    // Instantiate instruction fetch module (PLACEHOLDER)
-    instruction_fetch fetcher (
-        .clock(clock),
+
+
+    icache icache_0 (
+        .clock(clk),
         .reset(reset),
         
-        .next_if_valid(next_if_valid), // input: if lowered, must stall (don't give us more) 
+        // From memory (input to pipeline module)
+        .Imem2proc_response(Imem2proc_response), // Should be zero unless there is a response
+        .Imem2proc_data(Imem2proc_data),
+        .Imem2proc_tag(Imem2proc_tag),
 
-        /* Instruction memory interface */
-        .proc2mem_addr(proc2Imem_addr), // output: address requested
-        .mem2proc_data(mem2proc_data), // input: data recieved
+        // From fetch stage
+        .proc2Icache_addr(proc2Icache_addr),
+
+        // To memory
+        .proc2Imem_command(proc2Imem_command),
+        .proc2Imem_addr(proc2Imem_addr),
+
+        // To fetch stage
+        .Icache_data_out(Icache_data_out), // Data is mem[proc2Icache_addr]
+        .Icache_valid_out(Icache_valid_out) // When valid is high
         
-        /* SOME INPUTS: (branch prediction stuff?) */
-
-        /* OUTPUTS: packet retrieved, enable signal */
-        .fetched_packet(if_packet),
-        .fetch(if_id_enable)    // if lowered, must stall decode (is this needed?)
     );
 
+    ifetch ifetch_0 (
+        .clock(clk),
+        .reset(reset),
 
-    // TODO IF/ID register (sequential)
+        //          ***INPUTS***
+        .if_valid(next_if_valid),       // only go to next PC when true
+
+        // Program Counter Inputs
+        .certain_branch_pc(certain_branch_pc),
+        .certain_branch_req(certain_branch_req),
+
+        .rob_target_pc(rob_target_pc),
+        .rob_target_req(rob_target_req),
+
+        .branch_pred_pc(branch_pred_pc),
+        .branch_pred_req(branch_pred_req),
+
+        // Icache Request Response
+        .Icache2proc_data(Icache2proc_data), // data coming back from Instruction memory
+        .Icache2proc_data_valid(Icache2proc_data), // data coming back from Instruction memory
+        
+        //         *** OUTPUTS ***
+        .proc2Icache_addr(proc2Icache_addr),
+        .if_packet(if_packet), // to decode 
+
+
+        //          *** DEBUG ***
+        .req_debug(req_debug),
+        .gnt_debug(gnt_debug),
+        .PC_reg_debug(PC_reg_debug),
+        .fetch_available_debug(fetch_available_debug),
+        .inst_buffer_debug(inst_buffer_debug)
+    
+    );
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //            IF/ID Pipeline Register           //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    // register takes output from ifetch and gives input to decode
+    // if if_id_enable is not 1, just retains its old value (for stalling)
+
+        IF_ID_PACKET if_id_reg;
+
+        assign if_id_enable = 1'b1; // always enabled (TODO change for stall logic?)
+        // synopsys sync_set_reset "reset"
+        always_ff @(posedge clock) begin
+            if (reset) begin // TODO make sure these are correct
+                if_id_reg.inst  <= `NOP;
+                if_id_reg.valid <= `FALSE;
+                if_id_reg.NPC   <= 0;
+                if_id_reg.PC    <= 0;
+            end else if (if_id_enable) begin
+                if_id_reg <= if_packet;
+            end
+        end
+
+        // debug outputs
+        assign if_id_NPC_dbg   = if_id_reg.NPC;
+        assign if_id_inst_dbg  = if_id_reg.inst;
+        assign if_id_valid_dbg = if_id_reg.valid;
 
     //////////////////////////////////////////////////
     //                                              //
@@ -264,6 +488,131 @@ module pipeline (
             - Get operands from Map Table, update destination in map table
         b. If ROB does not issue (stall?) then do not allocate RS entry
     */
+    logic rob_stall;
+    logic rob_full;
+    logic dispatch_stall;
+    logic alu_entries_full;
+    logic mult_entries_full;
+    logic load_entries_full;
+    logic store_entries_full;
+    ID_IS_PACKET id_packet;
+    
+
+    dispatch dispatch_0 (
+        .if_id_packet(if_id_packet),
+        .rob_stall(rob_stall), 
+        .rob_full(rob_full), 
+        .alu_entries_full(alu_entries_full),       
+        .mult_entries_full(mult_entries_full),
+        .load_entries_full(load_entries_full),
+        .store_entries_full(store_entries_full),
+
+        .id_packet(id_packet),
+        .stall(dispatch_stall)                
+    );
+    reorder_buffer reorder_buffer_0(
+        .clock(clock),
+        .reset(reset),
+        .inst(inst),
+        .write(write),
+        .move_head(move_head),
+        .free_reg(free_reg),
+        .undo(undo),
+        .undo_index(undo_index),
+        .stall(rob_stall),
+        .used_free_reg(used_free_reg),
+        .update_free_list(update_free_list),
+        .free_index(free_index),
+
+        .update_map_table(update_map_table),
+        .mt_update_tag(mt_update_tag),
+        .mt_target_reg(mt_target_reg),
+
+        .update_arch_map(update_arch_map),
+        .update_arch_told(update_arch_told),
+        .update_phys_told(update_phys_told),
+        .arch_told(arch_told),
+        .phys_told(phys_told),
+        
+        .inst_index(inst_index),
+        .full(rob_full),
+        .head(head)
+    );
+    
+    
+    reservation_station reservation_station_0(
+        .clock(clock),
+        .reset(reset),
+        
+        /* Allocate */
+        .allocate(allocate),
+        .input_packet(input_packet),
+
+        .done(alloc_done),
+
+        /* Update */
+        .update(update),
+        .ready_reg(ready_reg),
+
+        /* Issue */
+        .issue_enable(issue_enable),
+
+        .ready(issue_ready),
+        .issued_packet(issued_packet),
+        .issue_fu_index(issue_fu_index),
+
+        /* Free */
+        .free_alu(free_alu),
+        .free_mult(free_mult),
+        .free_load(free_load),
+        .free_store(free_store),
+        .free_branch(free_branch)
+ 
+    );
+
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //            ID/IS Pipeline Register           //
+    //                                              //
+    //////////////////////////////////////////////////
+    // TODO this probably needs a lot more thought
+
+    ID_IS_PACKET id_is_reg;
+
+    assign id_is_enable = 1'b1; // always enabled?
+    // synopsys sync_set_reset "reset"
+    always_ff @(posedge clock) begin
+        if (reset) begin   
+            // TODO this is still p3 id_ex packet, replace with id_is
+            id_is_reg <= '{
+                `NOP, // we can't simply assign 0 because NOP is non-zero
+                {`XLEN{1'b0}}, // PC
+                {`XLEN{1'b0}}, // NPC
+                {`XLEN{1'b0}}, // rs1 select
+                {`XLEN{1'b0}}, // rs2 select
+                OPA_IS_RS1,
+                OPB_IS_RS2,
+                `ZERO_REG,
+                ALU_ADD,
+                1'b0, // rd_mem
+                1'b0, // wr_mem
+                1'b0, // cond
+                1'b0, // uncond
+                1'b0, // halt
+                1'b0, // illegal
+                1'b0, // csr_op
+                1'b0  // valid
+            };
+        end else if (id_is_enable) begin
+            id_is_reg <= id_packet;
+        end
+    end
+
+    // debug outputs
+    //assign id_ex_NPC_dbg   = id_ex_reg.NPC;
+    //assign id_ex_inst_dbg  = id_ex_reg.inst;
+    //assign id_ex_valid_dbg = id_ex_reg.valid;
 
 
     //////////////////////////////////////////////////
@@ -281,6 +630,66 @@ module pipeline (
             a. Convert physical register number for each operand to its value by reading regfile
     */  
 
+    /* SIGNALS */
+
+    IS_EX_PACKET is_packet;
+
+
+    issue stage_issue (
+        // Inputs
+        .rs_packet(issued_packet), 
+        .id_is_reg(id_packet),
+
+        // Outputs
+        .is_packet(is_packet)
+    );
+
+
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //            ID/EX Pipeline Register           //
+    //                                              //
+    //////////////////////////////////////////////////
+    // TODO this probably needs a lot more thought
+
+    IS_EX_PACKET is_ex_reg;
+
+    assign is_ex_enable = 1'b1; // always enabled?
+    // synopsys sync_set_reset "reset"
+    always_ff @(posedge clock) begin
+        if (reset) begin   
+            // TODO this is still p3 id_ex packet, replace with id_is
+            is_ex_reg <= '{
+                `NOP, // we can't simply assign 0 because NOP is non-zero
+                {`XLEN{1'b0}}, // PC
+                {`XLEN{1'b0}}, // NPC
+                {`XLEN{1'b0}}, // rs1 select
+                {`XLEN{1'b0}}, // rs2 select
+                OPA_IS_RS1,
+                OPB_IS_RS2,
+                `ZERO_REG,
+                ALU_ADD,
+                1'b0, // rd_mem
+                1'b0, // wr_mem
+                1'b0, // cond
+                1'b0, // uncond
+                1'b0, // halt
+                1'b0, // illegal
+                1'b0, // csr_op
+                1'b0  // valid
+            };
+        end else if (id_is_enable) begin
+            is_ex_reg <= id_packet;
+        end
+    end
+
+    // debug outputs
+    //assign id_ex_NPC_dbg   = id_ex_reg.NPC;
+    //assign id_ex_inst_dbg  = id_ex_reg.inst;
+    //assign id_ex_valid_dbg = id_ex_reg.valid;
+
+
 
     //////////////////////////////////////////////////
     //                                              //
@@ -288,6 +697,19 @@ module pipeline (
     //                                              //
     //////////////////////////////////////////////////
     // Perform each operation 
+    stage_ex stage_ex0 (
+        .clock(clock),
+        .reset(reset),
+        .is_ex_packet(is_ex_packet),
+        iissue_fu_index(issue_fu_inde)nput logic [`MAX_FU_INDEX-1:0] issue_fu_index,
+
+        output EX_CO_PACKET ex_packet,
+        output [`NUM_FU_ALU-1:0]    free_alu,
+        output [`NUM_FU_MULT-1:0]   free_mult,
+        output [`NUM_FU_LOAD-1:0]   free_load,
+        output [`NUM_FU_STORE-1:0]  free_store,
+        output [`NUM_FU_BRANCH-1:0] free_branch
+    );
 
 
     //////////////////////////////////////////////////
@@ -295,7 +717,16 @@ module pipeline (
     //               Complete (C)                   //
     //                                              //
     //////////////////////////////////////////////////    
-    // Write register file 
+    
+
+    module complete(
+    input EX_CO_PACKAGE ex_co_reg; //need to add type
+    output CO_RE_PACKAGE co_package;
+    output logic             regfile_en,  // register write enable
+    output logic [4:0]       regfile_idx, // register write index
+    output logic [`XLEN-1:0] regfile_data // register write data 
+);
+
 
     //////////////////////////////////////////////////
     //                                              //
