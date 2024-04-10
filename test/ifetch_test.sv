@@ -60,7 +60,6 @@ module testbench;
 
     logic [`XLEN-1:0] proc2mem_addr; // address for current command // support for memory model with byte level addressing
     logic [63:0] proc2mem_data; // address for current command
-    // MEM_SIZE proc2mem_size; // BYTE, HALF, WORD or DOUBLE
     logic[1:0] proc2mem_command; // `BUS_NONE `BUS_LOAD or `BUS_STORE
 
     logic [3:0]  mem2proc_response; // 0 = can't accept, other=tag of transaction
@@ -148,28 +147,36 @@ module testbench;
         @(negedge clock)
         reset = 0;
         
-        // cycle 1
-        $display("Priority Selector: Test 1");
         
-        certain_branch_pc = 32'h1111_1111;
+        certain_branch_pc = 32'h0000_1111;
         certain_branch_req = 1;
-        rob_target_pc = 32'h2222_2222;
+        rob_target_pc = 32'h0000_2222;
         rob_target_req = 1;
-        branch_pred_pc = 32'h3333_3333;
+        branch_pred_pc = 32'h0000_3333;
         branch_pred_req = 1;
 
+
+
         @(posedge if_packet.valid)
 
-        assert(if_packet.PC == 32'h1111_1111) else exit_on_error;
-        assert(if_packet.valid == 0) else exit_on_error;
-        $display("Priority Selector: Test 1 Passed!");
+        assert(if_packet.PC == 32'h0000_1111) else exit_on_error;
+        assert(if_packet.valid == 1) else exit_on_error;
+        $display("First Fetch Done!");
 
-        $display("Memory Retrieval: Test 1");
+        certain_branch_pc = 32'h0000_1221;
+
         @(posedge if_packet.valid)
-        $display("if_packet.inst = %h", if_packet.inst);
-        $display("Memory Retrieval: Test 1 Passed!");
-        
+        assert(if_packet.PC == 32'h0000_1221) else exit_on_error;
+        assert(if_packet.valid == 1) else exit_on_error;
+        $display("Second Fetch Done!");
 
+
+        certain_branch_req = 0; 
+        @(posedge if_packet.valid)
+        assert(if_packet.PC == 32'h0000_2222) else exit_on_error;
+        assert(if_packet.valid == 1) else exit_on_error;
+        $display("Third Fetch Done!");
+    
         $display("@@@Passed");
         $finish;
     end 
