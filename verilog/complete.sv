@@ -2,7 +2,7 @@ module complete(
     input EX_CO_PACKAGE ex_co_reg; //need to add type
     output CO_RE_PACKAGE co_package;
     output logic             regfile_en,  // register write enable
-    output logic [`PHYS_REG_IDX_SZ:0] regfile_idx, // register write index
+    output logic [`PHYS_REG_SZ-1:0]              regfile_idx, // register write index
     output logic [`XLEN-1:0] regfile_data // register write data 
 
 
