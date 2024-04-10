@@ -7,6 +7,7 @@ module dispatch (
     input logic mult_entries_full,
     input logic load_entries_full,
     input logic store_entries_full,
+    input logic branch_entries_full,
 
     output ID_IS_PACKET id_packet,      // outputs 
     // if rob or RS is not abvailable, stall will be high, keep all inputs same as pervious cycle.
@@ -24,7 +25,8 @@ module dispatch (
                               | (alu_entries_full & (id_packet.function_type == `ALU)) \
                               | (mult_entries_full & (id_packet.function_type == `MULT)) \
                               | (load_entries_full & (id_packet.function_type == `LOAD)) \
-                              | (store_entries_full & (id_packet.function_type == `STORE))
+                              | (store_entries_full & (id_packet.function_type == `STORE)) \
+                              | (branch_entries_full & (id_packet.function_type == `BRANCH)) \
     );
 
 
@@ -56,4 +58,3 @@ module dispatch (
     
     
 endmodule // decoder
-
