@@ -288,8 +288,6 @@ module stage_ex (
     input logic [`MAX_FU_INDEX-1:0] issue_fu_index,
 
     output EX_CO_PACKET ex_packet,
-    output [`XLEN-1:0]          mult_result,
-    output [`XLEN-1:0]          branch_result,
     output [`NUM_FU_ALU-1:0]    free_alu,
     output [`NUM_FU_MULT-1:0]   free_mult,
     output [`NUM_FU_LOAD-1:0]   free_load,
@@ -302,12 +300,12 @@ module stage_ex (
     output IS_EX_PACKET tmp_branch_packet
 );
 
+    logic [`XLEN-1:0] alu_result;
+    logic [`XLEN-1:0] mult_result;
+    logic [`XLEN-1:0] branch_result;
+
     logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
     logic take_conditional;
-
-    /*IS_EX_PACKET tmp_alu_packet;
-    IS_EX_PACKET tmp_mult_packet;
-    IS_EX_PACKET tmp_branch_packet;*/
 
     // Pass-throughs
     assign ex_packet.NPC          = is_ex_reg.NPC;
@@ -352,9 +350,13 @@ module stage_ex (
         endcase
     end
 
-    always_comb begin
+    logic alu_done; 
+    logic mult_done; 
+    logic branch_done;
 
-    end
+    logic [`XLEN-1:0] tmp_alu_result; 
+    logic [`XLEN-1:0] tmp_mult_result;
+    logic [`XLEN-1:0] tmp_branch_result;
 
     // Instantiate the ALU
     alu alu_0 (
@@ -368,8 +370,8 @@ module stage_ex (
         .in_packet(is_ex_reg),
 
         // Output
-        .result(ex_packet.result),
-        .alu_done(free_alu),
+        .result(alu_result),
+        .alu_done(alu_done),
         .out_packet(tmp_alu_packet)
     );
 
@@ -385,7 +387,7 @@ module stage_ex (
 
         // Output
         .result(branch_result),
-        .branch_done(free_branch),
+        .branch_done(branch_done),
         .out_packet(tmp_branch_packet)
     );
 
@@ -402,9 +404,46 @@ module stage_ex (
 
         // Output
         .product(mult_result),
-        .mult_done(free_mult),
+        .mult_done(mult_done),
         .out_packet(tmp_mult_packet)
     );
+
+    logic [5:0] waiting_fus; 
+
+    always_ff @(posedge clock) begin
+        if(reset) begin
+            waiting_fus <= 0;
+            tmp_alu_result <= 0;
+            tmp_mult_result <= 0;
+            tmp_branch_result <= 0;
+        end
+        else begin
+            if(alu_done) begin
+                waiting_fus[ALU] <= 1;
+                tmp_alu_result <= alu_result;
+            end 
+            if(mult_done) begin
+                waiting_fus[MULT] <= 1; 
+                tmp_mult_result <= mult_result;
+            end
+            if(branch_done) begin
+                waiting_fus[BRANCH] <= 1; 
+                tmp_branch_result <= branch_result;
+            end 
+
+            
+
+        end
+
+        // Iterate through the waiting FUs to choose 1 to free
+        if(waiting_fus[0] == 1) begin
+            waiting_fus[0] = 0;
+            free_alu[0] = 1;
+            ex_packet.result = tmp_alu_result;
+            ex_packet.NPC = tmp_alu_packet.NPC;
+            ex_packet.take_branch = 
+        end
+    end     
 
     // Instantiate the conditional branch module
     conditional_branch conditional_branch_0 (
