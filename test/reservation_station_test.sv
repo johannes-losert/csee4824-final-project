@@ -22,10 +22,11 @@ module testbench;
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
 
 
-    logic [`NUM_FU_ALU-1:0] free_alu;
-    logic [`NUM_FU_MULT-1:0] free_mult;
-    logic [`NUM_FU_LOAD-1:0] free_load;
-    logic [`NUM_FU_STORE-1:0] free_store;
+    logic [`NUM_FU_ALU-1:0]     free_alu;
+    logic [`NUM_FU_MULT-1:0]    free_mult;
+    logic [`NUM_FU_LOAD-1:0]    free_load;
+    logic [`NUM_FU_STORE-1:0]   free_store;
+    logic [`NUM_FU_BRANCH-1:0]  free_branch;
 
     reservation_station dut(
         .clock(clock),
@@ -52,7 +53,8 @@ module testbench;
         .free_alu(free_alu),
         .free_mult(free_mult),
         .free_load(free_load),
-        .free_store(free_store)
+        .free_store(free_store),
+        .free_branch(free_branch)
  
     );
 
@@ -74,11 +76,11 @@ module testbench;
         $monitor("alloc: %h, input_funit: %h, input_dest: %h, input_src1: %h, input_src2: %h, alloc_done: %h, \
                 issue_en: %h, issue_ready: %h, issued_funit: %h, issued_dest: %h, issued_src1: %h, issued_src2: %h, \
                 update: %h, ready_reg.reg_num: %h, \
-                free_alu: %h, free_mult: %h, free_load: %h, free_store: %h", 
+                free_alu: %h, free_mult: %h, free_load: %h, free_store: %h, free_branch: %h", 
                 allocate, input_packet.funit, input_packet.dest_reg.reg_num, input_packet.src1_reg.reg_num, input_packet.src2_reg.reg_num, alloc_done, 
                 issue_enable, issue_ready, issued_packet.funit, issued_packet.dest_reg.reg_num, issued_packet.src1_reg.reg_num, issued_packet.src2_reg.reg_num,
                 update, ready_reg.reg_num,
-                free_alu, free_mult, free_load, free_store);
+                free_alu, free_mult, free_load, free_store, free_branch);
 
         clock     = 0;
         reset     = 0;
@@ -95,6 +97,7 @@ module testbench;
         free_load = 0;
         free_mult = 0;
         free_store = 0;
+        free_branch = 0;
         
         // Initial Reset
         reset = 1;
@@ -124,6 +127,7 @@ module testbench;
         free_load = 0;
         free_store = 0;
         free_mult = 0;
+        free_branch = 0;
         
         @(negedge clock)
         assert(alloc_done) else exit_on_error;
@@ -152,6 +156,7 @@ module testbench;
         free_load = 0;
         free_store = 0;
         free_mult = 0;
+        free_branch = 0;
 
         @(negedge clock)
         assert(alloc_done) else exit_on_error;
@@ -188,6 +193,7 @@ module testbench;
         free_load = 1;
         free_store = 0;
         free_mult = 0;
+        free_branch = 0;
         
         @(negedge clock)
         assert(alloc_done) else exit_on_error;
@@ -218,6 +224,7 @@ module testbench;
         free_load = 0;
         free_store = 0;
         free_mult = 0;
+        free_branch = 0;
 
         @(negedge clock)
 
@@ -248,6 +255,7 @@ module testbench;
         free_load = 0;
         free_store = 0;
         free_mult = 1;
+        free_branch = 0;
 
         @(negedge clock)
 
@@ -284,6 +292,7 @@ module testbench;
         free_load = 1;
         free_store = 1;
         free_mult = 1;
+        free_branch = 0;
 
         @(negedge clock)
 

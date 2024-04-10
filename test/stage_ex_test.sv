@@ -4,8 +4,12 @@
 module testbench;
 
     logic [`XLEN-1:0] mult_result, branch_result;
-    logic clock, reset, alu_en, mult_en;
-    logic [`NUM_FU_ALU-1:0] free_alu, free_mult, free_load, free_store;
+    logic clock, reset, alu_en, mult_en, branch_en;
+    logic [`NUM_FU_ALU-1:0] free_alu;
+    logic [`NUM_FU_MULT-1:0] free_mult;
+    logic [`NUM_FU_LOAD-1:0] free_load;
+    logic [`NUM_FU_STORE-1:0] free_store;
+    logic [`NUM_FU_BRANCH-1:0] free_branch;
     logic [`MAX_FU_INDEX-1:0]     issue_fu_index;
     integer i;
     ID_EX_PACKET id_ex_reg;
@@ -20,6 +24,7 @@ module testbench;
         .funit(funit),
         .alu_en(alu_en),
         .mult_en(mult_en),
+        .branch_en(branch_en),
         .issue_fu_index(issue_fu_index),
         .ex_packet(ex_packet),
         .mult_result(mult_result),
@@ -27,7 +32,8 @@ module testbench;
         .free_alu(free_alu),
         .free_mult(free_mult),
         .free_load(free_load), 
-        .free_store(free_store)
+        .free_store(free_store),
+        .free_branch(free_branch)
     );
 
     // CLOCK_PERIOD is defined on the commandline by the makefile
@@ -58,8 +64,8 @@ module testbench;
 
     initial begin
         // NOTE: monitor starts using 5-digit decimal values for printing
-        $monitor("Time:%4.0f opa:%d opb:%d function:%d alu_result:%d mult_result:%d funit:%2h free_alu:%h free_mult:%b",
-                 $time, $signed(id_ex_reg.rs1_value), $signed(id_ex_reg.rs2_value), id_ex_reg.alu_func, $signed(ex_packet.alu_result), $signed(mult_result), funit, free_alu[0], free_mult[0]);
+        $monitor("Time:%4.0f opa:%d opb:%d function:%d alu_result:%d mult_result:%d funit:%2h free_alu:%b free_mult:%b",
+                 $time, $signed(id_ex_reg.rs1_value), $signed(id_ex_reg.rs2_value), id_ex_reg.alu_func, $signed(ex_packet.alu_result), $signed(mult_result), funit, free_alu, free_mult);
 
         $display("\nBeginning edge-case testing:");
 
@@ -207,6 +213,11 @@ module testbench;
         wait_until_done();
         assert(mult_result == 1) else exit_on_error;
         assert(free_mult[0] == 1) else exit_on_error;
+
+        // Add tests for branch... low priority since it should be the same as alu
+        
+
+        // Currently no tests on branch_calculation module because I need to ask some questions first 
 
         /*start = 1;
         a = 5;
