@@ -5,7 +5,7 @@ module retire(
     input logic [`XLEN-1:0] regfile_data, // register write data 
     input logic [3:0]       mem2proc_response,
     input logic [$clog2(`ROB_SZ)-1:0] rob_head, //head printer in rob
-
+    input logic             take_branch,
     //signals to tell rob to move head
     output logic move_head,
     //output of the processor
@@ -46,5 +46,12 @@ module retire(
         end
     end
 
+    always_comb begin
+        if (take_branch) begin
+            for (int i; i < `ROB_SZ; i++) begin
+                retire_buffer[i].valid = 0;
+            end
+        end   
+    end
 
 endmodule //retire
