@@ -17,7 +17,6 @@ module testbench;
 
     logic [`XLEN-1:0] rob_target_pc;
     logic rob_target_req;
-    logic rob_stall;
 
     logic [`XLEN-1:0] branch_pred_pc;
     logic branch_pred_req;
@@ -114,12 +113,12 @@ module testbench;
         // $monitor(
         //     "certain_branch_pc = %h, certain_branch_req = %b,\
         //     rob_target_pc = %h, rob_target_req = %b, \
-        //     rob_stall = %b, branch_pred_pc = %h,\
+        //     branch_pred_pc = %h,\
         //     branch_pred_req = %b, Icache2proc_data = %h,\
         //     Icache2proc_data_valid = %b, PC_reg_debug = %h", 
         //     certain_branch_pc, certain_branch_req,
         //     rob_target_pc, rob_target_req,
-        //     rob_stall, branch_pred_pc,
+        //     branch_pred_pc,
         //     branch_pred_req, 
         //     Icache2proc_data,
         //     Icache2proc_data_valid, PC_reg_debug);
@@ -127,7 +126,6 @@ module testbench;
         clock = 0;
         reset = 0;
         if_valid = 1;
-        rob_stall = 0;
 
         // Initial Reset
         reset = 1;

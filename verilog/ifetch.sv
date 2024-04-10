@@ -20,7 +20,6 @@ module ifetch (
 
     input [`XLEN-1:0] rob_target_pc,
     input rob_target_req,
-    input rob_stall, 
 
     input [`XLEN-1:0] branch_pred_pc,
     input branch_pred_req,
