@@ -294,7 +294,7 @@ typedef struct packed {
  * ID_EX Packet:
  * Data exchanged from the ID to the EX stage
  */
-typedef struct packed {
+/*typedef struct packed {
     INST              inst;
     logic [`XLEN-1:0] PC;
     logic [`XLEN-1:0] NPC; // PC + 4
@@ -316,7 +316,60 @@ typedef struct packed {
     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
 
     logic       valid;
-} ID_EX_PACKET;
+} ID_EX_PACKET;/*
+
+/**
+ * ID_IS Packet:
+ * Data exchanged from the ID to the IS stage
+ */
+typedef struct packed {
+    INST              inst;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC; // PC + 4
+
+    ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
+    ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
+
+    logic [4:0] dest_reg_idx;  // destination (writeback) register index
+    ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
+    logic       rd_mem;        // Does inst read memory?
+    logic       wr_mem;        // Does inst write memory?
+    logic       cond_branch;   // Is inst a conditional branch?
+    logic       uncond_branch; // Is inst an unconditional branch?
+    logic       halt;          // Is this a halt?
+    logic       illegal;       // Is this instruction illegal?
+    logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    logic [3:0]      function_type;
+    logic       valid;
+} ID_IS_PACKET;
+
+/**
+ * ID_IS Packet:
+ * Data exchanged from the ID to the IS stage
+ */
+typedef struct packed {
+    INST              inst;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC; // PC + 4
+
+    logic [`XLEN-1:0] rs1_value; // reg A value
+    logic [`XLEN-1:0] rs2_value; // reg B value
+
+    ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
+    ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
+
+    logic [4:0] dest_reg_idx;  // destination (writeback) register index
+    ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
+    logic       rd_mem;        // Does inst read memory?
+    logic       wr_mem;        // Does inst write memory?
+    logic       cond_branch;   // Is inst a conditional branch?
+    logic       uncond_branch; // Is inst an unconditional branch?
+    logic       halt;          // Is this a halt?
+    logic       illegal;       // Is this instruction illegal?
+    logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    logic [3:0]       function_type;
+    logic       valid;
+} IS_EX_PACKET;
 
 /**
  * EX_MEM Packet:
