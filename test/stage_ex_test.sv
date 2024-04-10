@@ -12,18 +12,16 @@ module testbench;
     logic [`NUM_FU_BRANCH-1:0] free_branch;
     logic [`MAX_FU_INDEX-1:0]     issue_fu_index;
     integer i;
-    ID_EX_PACKET id_ex_reg;
-    FUNIT funit;
-    EX_MEM_PACKET ex_packet;
+    IS_EX_PACKET is_ex_reg;
+    EX_CO_PACKET ex_packet;
 
 
     stage_ex dut(
         .clock(clock),
         .reset(reset),
-        .id_ex_reg(id_ex_reg),
-        .funit(funit),
-        .alu_en(alu_en),
+        .is_ex_reg(is_ex_reg),
         .mult_en(mult_en),
+        .alu_en(alu_en),
         .branch_en(branch_en),
         .issue_fu_index(issue_fu_index),
         .ex_packet(ex_packet),
@@ -64,12 +62,11 @@ module testbench;
 
     initial begin
         // NOTE: monitor starts using 5-digit decimal values for printing
-        $monitor("Time:%4.0f opa:%d opb:%d function:%d alu_result:%d mult_result:%d funit:%2h free_alu:%b free_mult:%b",
-                 $time, $signed(id_ex_reg.rs1_value), $signed(id_ex_reg.rs2_value), id_ex_reg.alu_func, $signed(ex_packet.alu_result), $signed(mult_result), funit, free_alu, free_mult);
-
+        $monitor("Time:%4.0f opa:%d opb:%d function:%d alu_result:%d mult_result:%d funit:%2h free_alu:%b free_mult:%b free_branch:%b",
+                 $time, $signed(is_ex_reg.rs1_value), $signed(is_ex_reg.rs2_value), is_ex_reg.alu_func, $signed(ex_packet.result), $signed(mult_result), is_ex_reg.function_type, free_alu, free_mult, free_branch);
         $display("\nBeginning edge-case testing:");
 
-        id_ex_reg <= '{
+        is_ex_reg <= '{
             `NOP, // we can't simply assign 0 because NOP is non-zero
             {`XLEN{1'b0}}, // PC
             {`XLEN{1'b0}}, // NPC
@@ -86,12 +83,13 @@ module testbench;
             1'b0, // halt
             1'b0, // illegal
             1'b0, // csr_op
+            3'b000,     // function type
             1'b0  // valid
         };
-        funit = 0;
         clock = 0;
         alu_en = 0;
         mult_en = 0;
+        branch_en = 0;
 
         // Initial Reset
         reset = 1;
@@ -99,12 +97,12 @@ module testbench;
         reset = 0;
 
         // Test that basic multiplication works
-        id_ex_reg.rs1_value = 2;
-        id_ex_reg.rs2_value = 3;
-        id_ex_reg.opa_select = OPA_IS_RS1;
-        id_ex_reg.opb_select = OPB_IS_RS2;
-        funit = MULT;
-        id_ex_reg.alu_func = ALU_MUL;
+        is_ex_reg.rs1_value = 2;
+        is_ex_reg.rs2_value = 3;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MUL;
         mult_en = 1;
         issue_fu_index = 0;
         @(negedge clock);
@@ -115,28 +113,28 @@ module testbench;
         assert(free_mult[0] == 1'b1) else exit_on_error;
 
         // Test that basic alu operations work
-        id_ex_reg.rs1_value = 6;
-        id_ex_reg.rs2_value = 3;
-        id_ex_reg.opa_select = OPA_IS_RS1;
-        id_ex_reg.opb_select = OPB_IS_RS2;
-        funit = ALU;
-        id_ex_reg.alu_func = ALU_SUB;
+        is_ex_reg.rs1_value = 6;
+        is_ex_reg.rs2_value = 3;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = ALU;
+        is_ex_reg.alu_func = ALU_SUB;
         alu_en = 1;
         issue_fu_index = 0;
         @(negedge clock);
         alu_en = 0;
-        assert(ex_packet.alu_result == 3) else exit_on_error;
+        assert(ex_packet.result == 3) else exit_on_error;
         assert(free_alu[0] == 1) else exit_on_error;
 
         @(negedge clock);
 
         // Test that multiplication with negative numbers works (MUL)
-        id_ex_reg.rs1_value = -5;
-        id_ex_reg.rs2_value = 2;
-        id_ex_reg.opa_select = OPA_IS_RS1;
-        id_ex_reg.opb_select = OPB_IS_RS2;
-        funit = MULT;
-        id_ex_reg.alu_func = ALU_MUL;
+        is_ex_reg.rs1_value = -5;
+        is_ex_reg.rs2_value = 2;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MUL;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
@@ -145,12 +143,12 @@ module testbench;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test multiplication with upper bits (MULH)
-        id_ex_reg.rs1_value = 123456789;
-        id_ex_reg.rs2_value = 123456789;
-        id_ex_reg.opa_select = OPA_IS_RS1;
-        id_ex_reg.opb_select = OPB_IS_RS2;
-        funit = MULT;
-        id_ex_reg.alu_func = ALU_MULH;
+        is_ex_reg.rs1_value = 123456789;
+        is_ex_reg.rs2_value = 123456789;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MULH;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
@@ -159,12 +157,12 @@ module testbench;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MULHSU (mixed sign and unsigned) ASK
-        id_ex_reg.rs1_value = -34343434;
-        id_ex_reg.rs2_value = 45454545;
-        id_ex_reg.opa_select = OPA_IS_RS1;
-        id_ex_reg.opb_select = OPB_IS_RS2;
-        funit = MULT;
-        id_ex_reg.alu_func = ALU_MULHSU;
+        is_ex_reg.rs1_value = -34343434;
+        is_ex_reg.rs2_value = 45454545;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MULHSU;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
@@ -173,12 +171,12 @@ module testbench;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MULHU (unsigned)
-        id_ex_reg.rs1_value = 34343434;
-        id_ex_reg.rs2_value = 56565656;
-        id_ex_reg.opa_select = OPA_IS_RS1;
-        id_ex_reg.opb_select = OPB_IS_RS2;
-        funit = MULT;
-        id_ex_reg.alu_func = ALU_MULHU;
+        is_ex_reg.rs1_value = 34343434;
+        is_ex_reg.rs2_value = 56565656;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MULHU;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
@@ -187,12 +185,12 @@ module testbench;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MULHU on very very large values
-        id_ex_reg.rs1_value = 32'hffff_ffff;
-        id_ex_reg.rs2_value = 32'hffff_ffff;
-        id_ex_reg.opa_select = OPA_IS_RS1;
-        id_ex_reg.opb_select = OPB_IS_RS2;
-        funit = MULT;
-        id_ex_reg.alu_func = ALU_MULHSU;
+        is_ex_reg.rs1_value = 32'hffff_ffff;
+        is_ex_reg.rs2_value = 32'hffff_ffff;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MULHSU;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
@@ -201,18 +199,51 @@ module testbench;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MUL on where inputs are the same binary as ^ but should give different product
-        id_ex_reg.rs1_value = -1;
-        id_ex_reg.rs2_value = -1;
-        id_ex_reg.opa_select = OPA_IS_RS1;
-        id_ex_reg.opb_select = OPB_IS_RS2;
-        funit = MULT;
-        id_ex_reg.alu_func = ALU_MUL;
+        is_ex_reg.rs1_value = -1;
+        is_ex_reg.rs2_value = -1;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MUL;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
         wait_until_done();
         assert(mult_result == 1) else exit_on_error;
         assert(free_mult[0] == 1) else exit_on_error;
+
+        // Test that doing mult -> alu will still allow the output of mult to be present (+packet)
+        is_ex_reg.rs1_value = 6;
+        is_ex_reg.rs2_value = 3;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MUL;
+        mult_en = 1;
+        issue_fu_index = 0;
+        @(negedge clock);
+        mult_en = 0;
+
+        is_ex_reg.rs1_value = 7;
+        is_ex_reg.rs2_value = 6;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = ALU;
+        is_ex_reg.alu_func = ALU_ADD;
+        alu_en = 1;
+        issue_fu_index = 0;
+        @(negedge clock);
+        alu_en = 0;
+        assert(ex_packet.result == 13) else exit_on_error;
+        assert(free_alu[0] == 1) else exit_on_error;
+
+        //@(negedge free_mult[0]);
+        wait_until_done();
+        $display(ex_packet);
+        assert(mult_result == 18) else exit_on_error;
+        assert(free_mult[0] == 1'b1) else exit_on_error;
+
+        
 
         // Add tests for branch... low priority since it should be the same as alu
         

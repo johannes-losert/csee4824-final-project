@@ -272,6 +272,14 @@ typedef enum logic [4:0] {
 // ---- Datapath Packets ---- //
 ////////////////////////////////
 
+typedef enum logic [2:0] {
+    ALU = 3'b000,
+    MULT = 3'b001,
+    LOAD = 3'b010,
+    STORE = 3'b011,
+    BRANCH = 3'b100
+} FUNIT;
+
 /**
  * Packets are used to move many variables between modules with
  * just one datatype, but can be cumbersome in some circumstances.
@@ -289,34 +297,6 @@ typedef struct packed {
     logic [`XLEN-1:0] NPC; // PC + 4
     logic             valid;
 } IF_ID_PACKET;
-
-/**
- * ID_EX Packet:
- * Data exchanged from the ID to the EX stage
- */
-/*typedef struct packed {
-    INST              inst;
-    logic [`XLEN-1:0] PC;
-    logic [`XLEN-1:0] NPC; // PC + 4
-
-    logic [`XLEN-1:0] rs1_value; // reg A value
-    logic [`XLEN-1:0] rs2_value; // reg B value
-
-    ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
-    ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
-
-    logic [4:0] dest_reg_idx;  // destination (writeback) register index
-    ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
-    logic       rd_mem;        // Does inst read memory?
-    logic       wr_mem;        // Does inst write memory?
-    logic       cond_branch;   // Is inst a conditional branch?
-    logic       uncond_branch; // Is inst an unconditional branch?
-    logic       halt;          // Is this a halt?
-    logic       illegal;       // Is this instruction illegal?
-    logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
-
-    logic       valid;
-} ID_EX_PACKET;/*
 
 /**
  * ID_IS Packet:
@@ -367,7 +347,7 @@ typedef struct packed {
     logic       halt;          // Is this a halt?
     logic       illegal;       // Is this instruction illegal?
     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
-    logic [3:0]       function_type;
+    FUNIT function_type;
     logic       valid;
 } IS_EX_PACKET;
 
@@ -417,14 +397,6 @@ typedef struct packed {
  * Reservation station stuff
 */
 
-typedef enum logic [2:0] {
-    ALU = 3'b000,
-    MULT = 3'b001,
-    LOAD = 3'b010,
-    STORE = 3'b011,
-    BRANCH = 3'b100
-} FUNIT;
-
 typedef struct packed {
     logic [`PHYS_REG_SZ:0] reg_num;
     logic ready;
@@ -446,5 +418,23 @@ typedef struct packed {
     logic issued;
 } RS_ENTRY;
 
+typedef struct packed {
+    logic [`XLEN-1:0] result;
+    logic [`XLEN-1:0] NPC;
+
+    logic             take_branch; // Is this a taken branch?
+    // Pass-through from decode stage
+    logic [`XLEN-1:0] rs2_value;
+    logic             rd_mem;
+    logic             wr_mem;
+    logic [4:0]       dest_reg_idx;
+    logic             halt;
+    logic             illegal;
+    logic             csr_op;
+    logic             rd_unsigned; // Whether proc2Dmem_data is signed or unsigned
+    MEM_SIZE          mem_size;
+    logic             valid;
+    logic [$clog2(`ROB_SZ)-1:0] rob_index; // this index is to indicate which instrction we should retire
+} EX_CO_PACKET;
 
 `endif // __SYS_DEFS_SVH__
