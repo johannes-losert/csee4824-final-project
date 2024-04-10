@@ -280,6 +280,14 @@ typedef enum logic [4:0] {
 // ---- Datapath Packets ---- //
 ////////////////////////////////
 
+typedef enum logic [2:0] {
+    ALU = 3'b000,
+    MULT = 3'b001,
+    LOAD = 3'b010,
+    STORE = 3'b011,
+    BRANCH = 3'b100
+} FUNIT;
+
 /**
  * Packets are used to move many variables between modules with
  * just one datatype, but can be cumbersome in some circumstances.
@@ -376,7 +384,7 @@ typedef struct packed {
     logic       halt;          // Is this a halt?
     logic       illegal;       // Is this instruction illegal?
     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
-    logic [3:0]       function_type;
+    FUNIT function_type;
     logic       valid;
 } IS_EX_PACKET;
 
@@ -425,14 +433,6 @@ typedef struct packed {
 /* 
  * Reservation station stuff
 */
-
-typedef enum logic [2:0] {
-    ALU = 3'b000,
-    MULT = 3'b001,
-    LOAD = 3'b010,
-    STORE = 3'b011,
-    BRANCH = 3'b100
-} FUNIT;
 
 typedef struct packed {
     logic [`PHYS_REG_IDX_SZ:0] reg_num;
