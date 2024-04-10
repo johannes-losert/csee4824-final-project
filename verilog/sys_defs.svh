@@ -37,6 +37,7 @@
 `define NUM_FU_MULT 1
 `define NUM_FU_LOAD 1
 `define NUM_FU_STORE 1
+`define NUM_FU_BRANCH 1
 
 // TODO make this automated, should equal clog2(max(NUM_FU_ALU, NUM_FU_MULT, NUM_FU_LOAD, NUM_FU_STORE))
 `define MAX_FU_INDEX 1
@@ -363,11 +364,12 @@ typedef struct packed {
  * Reservation station stuff
 */
 
-typedef enum logic [1:0] {
-    ALU = 2'b00,
-    MULT = 2'b01,
-    LOAD = 2'b10,
-    STORE = 2'b11
+typedef enum logic [2:0] {
+    ALU = 3'b000,
+    MULT = 3'b001,
+    LOAD = 3'b010,
+    STORE = 3'b011,
+    BRANCH = 3'b100
 } FUNIT;
 
 typedef struct packed {
@@ -383,7 +385,6 @@ typedef struct packed {
     PREG src1_reg;
     PREG src2_reg;
 } RS_PACKET; // TODO should this have a valid bit?
-
 
 typedef struct packed {
     RS_PACKET packet;

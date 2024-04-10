@@ -84,7 +84,8 @@ module branch_calculation (
     input ALU_FUNC    func,
     input logic       branch_en,
 
-    output logic [`XLEN-1:0] result
+    output logic [`XLEN-1:0]        result,
+    output logic [`NUM_FU_BRANCH]   branch_done
 );
 
     assign signed_opa   = opa;
@@ -105,6 +106,16 @@ module branch_calculation (
 
             default:    result = `XLEN'hfacebeec;  // here to prevent latches
         endcase
+    end
+
+    always_ff @(posedge clock) begin
+        if(reset) begin
+            branch_done[0] = 1'b0;
+        end else if (branch_en) begin
+            branch_done[0] = 1'b1;
+        end else begin
+            branch_done[0] = 1'b0;
+        end
     end
 
 endmodule
@@ -198,12 +209,14 @@ endmodule // conditional_branch
 
 
 module stage_ex (
+    // Test cases work with these inputs and outputs
     input                               clock,
     input                               reset,
     input ID_EX_PACKET                  id_ex_reg,
     input FUNIT                         funit,
     input                               mult_en,
     input                               alu_en,
+    input                               branch_en,
     input logic [`MAX_FU_INDEX-1:0]     issue_fu_index,
 
     output EX_MEM_PACKET        ex_packet,
@@ -212,7 +225,8 @@ module stage_ex (
     output [`NUM_FU_ALU-1:0]    free_alu,
     output [`NUM_FU_MULT-1:0]   free_mult,
     output [`NUM_FU_LOAD-1:0]   free_load,
-    output [`NUM_FU_STORE-1:0]  free_store
+    output [`NUM_FU_STORE-1:0]  free_store,
+    output [`NUM_FU_BRANCH-1:0] free_branch
 );
 
     logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
@@ -283,10 +297,11 @@ module stage_ex (
         .opa(opa_mux_out),
         .opb(opb_mux_out),
         .func(id_ex_reg.alu_func),
-        .branch_en(ex_packet.take_branch && issue_fu_index == 0),
+        .branch_en(funit == BRANCH && branch_en && issue_fu_index == 0),
 
         // Output
-        .result(branch_result)
+        .result(branch_result),
+        .branch_done(free_branch)
     );
 
     // Instantiate multiply functional unit
