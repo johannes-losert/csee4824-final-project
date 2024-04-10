@@ -6,6 +6,8 @@
 module testbench;
     logic clock, reset;
 
+    // IF MODULE 
+
     logic if_valid; 
 
     IF_ID_PACKET if_packet;
@@ -22,13 +24,23 @@ module testbench;
     
     logic [`XLEN-1:0] proc2Icache_addr;
 
-    // FROM ICACHE
     logic [63:0]      Icache2proc_data; // data coming back from Instruction memory
     logic Icache2proc_data_valid;
 
     logic [3:0] req_debug; 
     logic [3:0] gnt_debug; 
     logic [`XLEN-1:0] PC_reg_debug;
+
+    // MEMORY MODULES
+
+    logic [`XLEN-1:0] proc2mem_addr; // address for current command // support for memory model with byte level addressing
+    logic [63:0] proc2mem_data; // address for current command
+    logic[1:0] proc2mem_command; // `BUS_NONE `BUS_LOAD or `BUS_STORE
+
+    logic [3:0]  mem2proc_response; // 0 = can't accept, other=tag of transaction
+    logic [63:0] mem2proc_data;     // data resulting from a load
+    logic [3:0]  mem2proc_tag;       // 0 = no value, other=tag of transaction
+
 
     ifetch dut(
         .clock(clock),
@@ -56,18 +68,8 @@ module testbench;
         .PC_reg_debug(PC_reg_debug)
     );
 
-    logic clk; // Memory clock
-
-    logic [`XLEN-1:0] proc2mem_addr; // address for current command // support for memory model with byte level addressing
-    logic [63:0] proc2mem_data; // address for current command
-    logic[1:0] proc2mem_command; // `BUS_NONE `BUS_LOAD or `BUS_STORE
-
-    logic [3:0]  mem2proc_response; // 0 = can't accept, other=tag of transaction
-    logic [63:0] mem2proc_data;     // data resulting from a load
-    logic [3:0]  mem2proc_tag;       // 0 = no value, other=tag of transaction
-
     mem mem_0 (
-        .clk(clk),
+        .clk(clock),
 
         .proc2mem_addr(proc2mem_addr),
         .proc2mem_data(proc2mem_data),
@@ -96,23 +98,9 @@ module testbench;
         .Icache_valid_out(Icache2proc_data_valid)
     );
 
-    
-    // The latency of memory accesses in clock edges 
-    integer mem_latency_edges = `MEM_LATENCY_IN_CYCLES * 2;
-    // the number of elapsed clock edges
-    integer counter_edges = 0; 
-    
     always begin       
-
         #(`CLOCK_PERIOD/2.0);
         clock = ~clock;
-        counter_edges = counter_edges + 1; 
-
-        if (counter_edges == mem_latency_edges) begin
-            clk = ~clk;
-            counter_edges = 0; 
-        end
-
     end
 
     task exit_on_error;
@@ -137,7 +125,6 @@ module testbench;
         //     Icache2proc_data_valid, PC_reg_debug);
 
         clock = 0;
-        clk = 0;
         reset = 0;
         if_valid = 1;
         rob_stall = 0;
