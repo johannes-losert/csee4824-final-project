@@ -403,14 +403,14 @@ typedef struct packed {
 typedef struct packed {
     PREG T,Told;
     INST inst;
-    logic done;
+    // logic done;
 } ROB_ENTRY;
 
 
-typedef struct packed {
-    logic [`REG_IDX_SZ:0] rd; /* Architectural register */
-    PREG T; /* Could switch with index to not carry ready bit */
-} ROB_PACKET;
+// typedef struct packed {
+//     logic [`REG_IDX_SZ:0] rd; /* Architectural register */
+//     PREG T; /* Could switch with index to not carry ready bit */
+// } ROB_PACKET;
 
 /**
  * Branch Target Buffer:
@@ -432,3 +432,48 @@ typedef struct packed {
 } BTB_ENTRY;
 
 `endif // __SYS_DEFS_SVH__
+
+
+
+typedef struct packed {
+    logic [`XLEN-1:0] result;
+    logic [`XLEN-1:0] NPC;
+    logic [4:0]       dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
+    logic             take_branch;
+    logic             halt;    // not used by wb stage
+    logic             illegal; // not used by wb stage
+    logic             valid;
+
+    logic [$clog2(`ROB_SZ)-1:0] rob_index; // this index is to indicate which instrction we should retire
+} CO_RE_PACKET;
+
+
+typedef struct packed {
+    logic [`XLEN-1:0] result;
+    logic [`XLEN-1:0] NPC;
+
+    logic             take_branch; // Is this a taken branch?
+    // Pass-through from decode stage
+    logic [`XLEN-1:0] rs2_value;
+    logic             rd_mem;
+    logic             wr_mem;
+    logic [4:0]       dest_reg_idx;
+    logic             halt;
+    logic             illegal;
+    logic             csr_op;
+    logic             rd_unsigned; // Whether proc2Dmem_data is signed or unsigned
+    MEM_SIZE          mem_size;
+    logic             valid;
+    logic [$clog2(`ROB_SZ)-1:0] rob_index; // this index is to indicate which instrction we should retire
+} EX_CO_PACKET;
+
+
+typedef struct packed {
+    logic [3:0]       completed_insts;
+    logic [`XLEN-1:0] NPC;
+    EXCEPTION_CODE    error_status;
+    logic             regfile_en;   // register write enable
+    logic [4:0]       regfile_idx;  // register write index
+    logic [`XLEN-1:0] regfile_data; // register write data 
+    logic             valid;
+} RETIRE_ENTRY;
