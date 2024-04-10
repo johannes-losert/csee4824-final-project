@@ -30,7 +30,7 @@ module reorder_buffer(
     output logic stall,
 
     /* Tell free list we need a reg (TODO connect to dequeue_en) */
-    output logic used_free_reg,
+   // output logic used_free_reg,
 
     /* Signal to indicate we should update free list (TODO connect enqueue_en in free list) */
     output logic update_free_list,
@@ -71,12 +71,10 @@ module reorder_buffer(
 );
 
     ROB_ENTRY [`ROB_SZ-1:0] inst_buffer;
-    // logic [$clog2(`ROB_SZ)-1:0] head;
     logic [$clog2(`ROB_SZ)-1:0] tail;
     logic [$clog2(`ROB_SZ)-1:0] tail_h;
     logic [$clog2(`ROB_SZ)-1:0] next_head;
     logic [$clog2(`ROB_SZ)-1:0] next_tail;
-    logic [$clog2(`ROB_SZ)-1:0] pass_status;
     logic next_full;
 
     
@@ -108,7 +106,7 @@ module reorder_buffer(
                         inst_buffer[tail].T = free_reg; // input from Free list
                         inst_buffer[tail].Told = phys_told;
                         // inst_buffer[tail].done = 0;
-                        used_free_reg = 1;
+                        // used_free_reg = 1;
                         mt_target_reg = inst.r.rd;
                         mt_update_tag = free_reg;
                         update_map_table = 1;
@@ -125,7 +123,7 @@ module reorder_buffer(
                         mt_target_reg = inst.r.rd;
                         mt_update_tag = free_reg;
                         update_map_table = 0;
-                        used_free_reg = 0;
+                        // used_free_reg = 0;
                         next_tail = tail;
                     end
                 end else begin
@@ -136,7 +134,7 @@ module reorder_buffer(
                     mt_target_reg = inst.r.rd;
                     mt_update_tag = free_reg;
                     update_map_table = 0;
-                    used_free_reg = 0;
+                    // used_free_reg = 0;
                     if (!full) begin
                         next_tail = tail + 1;
                     end else begin
@@ -151,7 +149,7 @@ module reorder_buffer(
                 mt_target_reg  = inst.r.rd;
                 mt_update_tag = free_reg;
                 update_map_table = 0;
-                used_free_reg = 0;
+                // used_free_reg = 0;
                 next_tail = tail;
             end
         end
