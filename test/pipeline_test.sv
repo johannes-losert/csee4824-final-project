@@ -138,10 +138,18 @@ module testbench;
     );
 
 
-    // Generate System Clock
-    always begin
+    integer mem_latency_edges = `MEM_LATENCY_IN_CYCLES * 2;
+    integer counter_edges = 0; 
+
+    always begin       
         #(`CLOCK_PERIOD/2.0);
         clock = ~clock;
+        counter_edges = counter_edges + 1; 
+
+        if (counter_edges == mem_latency_edges) begin
+            clk = ~clk;
+            counter_edges = 0; 
+        end
     end
 
 
