@@ -1,6 +1,7 @@
 
 `include "verilog/sys_defs.svh"
 `include "test/mem.sv"
+`include "verilog/icache.sv"
 
 module testbench;
     logic clock, reset;
@@ -27,6 +28,7 @@ module testbench;
 
     logic [3:0] req_debug; 
     logic [3:0] gnt_debug; 
+    logic [`XLEN-1:0] PC_reg_debug;
 
     ifetch dut(
         .clock(clock),
@@ -36,6 +38,10 @@ module testbench;
         
         .certain_branch_pc(certain_branch_pc),
         .certain_branch_req(certain_branch_req),
+
+        .rob_target_pc(rob_target_pc),
+        .rob_target_req(rob_target_req),
+
         .branch_pred_pc(branch_pred_pc),
         .branch_pred_req(branch_pred_req),
 
@@ -44,15 +50,16 @@ module testbench;
 
         .if_packet(if_packet),
         .proc2Icache_addr(proc2Icache_addr),
+        
         .req_debug(req_debug),
-        .gnt_debug(gnt_debug)
+        .gnt_debug(gnt_debug),
+        .PC_reg_debug(PC_reg_debug)
     );
 
     logic clk; // Memory clock
 
     logic [`XLEN-1:0] proc2mem_addr; // address for current command // support for memory model with byte level addressing
     logic [63:0] proc2mem_data; // address for current command
-    // MEM_SIZE proc2mem_size; // BYTE, HALF, WORD or DOUBLE
     logic[1:0] proc2mem_command; // `BUS_NONE `BUS_LOAD or `BUS_STORE
 
     logic [3:0]  mem2proc_response; // 0 = can't accept, other=tag of transaction
@@ -70,6 +77,23 @@ module testbench;
         .mem2proc_response(mem2proc_response),
         .mem2proc_data(mem2proc_data),
         .mem2proc_tag(mem2proc_tag)
+    );
+
+    icache icache_0 (
+        .clock(clock),
+        .reset(reset),
+
+        .Imem2proc_response(mem2proc_response),
+        .Imem2proc_data(mem2proc_data),
+        .Imem2proc_tag(mem2proc_tag),
+
+        .proc2Icache_addr(proc2Icache_addr),
+
+        .proc2Imem_command(proc2mem_command),
+        .proc2Imem_addr(proc2mem_addr),
+
+        .Icache_data_out(Icache2proc_data),
+        .Icache_valid_out(Icache2proc_data_valid)
     );
 
     
@@ -99,21 +123,22 @@ module testbench;
     endtask
 
     initial begin  
-        $monitor(
-            "certain_branch_pc = %h, certain_branch_req = %b,\
-            rob_target_pc = %h, rob_target_req = %b, \
-            rob_stall = %b, branch_pred_pc = %h,\
-            branch_pred_req = %b, Icache2proc_data = %h,\
-            Icache2proc_data_valid = %b", 
-            certain_branch_pc, certain_branch_req,
-            rob_target_pc, rob_target_req,
-            rob_stall, branch_pred_pc,
-            branch_pred_req, 
-            Icache2proc_data,
-            Icache2proc_data_valid);
+        // $monitor(
+        //     "certain_branch_pc = %h, certain_branch_req = %b,\
+        //     rob_target_pc = %h, rob_target_req = %b, \
+        //     rob_stall = %b, branch_pred_pc = %h,\
+        //     branch_pred_req = %b, Icache2proc_data = %h,\
+        //     Icache2proc_data_valid = %b, PC_reg_debug = %h", 
+        //     certain_branch_pc, certain_branch_req,
+        //     rob_target_pc, rob_target_req,
+        //     rob_stall, branch_pred_pc,
+        //     branch_pred_req, 
+        //     Icache2proc_data,
+        //     Icache2proc_data_valid, PC_reg_debug);
 
-        clock     = 0;
-        reset     = 0;
+        clock = 0;
+        clk = 0;
+        reset = 0;
         if_valid = 1;
         rob_stall = 0;
 
@@ -122,20 +147,37 @@ module testbench;
         @(negedge clock)
         reset = 0;
         
-        // cycle 1
-        $display("Starting Certain Branch Test");
         
-        certain_branch_pc = 32'h1111_1111;
+        certain_branch_pc = 32'h0000_1111;
         certain_branch_req = 1;
-        rob_target_pc = 32'h2222_2222;
+        rob_target_pc = 32'h0000_2222;
         rob_target_req = 1;
-        branch_pred_pc = 32'h3333_3333;
+        branch_pred_pc = 32'h0000_3333;
         branch_pred_req = 1;
-            
-        @(negedge clock)
-        $display("proc2Icache_addr = %h", proc2Icache_addr);  
-        @(posedge Icache2proc_data_valid)
-        $display("if_packet.inst = %h", if_packet.inst);  
-        assert(if_packet.inst == 32'h1111_1110) else exit_on_error;
+
+
+
+        @(posedge if_packet.valid)
+
+        assert(if_packet.PC == 32'h0000_1111) else exit_on_error;
+        assert(if_packet.valid == 1) else exit_on_error;
+        $display("First Fetch Done!");
+
+        certain_branch_pc = 32'h0000_1221;
+
+        @(posedge if_packet.valid)
+        assert(if_packet.PC == 32'h0000_1221) else exit_on_error;
+        assert(if_packet.valid == 1) else exit_on_error;
+        $display("Second Fetch Done!");
+
+
+        certain_branch_req = 0; 
+        @(posedge if_packet.valid)
+        assert(if_packet.PC == 32'h0000_2222) else exit_on_error;
+        assert(if_packet.valid == 1) else exit_on_error;
+        $display("Third Fetch Done!");
+    
+        $display("@@@Passed");
+        $finish;
     end 
 endmodule 

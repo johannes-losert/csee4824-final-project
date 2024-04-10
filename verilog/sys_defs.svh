@@ -445,16 +445,65 @@ typedef struct packed {
  */
 
 // entries are written to using the write_entry struct
-typedef struct packed {
-    logic [`XLEN-1:0] branch_pc;
-    logic [`XLEN-1:0] target_pc;
-} BTB_WRITE;
+
+`define BTB_TAG_LEN 4
+`define BTB_ENTRIES 16 // 2^`BTB_TAG_LEN
 
 // entries are accessed using index
 typedef struct packed {
     logic [`XLEN-1:0] target_pc;
     logic valid;
 } BTB_ENTRY;
+
+/**
+ * Branch Predictor:
+ * 
+ * TODO ADD DESCRIPTION
+ * 
+ */
+
+`define BP_TAG_LEN 4
+`define BP_ENTRIES 16 // 2^`BP_TAG_LEN
+
+typedef enum logic [1:0] {
+    SNT  = 2'b00, // strongly not taken
+    WNT  = 2'b01, // weakly not taken
+    WT = 2'b11, // weakly taken
+    ST = 2'b10 // strongly taken
+} BP_ENTRY_STATE;
+
+typedef struct packed {
+    BP_ENTRY_STATE state; 
+    logic valid;
+} BP_ENTRY;
+
+
+/**
+ * Mem Controller:
+ * 
+ * TODO ADD DESCRIPTION
+ * 
+ */
+
+typedef enum logic [1:0] {
+    NONE = 2'b00,
+    ICACHE  = 2'b10,
+    DCACHE  = 2'b01
+} DEST_CACHE;
+
+// dcache and icache should be ready to receive the tag of the next request
+typedef enum logic [1:0] {
+    NO_REQUEST = 2'b00,
+    AWAIT_TAG_ICACHE = 2'b10,
+    AWAIT_TAG_DCACHE = 2'b01,
+    TAG_AVAILABLE = 2'b11
+} REQ_STATUS;
+
+typedef union packed {
+    logic [7:0][7:0]  byte_level;
+    logic [3:0][15:0] half_level;
+    logic [1:0][31:0] word_level;
+} MEM_RETURN;
 
 `endif // __SYS_DEFS_SVH__
 
