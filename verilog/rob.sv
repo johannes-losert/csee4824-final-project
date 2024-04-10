@@ -4,10 +4,11 @@ module reorder_buffer(
     input clock,
     input reset,
 
-    /* New instruction from fetch */
+    /* New instruction from fetch/dispatch */
     input INST inst,
 
-    /* Enable to write to ROB */
+    /* Enable to write to ROB 
+       connect to the valid signal from dispatch stage*/
     input logic write,
 
     /* Retire stage tells the rob to move its head */
@@ -22,15 +23,18 @@ module reorder_buffer(
     // TODO switch to is_empty rather than free_reg = ZERO_REG
     input logic [`PHYS_REG_SZ:0] free_reg,
 
-    /* If undo, rollback to former index */
+    /* If undo, rollback to former index 
+       undo may connect to take_branch
+       undo_index may connect to head_index*/
     input undo,
     input logic [$clog2(`ROB_SZ)-1:0] undo_index,
 
-    /* Signal to indicate we should stop fetching */
+    /* Signal to indicate we should stop fetching 
+       when stall is high, keep all inputs same as pervious cycle*/
     output logic stall,
 
     /* Tell free list we need a reg (TODO connect to dequeue_en) */
-   // output logic used_free_reg,
+    output logic used_free_reg,
 
     /* Signal to indicate we should update free list (TODO connect enqueue_en in free list) */
     output logic update_free_list,
@@ -96,7 +100,7 @@ module reorder_buffer(
     always_comb begin
         //update ROB & map table
         if (undo) begin
-            next_tail = undo_index;
+            next_tail = undo_index + 1;
         end else begin
             if (write) begin
                 inst_buffer[tail].inst = inst;
@@ -106,7 +110,7 @@ module reorder_buffer(
                         inst_buffer[tail].T = free_reg; // input from Free list
                         inst_buffer[tail].Told = phys_told;
                         // inst_buffer[tail].done = 0;
-                        // used_free_reg = 1;
+                        used_free_reg = 1;
                         mt_target_reg = inst.r.rd;
                         mt_update_tag = free_reg;
                         update_map_table = 1;
@@ -123,7 +127,7 @@ module reorder_buffer(
                         mt_target_reg = inst.r.rd;
                         mt_update_tag = free_reg;
                         update_map_table = 0;
-                        // used_free_reg = 0;
+                        used_free_reg = 0;
                         next_tail = tail;
                     end
                 end else begin
@@ -134,7 +138,7 @@ module reorder_buffer(
                     mt_target_reg = inst.r.rd;
                     mt_update_tag = free_reg;
                     update_map_table = 0;
-                    // used_free_reg = 0;
+                    used_free_reg = 0;
                     if (!full) begin
                         next_tail = tail + 1;
                     end else begin
@@ -149,7 +153,7 @@ module reorder_buffer(
                 mt_target_reg  = inst.r.rd;
                 mt_update_tag = free_reg;
                 update_map_table = 0;
-                // used_free_reg = 0;
+                used_free_reg = 0;
                 next_tail = tail;
             end
         end
