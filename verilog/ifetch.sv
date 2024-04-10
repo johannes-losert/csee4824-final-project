@@ -39,7 +39,9 @@ module ifetch (
     //          *** DEBUG ***
     output [3:0] req_debug,
     output [3:0] gnt_debug,
-    output [`XLEN-1:0] PC_reg_debug
+    output [`XLEN-1:0] PC_reg_debug,
+    output fetch_available_debug,
+    output IF_ID_PACKET inst_buffer_debug [`INSN_BUF_SIZE-1:0]
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
@@ -47,10 +49,12 @@ module ifetch (
     
     logic fetch_available; // if we are currently fetching an instruction in current cycle
     logic n_fetch_available; // if we will be fetching an instruction next cycle
+    assign fetch_available_debug = fetch_available;
 
     IF_ID_PACKET inst_buffer [`INSN_BUF_SIZE-1:0];
     IF_ID_PACKET n_inst_buffer [`INSN_BUF_SIZE-1:0];
     IF_ID_PACKET n_if_packet;
+    assign inst_buffer_debug = inst_buffer;
 
     logic [3:0] req;
     assign req = {certain_branch_req, rob_target_req, branch_pred_req, 1'b1};
@@ -61,25 +65,25 @@ module ifetch (
     assign gnt_debug = gnt;
     assign PC_reg_debug = PC_reg;
     
-    logic gnt_empty;
     psel_gen #(.WIDTH(4), .REQS(1)) 
     if_psel (
         .req(req),       
         .gnt(gnt),       
         .gnt_bus(), 
-        .empty(gnt_empty)  
+        .empty()  
     );
 
     always_comb begin
 
         // Select the next PC based four possible sources if we are not busy
 
-        if (if_valid && fetch_available && !gnt_empty) begin 
+        if (if_valid && fetch_available) begin 
             unique case (gnt)
                 4'b1000 : n_PC_reg = certain_branch_pc;
                 4'b0100 : n_PC_reg = rob_target_pc;
                 4'b0010 : n_PC_reg = branch_pred_pc;
                 4'b0001 : n_PC_reg = PC_reg + 4;
+                default : n_PC_reg = 32'hdeadbeef;
             endcase
         end else begin 
             n_PC_reg = PC_reg;
@@ -91,27 +95,34 @@ module ifetch (
         
         if (Icache2proc_data_valid) begin
             n_inst_buffer[0].inst = PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
+            n_inst_buffer[0].PC = PC_reg;
+            n_inst_buffer[0].NPC = PC_reg + 4;
             n_inst_buffer[0].valid = 1;
             n_fetch_available = 1;
         end else begin
             n_inst_buffer[0].inst = `NOP;
+            n_inst_buffer[0].PC = PC_reg;
+            n_inst_buffer[0].NPC = PC_reg + 4;
             n_inst_buffer[0].valid = 0;
             n_fetch_available = 0;
         end
 
-        for (int i = 1; i < `INSN_BUF_SIZE - 1; i++) begin
+        for (int i = 0; i < `INSN_BUF_SIZE - 1; i++) begin
             n_inst_buffer[i+1] = inst_buffer[i];
         end
     end
-        
 
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             PC_reg <= 0;
             fetch_available <= 1;
-            // inst_buffer <= 0;
-            // if_packet <= 0;
+            for (int i = 0; i < `INSN_BUF_SIZE; i++) begin
+                inst_buffer[i].inst <= `NOP;
+                inst_buffer[i].PC <= 0;
+                inst_buffer[i].NPC <= 0;
+                inst_buffer[i].valid <= 0;
+            end
         end else begin
             PC_reg <= n_PC_reg;
             inst_buffer <= n_inst_buffer;

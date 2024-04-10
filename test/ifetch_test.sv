@@ -38,6 +38,10 @@ module testbench;
         
         .certain_branch_pc(certain_branch_pc),
         .certain_branch_req(certain_branch_req),
+
+        .rob_target_pc(rob_target_pc),
+        .rob_target_req(rob_target_req),
+
         .branch_pred_pc(branch_pred_pc),
         .branch_pred_req(branch_pred_req),
 
@@ -141,9 +145,8 @@ module testbench;
 
         // Initial Reset
         reset = 1;
-        @(negedge clk)
-        reset = 0;
         @(negedge clock)
+        reset = 0;
         
         // cycle 1
         $display("Priority Selector: Test 1");
@@ -154,10 +157,9 @@ module testbench;
         rob_target_req = 1;
         branch_pred_pc = 32'h3333_3333;
         branch_pred_req = 1;
-        
-        @(posedge proc2Icache_addr)
-        
-        $display("if_packet.PC = %h", if_packet.PC);
+
+        @(posedge if_packet.valid)
+
         assert(if_packet.PC == 32'h1111_1111) else exit_on_error;
         assert(if_packet.valid == 0) else exit_on_error;
         $display("Priority Selector: Test 1 Passed!");
