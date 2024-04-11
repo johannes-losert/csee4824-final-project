@@ -144,6 +144,8 @@ module testbench;
 
         @(posedge if_packet.valid)
 
+        $display("if_packet.valid = %b", if_packet.valid);
+        $display("if_packet.PC = %h", if_packet.PC);
         assert(if_packet.PC == 32'h0000_1111) else exit_on_error;
         assert(if_packet.valid == 1) else exit_on_error;
         $display("First Fetch Done!");
