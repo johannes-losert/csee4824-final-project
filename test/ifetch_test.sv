@@ -6,6 +6,8 @@
 module testbench;
     logic clock, reset;
 
+    // IF MODULE 
+
     logic if_valid; 
 
     IF_ID_PACKET if_packet;
@@ -15,20 +17,29 @@ module testbench;
 
     logic [`XLEN-1:0] rob_target_pc;
     logic rob_target_req;
-    logic rob_stall;
 
     logic [`XLEN-1:0] branch_pred_pc;
     logic branch_pred_req;
     
     logic [`XLEN-1:0] proc2Icache_addr;
 
-    // FROM ICACHE
     logic [63:0]      Icache2proc_data; // data coming back from Instruction memory
     logic Icache2proc_data_valid;
 
     logic [3:0] req_debug; 
     logic [3:0] gnt_debug; 
     logic [`XLEN-1:0] PC_reg_debug;
+
+    // MEMORY MODULES
+
+    logic [`XLEN-1:0] proc2mem_addr; // address for current command // support for memory model with byte level addressing
+    logic [63:0] proc2mem_data; // address for current command
+    logic[1:0] proc2mem_command; // `BUS_NONE `BUS_LOAD or `BUS_STORE
+
+    logic [3:0]  mem2proc_response; // 0 = can't accept, other=tag of transaction
+    logic [63:0] mem2proc_data;     // data resulting from a load
+    logic [3:0]  mem2proc_tag;       // 0 = no value, other=tag of transaction
+
 
     ifetch dut(
         .clock(clock),
@@ -56,18 +67,8 @@ module testbench;
         .PC_reg_debug(PC_reg_debug)
     );
 
-    logic clk; // Memory clock
-
-    logic [`XLEN-1:0] proc2mem_addr; // address for current command // support for memory model with byte level addressing
-    logic [63:0] proc2mem_data; // address for current command
-    logic[1:0] proc2mem_command; // `BUS_NONE `BUS_LOAD or `BUS_STORE
-
-    logic [3:0]  mem2proc_response; // 0 = can't accept, other=tag of transaction
-    logic [63:0] mem2proc_data;     // data resulting from a load
-    logic [3:0]  mem2proc_tag;       // 0 = no value, other=tag of transaction
-
     mem mem_0 (
-        .clk(clk),
+        .clk(clock),
 
         .proc2mem_addr(proc2mem_addr),
         .proc2mem_data(proc2mem_data),
@@ -112,21 +113,19 @@ module testbench;
         // $monitor(
         //     "certain_branch_pc = %h, certain_branch_req = %b,\
         //     rob_target_pc = %h, rob_target_req = %b, \
-        //     rob_stall = %b, branch_pred_pc = %h,\
+        //     branch_pred_pc = %h,\
         //     branch_pred_req = %b, Icache2proc_data = %h,\
         //     Icache2proc_data_valid = %b, PC_reg_debug = %h", 
         //     certain_branch_pc, certain_branch_req,
         //     rob_target_pc, rob_target_req,
-        //     rob_stall, branch_pred_pc,
+        //     branch_pred_pc,
         //     branch_pred_req, 
         //     Icache2proc_data,
         //     Icache2proc_data_valid, PC_reg_debug);
 
         clock = 0;
-        clk = 0;
         reset = 0;
         if_valid = 1;
-        rob_stall = 0;
 
         // Initial Reset
         reset = 1;
@@ -145,6 +144,8 @@ module testbench;
 
         @(posedge if_packet.valid)
 
+        $display("if_packet.valid = %b", if_packet.valid);
+        $display("if_packet.PC = %h", if_packet.PC);
         assert(if_packet.PC == 32'h0000_1111) else exit_on_error;
         assert(if_packet.valid == 1) else exit_on_error;
         $display("First Fetch Done!");
