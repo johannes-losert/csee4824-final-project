@@ -276,7 +276,34 @@ module testbench;
         assert(mult_packet.function_type == MULT) else exit_on_error;
         assert(mult_packet.rs1_value == 6) else exit_on_error;
 
-        
+        // Maybe test whether fus can end simultaneously by starting a mult and then keeping the alu on until the mult ends? 
+        is_ex_reg.rs1_value = 10;
+        is_ex_reg.rs2_value = 11;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = MULT;
+        is_ex_reg.alu_func = ALU_MUL;
+        mult_en = 1;
+        issue_fu_index = 0;
+        @(negedge clock);
+        mult_en = 0;
+        is_ex_reg.rs1_value = 1;
+        is_ex_reg.rs2_value = 10;
+        is_ex_reg.opa_select = OPA_IS_RS1;
+        is_ex_reg.opb_select = OPB_IS_RS2;
+        is_ex_reg.function_type = ALU;
+        is_ex_reg.alu_func = ALU_ADD;
+        alu_en = 1;
+        issue_fu_index = 0;
+        wait_until_done_mult();
+        assert(ex_packet.result == 110) else exit_on_error;
+        assert(free_mult[0] == 1'b1) else exit_on_error;
+        assert(mult_packet.rs1_value == 10) else exit_on_error;
+        @(negedge clock) 
+        assert(ex_packet.result == 11) else exit_on_error;
+        assert(free_alu[0] == 1'b1) else exit_on_error;
+        assert(alu_packet.rs1_value == 1) else exit_on_error;
+        alu_en = 0;
 
         // Add tests for branch... low priority since it should be the same as alu
         
