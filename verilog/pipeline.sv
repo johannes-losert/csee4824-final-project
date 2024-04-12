@@ -588,7 +588,8 @@ module pipeline (
     logic [`PHYS_REG_IDX_SZ:0] rob_free_reg_pr;
 
     assign rob_free_reg_pr = (fl_is_empty) ? `ZERO_REG : fl_head_pr;
-    
+    // TODO add reset?
+    // TODO: need to find the phys reg
     dispatch dispatch_0 (
         .if_id_packet(if_id_packet),
         .rob_stall(rob_stall), 
@@ -604,7 +605,7 @@ module pipeline (
         .stall(dispatch_stall)                
     );
 
-
+    // TODO fixup inputs and outputs
     reorder_buffer reorder_buffer_0(
         .clock(clock),
         .reset(reset),
@@ -697,39 +698,25 @@ module pipeline (
 
     ID_IS_PACKET id_is_reg;
 
+
+    // TODO maybe use this for stalling?
     assign id_is_enable = 1'b1; // always enabled?
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin   
             // TODO this is still p3 id_ex packet, replace with id_is
-            id_is_reg <= '{
-                `NOP, // we can't simply assign 0 because NOP is non-zero
-                {`XLEN{1'b0}}, // PC
-                {`XLEN{1'b0}}, // NPC
-                {`XLEN{1'b0}}, // rs1 select
-                {`XLEN{1'b0}}, // rs2 select
-                OPA_IS_RS1,
-                OPB_IS_RS2,
-                `ZERO_REG,
-                ALU_ADD,
-                1'b0, // rd_mem
-                1'b0, // wr_mem
-                1'b0, // cond
-                1'b0, // uncond
-                1'b0, // halt
-                1'b0, // illegal
-                1'b0, // csr_op
-                1'b0  // valid
-            };
+            id_is_reg <= `INVALID_ID_IS_PACKET;
         end else if (id_is_enable) begin
             id_is_reg <= id_packet;
         end
     end
 
-    // debug outputs
-    //assign id_ex_NPC_dbg   = id_ex_reg.NPC;
-    //assign id_ex_inst_dbg  = id_ex_reg.inst;
-    //assign id_ex_valid_dbg = id_ex_reg.valid;
+    // debug outputs TODO add more
+    assign id_is_NPC_dbg   = id_is_reg.NPC;
+    assign id_is_inst_dbg  = id_is_reg.inst;
+    assign id_is_function_type = id_is_reg.function_type;
+    assign id_is_valid_dbg = id_is_reg.valid;
+ 
 
 
     //////////////////////////////////////////////////
