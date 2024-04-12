@@ -86,25 +86,34 @@ module branch_calculation (
     input reset,
     input [`XLEN-1:0] opa,
     input [`XLEN-1:0] opb,
-    input ALU_FUNC    func,
+    input [`XLEN-1:0] rs1,  // Value to check against condition
+    input [`XLEN-1:0] rs2,
+    input ALU_FUNC    alu_func,
+    input [2:0] func,
     input logic       branch_en,
     input IS_EX_PACKET in_packet,
 
     output logic [`XLEN-1:0]        result,
     output logic [`NUM_FU_BRANCH]   branch_done,
+
     output IS_EX_PACKET out_packet
 );
 
     logic [`XLEN-1:0] branch_opa;
     logic [`XLEN-1:0] branch_opb;
-    ALU_FUNC branch_func; 
+    logic [`XLEN-1:0] branch_rs1;
+    logic [`XLEN-1:0] branch_rs2;
+    ALU_FUNC b_alu_func; 
+    logic [2:0] branch_func;
     IS_EX_PACKET branch_packet;
 
     assign signed_opa   = branch_opa;
     assign signed_opb   = branch_opb;
+    assign signed_rs1 = branch_rs1;
+    assign signed_rs2 = branch_rs2;
 
     always_comb begin
-        case (func)
+        case (alu_func)
             ALU_ADD:    result = branch_opa + branch_opb;
             ALU_SUB:    result = branch_opa - branch_opb;
             ALU_AND:    result = branch_opa & branch_opb;
@@ -118,7 +127,20 @@ module branch_calculation (
 
             default:    result = `XLEN'hfacebeec;  // here to prevent latches
         endcase
+        
     end
+
+    /*always_comb begin
+        case (func)
+            3'b000:  take = signed_rs1 == signed_rs2; // BEQ
+            3'b001:  take = signed_rs1 != signed_rs2; // BNE
+            3'b100:  take = signed_rs1 < signed_rs2;  // BLT
+            3'b101:  take = signed_rs1 >= signed_rs2; // BGE
+            3'b110:  take = branch_rs1 < branch_rs2;                // BLTU
+            3'b111:  take = branch_rs1 >= branch_rs2;               // BGEU
+            default: take = `FALSE;
+        endcase
+    end*/
 
     always_ff @(posedge clock) begin
         if(reset) begin
@@ -126,6 +148,9 @@ module branch_calculation (
             out_packet <= 0;
             branch_opa <= 0;
             branch_opb <= 0;
+            branch_rs1 <= 0;
+            branch_rs2 <= 0;
+            b_alu_func <= 0;
             branch_func <= 0;
             branch_packet <= 0;
         end else if (branch_en) begin
@@ -133,15 +158,66 @@ module branch_calculation (
             out_packet <= in_packet;
             branch_opa <= opa;
             branch_opb <= opb;
+            branch_rs1 <= rs1;
+            branch_rs2 <= rs2;
+            b_alu_func <= alu_func;
             branch_func <= func;
             branch_packet <= in_packet;
         end else begin
             branch_done[0] <= 1'b0;
-            out_packet <= 0;
+            branch_opa <= branch_opa;
+            branch_opb <= branch_opb;
+            branch_rs1 <= branch_rs1;
+            branch_rs2 <= branch_rs2;
+            //out_packet <= 0;
         end
     end
 
 endmodule
+
+// Conditional branch module: compute whether to take conditional branches
+// This module is purely combinational
+module conditional_branch (
+    input clock,
+    input reset,
+    input [2:0]       func, // Specifies which condition to check
+    input [`XLEN-1:0] rs1,  // Value to check against condition
+    input [`XLEN-1:0] rs2,
+    input logic cond_en,
+
+    output logic take // True/False condition result
+);
+
+    logic [`XLEN-1:0] cond_rs1;
+    logic [`XLEN-1:0] cond_rs2;
+
+    logic signed [`XLEN-1:0] signed_rs1, signed_rs2;
+    assign signed_rs1 = cond_rs1;
+    assign signed_rs2 = cond_rs2;
+    always_comb begin
+        case (func)
+            3'b000:  take = signed_rs1 == signed_rs2; // BEQ
+            3'b001:  take = signed_rs1 != signed_rs2; // BNE
+            3'b100:  take = signed_rs1 < signed_rs2;  // BLT
+            3'b101:  take = signed_rs1 >= signed_rs2; // BGE
+            3'b110:  take = cond_rs1 < cond_rs2;                // BLTU
+            3'b111:  take = cond_rs1 >= cond_rs2;               // BGEU
+            default: take = `FALSE;
+        endcase
+    end
+
+    always_ff @(posedge clock) begin
+        if (reset) begin
+            cond_rs1 <= 0;
+            cond_rs2 <= 0;
+        end else if (cond_en) begin
+            cond_rs1 <= rs1; 
+            cond_rs2 <= rs2;
+        end
+    end
+
+endmodule // conditional_branch
+
 
 module multiply (
     input clock,
@@ -231,34 +307,6 @@ module multiply (
 
 endmodule
 
-// Conditional branch module: compute whether to take conditional branches
-// This module is purely combinational
-module conditional_branch (
-    input [2:0]       func, // Specifies which condition to check
-    input [`XLEN-1:0] rs1,  // Value to check against condition
-    input [`XLEN-1:0] rs2,
-
-    output logic take // True/False condition result
-);
-
-    logic signed [`XLEN-1:0] signed_rs1, signed_rs2;
-    assign signed_rs1 = rs1;
-    assign signed_rs2 = rs2;
-    always_comb begin
-        case (func)
-            3'b000:  take = signed_rs1 == signed_rs2; // BEQ
-            3'b001:  take = signed_rs1 != signed_rs2; // BNE
-            3'b100:  take = signed_rs1 < signed_rs2;  // BLT
-            3'b101:  take = signed_rs1 >= signed_rs2; // BGE
-            3'b110:  take = rs1 < rs2;                // BLTU
-            3'b111:  take = rs1 >= rs2;               // BGEU
-            default: take = `FALSE;
-        endcase
-    end
-
-endmodule // conditional_branch
-
-
 module stage_ex (
     // Test cases work with these inputs and outputs
     /* input                               clock,
@@ -293,6 +341,7 @@ module stage_ex (
     output logic [`NUM_FU_LOAD-1:0]   free_load,
     output logic [`NUM_FU_STORE-1:0]  free_store,
     output logic [`NUM_FU_BRANCH-1:0] free_branch,
+    output logic take_conditional,
 
     // debug outputs
     output IS_EX_PACKET tmp_alu_packet,
@@ -366,14 +415,32 @@ module stage_ex (
         .reset(reset),
         .opa(opa_mux_out),
         .opb(opb_mux_out),
-        .func(is_ex_reg.alu_func),
+        .rs1(is_ex_reg.rs1_value),
+        .rs2(is_ex_reg.rs2_value),
+        .alu_func(is_ex_reg.alu_func),
+        .func(is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
         .branch_en(is_ex_reg.function_type == BRANCH && branch_en && issue_fu_index == 0),
         .in_packet(is_ex_reg),
 
         // Output
         .result(branch_result),
         .branch_done(branch_done),
+
         .out_packet(tmp_branch_packet)
+    );
+
+    // Instantiate the conditional branch module
+    conditional_branch conditional_branch_0 (
+        // Inputs
+        .clock(clock),
+        .reset(reset),
+        .func(is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
+        .rs1(is_ex_reg.rs1_value),
+        .rs2(is_ex_reg.rs2_value),
+        .cond_en(is_ex_reg.function_type == BRANCH && branch_en && issue_fu_index == 0),
+
+        // Output
+        .take(take_conditional)
     );
 
     // Instantiate multiply functional unit
@@ -397,6 +464,7 @@ module stage_ex (
     logic alu_done_process;
     logic mult_done_process;
     logic branch_done_process;
+    logic tmp_take_conditional;
 
     always_comb begin
         if(alu_done_process) begin
@@ -434,7 +502,7 @@ module stage_ex (
         end else if (branch_done_process) begin
             ex_packet.result = tmp_branch_result;
             ex_packet.NPC = tmp_branch_packet.NPC;
-            ex_packet.take_branch = 1;
+            ex_packet.take_branch = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
 
             ex_packet.rs2_value = tmp_branch_packet.rs2_value;
             ex_packet.rd_mem = tmp_branch_packet.rd_mem;
@@ -459,6 +527,7 @@ module stage_ex (
             alu_done_process <= 0;
             mult_done_process <= 0;
             branch_done_process <= 0;
+            tmp_take_conditional <= 0;
         end
         else begin
             if(alu_done) begin
@@ -472,6 +541,7 @@ module stage_ex (
             if(branch_done) begin
                 waiting_fus[BRANCH] <= 1; 
                 tmp_branch_result <= branch_result;
+                tmp_take_conditional <= take_conditional;
             end 
 
             // Defaults
@@ -500,15 +570,6 @@ module stage_ex (
         end
     end     
 
-    // Instantiate the conditional branch module
-    conditional_branch conditional_branch_0 (
-        // Inputs
-        .func(is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
-        .rs1(is_ex_reg.rs1_value),
-        .rs2(is_ex_reg.rs2_value),
-
-        // Output
-        .take(take_conditional)
-    );
+    
 
 endmodule // stage_ex
