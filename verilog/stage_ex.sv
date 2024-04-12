@@ -75,7 +75,7 @@ module alu (
             alu_packet <= in_packet;
         end else begin
             alu_done[0] <= 1'b0;
-            out_packet <= 0;
+            //out_packet <= 0;
         end
     end
 
