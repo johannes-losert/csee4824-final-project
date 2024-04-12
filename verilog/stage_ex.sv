@@ -330,10 +330,7 @@ module stage_ex (
     input clock,
     input reset,
     input IS_EX_PACKET is_ex_reg,
-    input                               mult_en,
-    input                               alu_en,
-    input                               branch_en,
-    input logic [`MAX_FU_INDEX-1:0] issue_fu_index,
+    input logic [`MAX_FU_INDEX-1:0] issue_fu_index, // add this to packet at earlier stage of the pipeline
 
     output EX_CO_PACKET ex_packet,
     output logic [`NUM_FU_ALU-1:0]    free_alu,
@@ -341,7 +338,6 @@ module stage_ex (
     output logic [`NUM_FU_LOAD-1:0]   free_load,
     output logic [`NUM_FU_STORE-1:0]  free_store,
     output logic [`NUM_FU_BRANCH-1:0] free_branch,
-    output logic take_conditional,
 
     // debug outputs
     output IS_EX_PACKET tmp_alu_packet,
@@ -400,7 +396,7 @@ module stage_ex (
         .opa(opa_mux_out),
         .opb(opb_mux_out),
         .func(is_ex_reg.alu_func),
-        .alu_en(is_ex_reg.function_type == ALU && alu_en && issue_fu_index == 0),
+        .alu_en(is_ex_reg.function_type == ALU && is_ex_reg.valid && issue_fu_index == 0),
         .in_packet(is_ex_reg),
 
         // Output
@@ -419,7 +415,7 @@ module stage_ex (
         .rs2(is_ex_reg.rs2_value),
         .alu_func(is_ex_reg.alu_func),
         .func(is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
-        .branch_en(is_ex_reg.function_type == BRANCH && branch_en && issue_fu_index == 0),
+        .branch_en(is_ex_reg.function_type == BRANCH && is_ex_reg.valid && issue_fu_index == 0),
         .in_packet(is_ex_reg),
 
         // Output
@@ -437,7 +433,7 @@ module stage_ex (
         .func(is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
         .rs1(is_ex_reg.rs1_value),
         .rs2(is_ex_reg.rs2_value),
-        .cond_en(is_ex_reg.function_type == BRANCH && branch_en && issue_fu_index == 0),
+        .cond_en(is_ex_reg.function_type == BRANCH && is_ex_reg.valid && issue_fu_index == 0),
 
         // Output
         .take(take_conditional)
@@ -451,7 +447,7 @@ module stage_ex (
         .mcand(opa_mux_out),
         .mplier(opb_mux_out),
         .func(is_ex_reg.alu_func),
-        .mult_en(is_ex_reg.function_type == MULT && mult_en && issue_fu_index == 0),
+        .mult_en(is_ex_reg.function_type == MULT && is_ex_reg.valid && issue_fu_index == 0),
         .in_packet(is_ex_reg),
 
         // Output

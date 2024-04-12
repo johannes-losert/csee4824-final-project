@@ -819,18 +819,27 @@ module pipeline (
 
     // Perform each operation 
     stage_ex stage_ex0 (
+        // Inputs
         .clock(clock),
         .reset(reset),
-        .is_ex_packet(is_ex_packet),
-        iissue_fu_index(issue_fu_inde)nput logic [`MAX_FU_INDEX-1:0] issue_fu_index,
+        .is_ex_reg(is_ex_reg),
+        .issue_fu_index(issue_fu_index), // TODO add this to packet at earlier stage of the pipeline
 
-        output EX_CO_PACKET ex_packet,
-        output [`NUM_FU_ALU-1:0]    free_alu,
-        output [`NUM_FU_MULT-1:0]   free_mult,
-        output [`NUM_FU_LOAD-1:0]   free_load,
-        output [`NUM_FU_STORE-1:0]  free_store,
-        output [`NUM_FU_BRANCH-1:0] free_branch
+        // Outputs
+        .ex_packet(ex_packet),
+        .free_alu(free_alu),
+        .free_mult(free_mult),
+        .free_load(free_load),
+        .free_store(free_store),
+        .free_branch(free_branch),
+
+        // debug outputs
+        .tmp_alu_packet(tmp_alu_packet),
+        .tmp_mult_packet(tmp_mult_packet),
+        .tmp_branch_packet(tmp_branch_packet)
     );
+
+
 
     //////////////////////////////////////////////////
     //                                              //
