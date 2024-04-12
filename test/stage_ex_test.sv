@@ -25,8 +25,6 @@ module testbench;
         .branch_en(branch_en),
         .issue_fu_index(issue_fu_index),
         .ex_packet(ex_packet),
-        .mult_result(mult_result),
-        .branch_result(branch_result),
         .free_alu(free_alu),
         .free_mult(free_mult),
         .free_load(free_load), 
@@ -46,12 +44,38 @@ module testbench;
     // Some students have had problems just using "@(posedge done)" because their
     // "done" signals glitch (even though they are the output of a register). This
     // prevents that by making sure "done" is high at the clock edge.
-    task wait_until_done;
+    task wait_until_done_mult;
         forever begin : wait_loop
             @(posedge free_mult[0]);
             @(negedge clock);
             if (free_mult[0]) begin
-                disable wait_until_done;
+                disable wait_until_done_mult;
+            end
+        end
+    endtask
+
+    // Some students have had problems just using "@(posedge done)" because their
+    // "done" signals glitch (even though they are the output of a register). This
+    // prevents that by making sure "done" is high at the clock edge.
+    task wait_until_done_alu;
+        forever begin : wait_loop
+            @(posedge free_alu[0]);
+            @(negedge clock);
+            if (free_alu[0]) begin
+                disable wait_until_done_alu;
+            end
+        end
+    endtask
+
+    // Some students have had problems just using "@(posedge done)" because their
+    // "done" signals glitch (even though they are the output of a register). This
+    // prevents that by making sure "done" is high at the clock edge.
+    task wait_until_done_branch;
+        forever begin : wait_loop
+            @(posedge free_branch[0]);
+            @(negedge clock);
+            if (free_branch[0]) begin
+                disable wait_until_done_branch;
             end
         end
     endtask
@@ -65,8 +89,8 @@ module testbench;
 
     initial begin
         // NOTE: monitor starts using 5-digit decimal values for printing
-        $monitor("Time:%4.0f opa:%d opb:%d function:%d alu_result:%d mult_result:%d funit:%2h free_alu:%b free_mult:%b free_branch:%b",
-                 $time, $signed(is_ex_reg.rs1_value), $signed(is_ex_reg.rs2_value), is_ex_reg.alu_func, $signed(ex_packet.result), $signed(mult_result), is_ex_reg.function_type, free_alu, free_mult, free_branch);
+        $monitor("Time:%4.0f opa:%d opb:%d function:%d result:%d funit:%2h free_alu:%b free_mult:%b free_branch:%b",
+                 $time, $signed(is_ex_reg.rs1_value), $signed(is_ex_reg.rs2_value), is_ex_reg.alu_func, $signed(ex_packet.result), is_ex_reg.function_type, free_alu, free_mult, free_branch);
         $display("\nBeginning edge-case testing:");
 
         is_ex_reg <= '{
@@ -87,7 +111,8 @@ module testbench;
             1'b0, // illegal
             1'b0, // csr_op
             3'b000,     // function type
-            1'b0  // valid
+            1'b0,  // valid
+            0
         };
         clock = 0;
         alu_en = 0;
@@ -111,8 +136,8 @@ module testbench;
         @(negedge clock);
         mult_en = 0;
         //@(negedge free_mult[0]);
-        wait_until_done();
-        assert(mult_result == 6) else exit_on_error;
+        wait_until_done_mult();
+        assert(ex_packet.result == 6) else exit_on_error;
         assert(free_mult[0] == 1'b1) else exit_on_error;
 
         // Test that basic alu operations work
@@ -126,6 +151,7 @@ module testbench;
         issue_fu_index = 0;
         @(negedge clock);
         alu_en = 0;
+        wait_until_done_alu();
         assert(ex_packet.result == 3) else exit_on_error;
         assert(free_alu[0] == 1) else exit_on_error;
 
@@ -141,8 +167,8 @@ module testbench;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
-        wait_until_done();
-        assert(mult_result == 32'b11111111111111111111111111110110) else exit_on_error;
+        wait_until_done_mult();
+        assert(ex_packet.result == 32'b11111111111111111111111111110110) else exit_on_error;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test multiplication with upper bits (MULH)
@@ -155,8 +181,8 @@ module testbench;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
-        wait_until_done();
-        assert(mult_result == 32'b00000000001101100010011000100010) else exit_on_error;
+        wait_until_done_mult();
+        assert(ex_packet.result == 32'b00000000001101100010011000100010) else exit_on_error;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MULHSU (mixed sign and unsigned) ASK
@@ -169,7 +195,7 @@ module testbench;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
-        wait_until_done();
+        wait_until_done_mult();
         // assert(mult_result == 32'b11111111111110100111010000111000) else exit_on_error;
         assert(free_mult[0] == 1) else exit_on_error;
 
@@ -183,8 +209,8 @@ module testbench;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
-        wait_until_done();
-        assert(mult_result == 32'b00000000000001101110011011010110) else exit_on_error;
+        wait_until_done_mult();
+        assert(ex_packet.result == 32'b00000000000001101110011011010110) else exit_on_error;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MULHU on very very large values
@@ -197,8 +223,8 @@ module testbench;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
-        wait_until_done();
-        assert(mult_result == 32'b11111111111111111111111111111110) else exit_on_error;
+        wait_until_done_mult();
+        assert(ex_packet.result == 32'b11111111111111111111111111111110) else exit_on_error;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test MUL on where inputs are the same binary as ^ but should give different product
@@ -211,8 +237,8 @@ module testbench;
         mult_en = 1;
         @(negedge clock);
         mult_en = 0;
-        wait_until_done();
-        assert(mult_result == 1) else exit_on_error;
+        wait_until_done_mult();
+        assert(ex_packet.result == 1) else exit_on_error;
         assert(free_mult[0] == 1) else exit_on_error;
 
         // Test that doing mult -> alu will still allow the output of mult to be present (+packet)
@@ -238,19 +264,19 @@ module testbench;
         issue_fu_index = 0;
         @(negedge clock);
         alu_en = 0;
+        wait_until_done_alu();
         assert(ex_packet.result == 13) else exit_on_error;
         assert(free_alu[0] == 1) else exit_on_error;
         assert(alu_packet.function_type == ALU) else exit_on_error;
 
         //@(negedge free_mult[0]);
-        wait_until_done();
-        assert(mult_result == 18) else exit_on_error;
+        wait_until_done_mult();
+        assert(ex_packet.result == 18) else exit_on_error;
         assert(free_mult[0] == 1'b1) else exit_on_error;
-        $display(mult_packet.rs1_value);
         assert(mult_packet.function_type == MULT) else exit_on_error;
         assert(mult_packet.rs1_value == 6) else exit_on_error;
 
-
+        
 
         // Add tests for branch... low priority since it should be the same as alu
         

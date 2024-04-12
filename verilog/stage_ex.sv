@@ -288,11 +288,11 @@ module stage_ex (
     input logic [`MAX_FU_INDEX-1:0] issue_fu_index,
 
     output EX_CO_PACKET ex_packet,
-    output [`NUM_FU_ALU-1:0]    free_alu,
-    output [`NUM_FU_MULT-1:0]   free_mult,
-    output [`NUM_FU_LOAD-1:0]   free_load,
-    output [`NUM_FU_STORE-1:0]  free_store,
-    output [`NUM_FU_BRANCH-1:0] free_branch,
+    output logic [`NUM_FU_ALU-1:0]    free_alu,
+    output logic [`NUM_FU_MULT-1:0]   free_mult,
+    output logic [`NUM_FU_LOAD-1:0]   free_load,
+    output logic [`NUM_FU_STORE-1:0]  free_store,
+    output logic [`NUM_FU_BRANCH-1:0] free_branch,
 
     // debug outputs
     output IS_EX_PACKET tmp_alu_packet,
@@ -307,24 +307,9 @@ module stage_ex (
     logic [`XLEN-1:0] opa_mux_out, opb_mux_out;
     logic take_conditional;
 
-    // Pass-throughs
-    assign ex_packet.NPC          = is_ex_reg.NPC;
-    assign ex_packet.rs2_value    = is_ex_reg.rs2_value;
-    assign ex_packet.rd_mem       = is_ex_reg.rd_mem;
-    assign ex_packet.wr_mem       = is_ex_reg.wr_mem;
-    assign ex_packet.dest_reg_idx = is_ex_reg.dest_reg_idx;
-    assign ex_packet.halt         = is_ex_reg.halt;
-    assign ex_packet.illegal      = is_ex_reg.illegal;
-    assign ex_packet.csr_op       = is_ex_reg.csr_op;
-    assign ex_packet.valid        = is_ex_reg.valid;
-
-    // Break out the signed/unsigned bit and memory read/write size
-    assign ex_packet.rd_unsigned  = is_ex_reg.inst.r.funct3[2]; // 1 if unsigned, 0 if signed
-    assign ex_packet.mem_size     = MEM_SIZE'(is_ex_reg.inst.r.funct3[1:0]);
-
     // ultimate "take branch" signal:
     // unconditional, or conditional and the condition is true
-    assign ex_packet.take_branch = is_ex_reg.uncond_branch || (is_ex_reg.cond_branch && take_conditional);
+    // assign ex_packet.take_branch = is_ex_reg.uncond_branch || (is_ex_reg.cond_branch && take_conditional);
 
     // ALU opA mux
     always_comb begin
@@ -409,6 +394,61 @@ module stage_ex (
     );
 
     logic [5:0] waiting_fus; 
+    logic alu_done_process;
+    logic mult_done_process;
+    logic branch_done_process;
+
+    always_comb begin
+        if(alu_done_process) begin
+            ex_packet.result = tmp_alu_result;
+            ex_packet.NPC = tmp_alu_packet.NPC;
+            ex_packet.take_branch = 0;
+
+            ex_packet.rs2_value = tmp_alu_packet.rs2_value;
+            ex_packet.rd_mem = tmp_alu_packet.rd_mem;
+            ex_packet.wr_mem = tmp_alu_packet.wr_mem;
+            ex_packet.dest_reg_idx = tmp_alu_packet.dest_reg_idx;
+            ex_packet.halt = tmp_alu_packet.halt;
+            ex_packet.illegal = tmp_alu_packet.illegal;
+            ex_packet.csr_op = tmp_alu_packet.csr_op;
+            ex_packet.rd_unsigned  = tmp_alu_packet.inst.r.funct3[2];
+            ex_packet.mem_size     = MEM_SIZE'(tmp_alu_packet.inst.r.funct3[1:0]);
+            ex_packet.valid = tmp_alu_packet.valid;
+            ex_packet.rob_index = tmp_alu_packet.rob_index;
+        end else if (mult_done_process) begin
+            ex_packet.result = tmp_mult_result;
+            ex_packet.NPC = tmp_mult_packet.NPC;
+            ex_packet.take_branch = 0;
+
+            ex_packet.rs2_value = tmp_mult_packet.rs2_value;
+            ex_packet.rd_mem = tmp_mult_packet.rd_mem;
+            ex_packet.wr_mem = tmp_mult_packet.wr_mem;
+            ex_packet.dest_reg_idx = tmp_mult_packet.dest_reg_idx;
+            ex_packet.halt = tmp_mult_packet.halt;
+            ex_packet.illegal = tmp_mult_packet.illegal;
+            ex_packet.csr_op = tmp_mult_packet.csr_op;
+            ex_packet.rd_unsigned  = tmp_mult_packet.inst.r.funct3[2];
+            ex_packet.mem_size     = MEM_SIZE'(tmp_mult_packet.inst.r.funct3[1:0]);
+            ex_packet.valid = tmp_mult_packet.valid;
+            ex_packet.rob_index = tmp_mult_packet.rob_index;
+        end else if (branch_done_process) begin
+            ex_packet.result = tmp_branch_result;
+            ex_packet.NPC = tmp_branch_packet.NPC;
+            ex_packet.take_branch = 1;
+
+            ex_packet.rs2_value = tmp_branch_packet.rs2_value;
+            ex_packet.rd_mem = tmp_branch_packet.rd_mem;
+            ex_packet.wr_mem = tmp_branch_packet.wr_mem;
+            ex_packet.dest_reg_idx = tmp_branch_packet.dest_reg_idx;
+            ex_packet.halt = tmp_branch_packet.halt;
+            ex_packet.illegal = tmp_branch_packet.illegal;
+            ex_packet.csr_op = tmp_branch_packet.csr_op;
+            ex_packet.rd_unsigned  = tmp_mult_packet.inst.r.funct3[2];
+            ex_packet.mem_size     = MEM_SIZE'(tmp_branch_packet.inst.r.funct3[1:0]);
+            ex_packet.valid = tmp_branch_packet.valid;
+            ex_packet.rob_index = tmp_branch_packet.rob_index;
+        end
+    end
 
     always_ff @(posedge clock) begin
         if(reset) begin
@@ -416,6 +456,9 @@ module stage_ex (
             tmp_alu_result <= 0;
             tmp_mult_result <= 0;
             tmp_branch_result <= 0;
+            alu_done_process <= 0;
+            mult_done_process <= 0;
+            branch_done_process <= 0;
         end
         else begin
             if(alu_done) begin
@@ -431,17 +474,29 @@ module stage_ex (
                 tmp_branch_result <= branch_result;
             end 
 
+            // Defaults
+            alu_done_process <= 0;
+            mult_done_process <= 0;
+            branch_done_process <= 0;
+            free_alu[0] <= 0;
+            free_mult[0] <= 0;
+            free_branch[0] <= 0;
+
+            if(waiting_fus[ALU] == 1) begin
+                waiting_fus[ALU] <= 0;
+                alu_done_process <= 1; 
+                free_alu[0] <= 1;
+            end else if(waiting_fus[MULT] == 1) begin
+                waiting_fus[MULT] <= 0;
+                mult_done_process <= 1;
+                free_mult[0] <= 1;
+            end else if(waiting_fus[BRANCH] == 1) begin
+                waiting_fus[BRANCH] <= 0;
+                branch_done_process <= 1;
+                free_branch[0] <= 1;
+            end
             
-
-        end
-
-        // Iterate through the waiting FUs to choose 1 to free
-        if(waiting_fus[0] == 1) begin
-            waiting_fus[0] = 0;
-            free_alu[0] = 1;
-            ex_packet.result = tmp_alu_result;
-            ex_packet.NPC = tmp_alu_packet.NPC;
-            ex_packet.take_branch = 
+            
         end
     end     
 

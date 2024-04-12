@@ -387,6 +387,7 @@ typedef struct packed {
     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
     FUNIT function_type;
     logic       valid;
+    logic [$clog2(`ROB_SZ)-1:0] rob_index;
 } IS_EX_PACKET;
 
 /**
@@ -536,10 +537,6 @@ typedef union packed {
     logic [1:0][31:0] word_level;
 } MEM_RETURN;
 
-`endif // __SYS_DEFS_SVH__
-
-
-
 typedef struct packed {
     logic [`XLEN-1:0] result;
     logic [`XLEN-1:0] NPC;
@@ -578,7 +575,9 @@ typedef struct packed {
     logic [`XLEN-1:0] NPC;
     EXCEPTION_CODE    error_status;
     logic             regfile_en;   // register write enable
- logic [`PHYS_REG_IDX_SZ:0]  regfile_idx;  // register write index
+    logic [`PHYS_REG_IDX_SZ:0]  regfile_idx;  // register write index
     logic [`XLEN-1:0] regfile_data; // register write data 
     logic             valid;
 } RETIRE_ENTRY;
+
+`endif // __SYS_DEFS_SVH__
