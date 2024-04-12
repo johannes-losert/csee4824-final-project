@@ -18,6 +18,10 @@ module map_table (
     input logic [`PHYS_REG_IDX_SZ:0] new_dest_pr,
     output PREG old_dest_pr,
 
+    // GET physical register from architecture map 
+    input logic [`REG_IDX_SZ:0] arch_map_arch_reg_idx,
+    output PREG arch_map_phys_reg_out,
+
     // Retire operation (copies this preg to retired_preg)
     input logic [`REG_IDX_SZ:0] retire_arch_reg,
     input logic retire_enable,
@@ -66,6 +70,21 @@ module map_table (
             end 
 
             preg2_out.reg_num = preg_entries[arch_reg2_idx].reg_num;
+        end
+    end
+
+
+    // Arch map read port 
+    always_comb begin 
+        if (arch_map_arch_reg_idx == `ZERO_REG) begin
+            arch_map_phys_reg_out.ready = 1;
+            arch_map_phys_reg_out.reg_num = `ZERO_REG;
+        end else begin 
+            if (retire_enable && (retire_arch_reg == arch_map_arch_reg_idx)) begin
+                arch_map_phys_reg_out = preg_entries[arch_map_arch_reg_idx];
+            end else begin
+                arch_map_phys_reg_out = retired_preg_entries[arch_map_arch_reg_idx];
+            end
         end
     end
 
