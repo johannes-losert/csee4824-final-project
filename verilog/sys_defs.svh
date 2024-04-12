@@ -28,6 +28,7 @@
 `define RS_SZ 1 // TODO should this be num FUs?
 
 `define REG_SZ 32
+// REG_IDX_SZ MUST BE 4, because instruction logic assumes it
 `define REG_IDX_SZ ($clog2(`REG_SZ-1))
 `define PHYS_REG_SZ (`REG_SZ + `ROB_SZ)
 `define PHYS_REG_IDX_SZ ($clog2(`PHYS_REG_SZ-1))
@@ -157,6 +158,7 @@ typedef enum logic [3:0] {
 ///////////////////////////////////
 
 // from the RISC-V ISA spec
+// TODO update to make architectural register sizes more dynamic
 typedef union packed {
     logic [31:0] inst;
     struct packed {
@@ -338,8 +340,10 @@ typedef struct packed {
 
 /**
  * ID_IS Packet:
- * Data exchanged from the ID to the IS stage
+ * Data from the ID stage to the IS stage AND 
+ * packed stored in RS while waiting to issue
  */
+ //TODO rena
 typedef struct packed {
     INST              inst;
     logic [`XLEN-1:0] PC;
@@ -348,7 +352,15 @@ typedef struct packed {
     ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
     ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
 
-    logic [4:0] dest_reg_idx;  // destination (writeback) register index
+    // logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
+    // logic [`PHYS_REG_IDX_SZ:0] opa_phys_reg_idx; // reg A physical register
+    // logic [`PHYS_REG_IDX_SZ:0] opb_phys_reg_idx; // reg B physical register
+    
+    /* Includes 'ready' bit and index*/
+    PREG dest_reg;
+    PREG src1_reg;
+    PREG src2_reg;
+
     ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
     logic       rd_mem;        // Does inst read memory?
     logic       wr_mem;        // Does inst write memory?
@@ -359,7 +371,31 @@ typedef struct packed {
     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
     FUNIT       function_type;
     logic       valid;
+
+    logic [$clog2(`ROB_SZ)-1:0] rob_index;
+
 } ID_IS_PACKET;
+
+`define INVALID_ID_IS_PACKET {
+                        `NOP, // we can't simply assign 0 because NOP is non-zero
+                        {`XLEN{1'b0}}, // PC
+                        {`XLEN{1'b0}}, // NPC
+                        OPA_IS_RS1,
+                        OPB_IS_RS2,
+                        `ZERO_REG,
+                        ALU_ADD,
+                        1'b0, // rd_mem
+                        1'b0, // wr_mem
+                        1'b0, // cond
+                        1'b0, // uncond
+                        1'b0, // halt
+                        1'b0, // illegal
+                        1'b0, // csr_op
+                        ALU, // function type
+                        1'b0,  // valid,
+                        1'b0 // rob_index
+                    };
+
 
 /**
  * ID_IS Packet:
@@ -441,27 +477,34 @@ typedef struct packed {
     logic ready;
 } PREG;
 
-/* Output of the reservation station */
-typedef struct packed {
-    FUNIT funit;
-    INST inst;
-    PREG dest_reg;
-    PREG src1_reg;
-    PREG src2_reg;
-} RS_PACKET; // TODO should this have a valid bit?
+/* OLD Output of the reservation station */
+// typedef struct packed {
+//     FUNIT funit;
+//    INST inst; 
+//     PREG dest_reg;
+//     PREG src1_reg;
+//     PREG src2_reg;
+// } RS_PACKET; // TODO should this have a valid bit?
 
+// An entry in the reservation station, with all information about an instruction
+// to be issued
 typedef struct packed {
-    RS_PACKET packet;
+    ID_IS_PACKET packet;
     logic busy;
-    logic valid;
     logic issued;
 } RS_ENTRY;
 
 typedef struct packed {
     PREG T,Told;
-    INST inst;
     // logic done;
 } ROB_ENTRY;
+
+// Packet passed from output of RS to IS stage TODO these names are weird
+typdef struct packed {
+
+
+} RS_IS_PACKET;
+
 
 
 // typedef struct packed {
