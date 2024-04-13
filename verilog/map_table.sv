@@ -15,7 +15,7 @@ module map_table (
     // GET/SET operation (get old dest, replace with new dest)
     input logic [`REG_IDX_SZ:0] arch_dest_idx, 
     input logic set_dest_enable, /* Enable to overwrite dest with new pr */
-    input logic [`PHYS_REG_IDX_SZ:0] new_dest_pr,
+    input logic [`PHYS_REG_IDX_SZ:0] new_dest_pr_idx,
     output PREG old_dest_pr,
 
     // GET physical register from architecture map 
@@ -121,7 +121,7 @@ module map_table (
             
             // SET new dest
             if (set_dest_enable && (arch_dest_idx != `ZERO_REG)) begin
-                preg_entries[arch_dest_idx].reg_num <= new_dest_pr;
+                preg_entries[arch_dest_idx].reg_num <= new_dest_pr_idx;
                 // TODO do I need to forward ready bit from CDB? probably not
                 preg_entries[arch_dest_idx].ready <= 0;
             end 
