@@ -1,6 +1,6 @@
 
 `include "verilog/sys_defs.svh"
-
+`include "verilog/ISA.svh"
 
 module testbench;
     // inputs
@@ -113,8 +113,8 @@ output_func_type=%0d output_valid=%0b\n-------\n", clock, reset, if_id_packet.in
         if_id_packet.inst.r.funct7 = 7'b101;
         if_id_packet.inst.r.rd = 5'h1;
         if_id_packet.inst.r.rs1 = 5'h2;
-        if_id_packet.PC = 0;
-        if_id_packet.NPC = 0;
+        if_id_packet.PC = 1;
+        if_id_packet.NPC = 2;
         if_id_packet.valid = 0;
         
         cdb_broadcast_en = 0;
@@ -125,7 +125,7 @@ output_func_type=%0d output_valid=%0b\n-------\n", clock, reset, if_id_packet.in
         @(negedge clock)
         assert(!id_packet.valid) else exit_on_error;
       
-        $display("Test case 2");       
+        $display("Fetch Mul instruction");       
 
         free_alu = 0;
         free_mult = 0;
@@ -133,12 +133,12 @@ output_func_type=%0d output_valid=%0b\n-------\n", clock, reset, if_id_packet.in
         free_store = 0;
         free_branch = 0;
 
-        if_id_packet.inst.r.funct7 = 7'b101;
+        if_id_packet.inst = `RV32_MUL;
         if_id_packet.inst.r.rd = 5'h1;
         if_id_packet.inst.r.rs1 = 5'h2;
         if_id_packet.inst.r.rs2 = 5'h3;
-        if_id_packet.PC = 1;
-        if_id_packet.NPC = 2;
+        if_id_packet.PC = 2;
+        if_id_packet.NPC = 3;
         if_id_packet.valid = 1;
         
         cdb_broadcast_en = 0;
@@ -150,29 +150,31 @@ output_func_type=%0d output_valid=%0b\n-------\n", clock, reset, if_id_packet.in
         assert(!id_packet.valid) else exit_on_error;
 
               
-        $display("Test case 3");       
+        $display("Fetch Add Instruction");       
 
+       
         free_alu = 0;
         free_mult = 0;
         free_load = 0;
         free_store = 0;
         free_branch = 0;
 
-        if_id_packet.inst.r.funct7 = 7'b101;
+        if_id_packet.inst = `RV32_ADD;
         if_id_packet.inst.r.rd = 5'h1;
         if_id_packet.inst.r.rs1 = 5'h2;
         if_id_packet.inst.r.rs2 = 5'h3;
-        if_id_packet.PC = 1;
-        if_id_packet.NPC = 2;
-        if_id_packet.valid = 0;
+        if_id_packet.PC = 3;
+        if_id_packet.NPC = 4;
+        if_id_packet.valid = 1;
         
-        cdb_broadcast_en = 1;
-        cdb_ready_reg = 2;
+        cdb_broadcast_en = 0;
+        cdb_ready_reg = 0;
         rollback = 0;
         retire_move_head = 0;
 
         @(negedge clock)
-        assert(!id_packet.valid) else exit_on_error;
+        assert(id_packet.valid) else exit_on_error;
+        assert(id_packet.function_type == MULT) else exit_on_error;
         $display("Test case 4");       
 
         free_alu = 0;
@@ -185,17 +187,18 @@ output_func_type=%0d output_valid=%0b\n-------\n", clock, reset, if_id_packet.in
         if_id_packet.inst.r.rd = 5'h1;
         if_id_packet.inst.r.rs1 = 5'h2;
         if_id_packet.inst.r.rs2 = 5'h3;
-        if_id_packet.PC = 1;
-        if_id_packet.NPC = 2;
+        if_id_packet.PC = 5;
+        if_id_packet.NPC = 6;
         if_id_packet.valid = 0;
         
         cdb_broadcast_en = 1;
-        cdb_ready_reg = 3;
+        cdb_ready_reg = 2;
         rollback = 0;
         retire_move_head = 0;
 
         @(negedge clock)
-        assert(!id_packet.valid) else exit_on_error;
+        assert(id_packet.valid) else exit_on_error;
+        assert(id_packet.function_type == ALU) else exit_on_error;
         $display("Test case 5");       
 
         free_alu = 0;
@@ -208,18 +211,22 @@ output_func_type=%0d output_valid=%0b\n-------\n", clock, reset, if_id_packet.in
         if_id_packet.inst.r.rd = 5'h1;
         if_id_packet.inst.r.rs1 = 5'h2;
         if_id_packet.inst.r.rs2 = 5'h3;
-        if_id_packet.PC = 1;
-        if_id_packet.NPC = 2;
+        if_id_packet.PC = 7;
+        if_id_packet.NPC = 8;
         if_id_packet.valid = 0;
         
-        cdb_broadcast_en = 0;
-        cdb_ready_reg = 0;
+        cdb_broadcast_en = 1;
+        cdb_ready_reg = 3;
         rollback = 0;
         retire_move_head = 0;
 
         @(negedge clock)
        // assert(id_packet.valid) else exit_on_error;
 
+        @(negedge clock)
+        @(negedge clock)
+        @(negedge clock)
+        @(negedge clock)
         @(negedge clock)
         @(negedge clock)
         @(negedge clock)
