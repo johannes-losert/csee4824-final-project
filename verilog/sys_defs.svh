@@ -338,12 +338,18 @@ typedef struct packed {
 
 // TODO change all the 4s to `PHYS_REG_IDX_SZ
 
+
+typedef struct packed {
+    logic [`PHYS_REG_IDX_SZ:0] reg_num;
+    logic ready;
+} PREG;
+
+
 /**
  * ID_IS Packet:
  * Data from the ID stage to the IS stage AND 
  * packed stored in RS while waiting to issue
  */
- //TODO rena
 typedef struct packed {
     INST              inst;
     logic [`XLEN-1:0] PC;
@@ -373,28 +379,30 @@ typedef struct packed {
     logic       valid;
 
     logic [$clog2(`ROB_SZ)-1:0] rob_index;
+    logic has_dest;
 
 } ID_IS_PACKET;
 
-`define INVALID_ID_IS_PACKET {
-                        `NOP, // we can't simply assign 0 because NOP is non-zero
-                        {`XLEN{1'b0}}, // PC
-                        {`XLEN{1'b0}}, // NPC
-                        OPA_IS_RS1,
-                        OPB_IS_RS2,
-                        `ZERO_REG,
-                        ALU_ADD,
-                        1'b0, // rd_mem
-                        1'b0, // wr_mem
-                        1'b0, // cond
-                        1'b0, // uncond
-                        1'b0, // halt
-                        1'b0, // illegal
-                        1'b0, // csr_op
-                        ALU, // function type
-                        1'b0,  // valid,
-                        1'b0 // rob_index
-                    };
+ID_IS_PACKET INVALID_ID_IS_PACKET = {
+    `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    {`XLEN{1'b0}}, // PC
+    {`XLEN{1'b0}}, // NPC
+    OPA_IS_RS1, // opa_select
+    OPB_IS_RS2, // opb_select
+    5'b0, // dest_reg_idx
+    ALU_ADD, // alu_func
+    1'b0, // rd_mem
+    1'b0, // wr_mem
+    1'b0, // cond_branch
+    1'b0, // uncond_branch
+    1'b0, // halt
+    1'b0, // illegal
+    1'b0, // csr_op
+    ALU, // function_type
+    1'b0, // valid
+    {`ROB_SZ{1'b0}}, // rob_index
+    1'b0 // has_dest
+};
 
 
 /**
@@ -472,10 +480,6 @@ typedef struct packed {
  * Reservation station stuff
 */
 
-typedef struct packed {
-    logic [`PHYS_REG_IDX_SZ:0] reg_num;
-    logic ready;
-} PREG;
 
 /* OLD Output of the reservation station */
 // typedef struct packed {
@@ -496,14 +500,9 @@ typedef struct packed {
 
 typedef struct packed {
     PREG T,Told;
+    INST inst;
     // logic done;
 } ROB_ENTRY;
-
-// Packet passed from output of RS to IS stage TODO these names are weird
-typdef struct packed {
-
-
-} RS_IS_PACKET;
 
 
 
@@ -609,6 +608,7 @@ typedef struct packed {
     logic             rd_unsigned; // Whether proc2Dmem_data is signed or unsigned
     MEM_SIZE          mem_size;
     logic             valid;
+    FUNIT             function_type;
     logic [$clog2(`ROB_SZ)-1:0] rob_index; // this index is to indicate which instrction we should retire
 } EX_CO_PACKET;
 
