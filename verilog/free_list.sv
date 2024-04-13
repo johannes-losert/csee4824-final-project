@@ -47,41 +47,41 @@ module free_list (
       [x],
       [x] ]
     enqueue 1
-    [ [1], <- tail_ptr
-      [x], <-head_ptr
+    [ [1], <- head_ptr
+      [x], <-tail_ptr
       [x],
       [x] ] 
     enqueue 2
-    [ [1], <- tail
+    [ [1], <- head
       [2], 
-      [x], <-head
+      [x], <-tail
       [x] ]
     enqueue 3
-    [ [1], <- tail
+    [ [1], <- head
       [2], 
       [3], 
-      [x] <-head ]
+      [x] <- tail ]
     dequeue 1
     [ [x], 
-      [2], <-tail
+      [2], <-head
       [3],
-      [x], <- head]
+      [x], <- tail]
     enqueue 4
-    [ [x], <- head
-      [2], <- tail
+    [ [x], <- tail
+      [2], <- head
       [3],
       [4] ]
     enqueue 5, dequeue 2
     [ [5], 
-      [x], <- head
-      [3], <- tail
+      [x], <- tail
+      [3], <- head
       [4] ] 
 */
 
     always @(posedge clk) begin
         if (reset) begin
             back_tail_ptr <= 0;
-            front_head_ptr <= 0;
+            front_head_ptr <= 1;
             was_dequeued <= 0;
             was_enqueued <= 0;
             dequeue_pr <= 0;

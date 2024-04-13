@@ -29,7 +29,13 @@ module dispatch (
 
     output ID_IS_PACKET id_packet,      // outputs (new) 
     // if rob or RS is not abvailable, stall will be high, keep all inputs same as pervious cycle.
-    output logic stall          // (new) stall signal to ifetch stage 
+    output logic stall,          // (new) stall signal to ifetch stage 
+
+
+    // Debug outputs
+    output logic rob_full,
+    output logic rs_full,
+    output logic free_list_empty
 );
 
     // if_id_packet comes in from fetch stage, mostly passed to decoder
@@ -153,7 +159,7 @@ module dispatch (
     // Declare Free List
 
     // many of these signals are debug signals
-    logic free_list_empty;
+   // logic free_list_empty;
 
     logic fl_dequeue_en, fl_was_dequeued;
     logic [`PHYS_REG_IDX_SZ:0] fl_dequeue_pr, fl_head_pr;
