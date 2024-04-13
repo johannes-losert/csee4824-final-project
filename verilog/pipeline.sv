@@ -868,9 +868,40 @@ module pipeline (
         // CDB output
         .regfile_en(cdb_broadcast_en),
         .regfile_idx(cdb_phys_idx),
-        .regfile_data(cdb_data)
+        .regfile_data(cdb_data),
+        .free_alu(free_alu),
+        .free_mult(free_mult),
+        .free_branch(free_branch),
+        .free_load(free_load),
+        .free_store(free_store)
     );
 
+    //////////////////////////////////////////////////
+    //                                              //
+    //           CO/RE Pipeline Register             //
+    //                                              //
+    //////////////////////////////////////////////////
+    // TODO this probably needs a lot more thought
+    CO_RE_PACKET co_re_reg;
+    logic co_re_enable;
+    logic re_regfile_en;
+    logic [`PHYS_REG_SZ-1:0] re_regfile_idx;
+    logic [`XLEN-1:0] re_regfile_data;
+
+    assign co_re_enable = 1'b1; // always enabled
+    // synopsys sync_set_reset "reset"
+    always_ff @(posedge clock) begin
+        if (reset) begin
+            co_re_inst_dbg  <= `NOP; // debug output
+            co_re_reg       <= 0;    // TODO can the defaults all be zero?
+        end else if (co_re_enable) begin
+      //      ex_co_inst_dbg <= id_ex_inst_dbg; // debug output, just forwarded from ID
+            co_re_reg       <= ex_packet;
+            re_regfile_en   <= cdb_broadcast_en;
+            re_regfile_idx  <= cdb_phys_idx;
+            re_regfile_data <= cdb_data;
+        end
+    end
     //////////////////////////////////////////////////
     //                                              //
     //               Retire (R)                     //
@@ -884,7 +915,24 @@ module pipeline (
         If it is, retire it by removing from ROB, updating Arch Map, and freeing PR
     */
 
-
+    retire retire_0(
+        .co_package(co_package), //need to add type
+        .regfile_en(re_regfile_en),  // register write enable
+        .regfile_idx(re_regfile_idx), // register write index
+        .regfile_data(re_regfile_data), // register write data 
+        .mem2proc_response(mem2proc_response), //TODO: need to update when memory operation is implemented
+        .rob_head(rob_head), //head printer in rob
+        .take_branch(take_branch),
+        //signals to tell rob to move head
+        .move_head(move_head),
+        //output of the processor
+        .pipeline_completed_insts(pipeline_completed_insts),
+        .pipeline_error_status(pipeline_error_status),
+        .pipeline_commit_wr_idx(pipeline_commit_wr_idx),
+        .pipeline_commit_wr_data(pipeline_commit_wr_data),
+        .pipeline_commit_wr_en(pipeline_commit_wr_en),
+        .pipeline_commit_NPC(pipeline_commit_NPC)
+);
 
    
 
