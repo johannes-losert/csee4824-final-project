@@ -134,6 +134,7 @@ module reorder_buffer(
         if (reset) begin
             head <= 0;
             tail <= 0;
+            full <= 0;
         end else if (write) begin
             full <= next_full;
             tail <= next_tail;
