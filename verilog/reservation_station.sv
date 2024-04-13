@@ -6,12 +6,12 @@ module reservation_station (
     input clock, reset, 
    
     /* Allocating */
-    input allocate,
+    input logic allocate,
     input ID_IS_PACKET input_packet,
     output logic done,
 
     /* Updating given PREG (from CDB) */
-    input update, 
+    input logic update, 
     input PREG ready_reg,
 
     /* Issuing */
@@ -28,13 +28,13 @@ module reservation_station (
     output logic branch_entries_full,
 
     /* Freeing */
-    input [`NUM_FU_ALU-1:0]free_alu,
-    input [`NUM_FU_MULT-1:0]free_mult,
-    input [`NUM_FU_LOAD-1:0]free_load,
-    input [`NUM_FU_STORE-1:0]free_store,
-    input [`NUM_FU_BRANCH-1:0]free_branch
+    input logic [`NUM_FU_ALU-1:0]free_alu,
+    input logic [`NUM_FU_MULT-1:0]free_mult,
+    input logic [`NUM_FU_LOAD-1:0]free_load,
+    input logic [`NUM_FU_STORE-1:0]free_store,
+    input logic [`NUM_FU_BRANCH-1:0]free_branch
     // input logic [`MAX_FU_INDEX-1:0] free_fu_index,
-    // input FUNIT free_funit
+    // input function_type free_function_type
 );
 
     /* Reservation Station Entries */
@@ -296,12 +296,12 @@ module reservation_station (
                     issued_packet <= 0; // TODO this is really undefined 
                     issue_fu_index <= 0; // TODO this is really undefined
 
-                    issued_packet <= `INVALID_ID_IS_PACKET;
+                    issued_packet <= INVALID_ID_IS_PACKET;
 
                 end
             end else begin 
                // ready <= 1'b0;
-                issued_packet <= `INVALID_ID_IS_PACKET; // TODO this is really undefined 
+                issued_packet <= INVALID_ID_IS_PACKET; // TODO this is really undefined 
                 issue_fu_index <= 0; // TODO this is really undefined
             end
 
@@ -348,7 +348,7 @@ module reservation_station (
             // Try allocation 
             // find not busy entry in the four RS_ENTRYs
             if(allocate) begin 
-                if(input_packet.funit == ALU) begin
+                if(input_packet.function_type == ALU) begin
                     if (alu_available_index_found) begin
                         alu_entries[alu_available_index].busy <= 1;
                         alu_entries[alu_available_index].packet <= input_packet;
@@ -357,7 +357,7 @@ module reservation_station (
                     end else begin 
                         done <= 0;
                     end
-                end else if(input_packet.funit == MULT) begin
+                end else if(input_packet.function_type == MULT) begin
                     if (mult_available_index_found) begin
                         mult_entries[mult_available_index].busy <= 1;
                         mult_entries[mult_available_index].packet <= input_packet;
@@ -366,7 +366,7 @@ module reservation_station (
                     end else begin
                         done <= 0;
                     end
-                end else if(input_packet.funit == LOAD) begin
+                end else if(input_packet.function_type == LOAD) begin
                     if (load_available_index_found) begin
                         load_entries[load_available_index].busy <= 1;
                         load_entries[load_available_index].packet <= input_packet;
@@ -375,7 +375,7 @@ module reservation_station (
                     end else begin 
                         done <= 0;
                     end
-                end else if(input_packet.funit == STORE) begin
+                end else if(input_packet.function_type == STORE) begin
                     if (store_available_index_found) begin
                         store_entries[store_available_index].busy <= 1;
                         store_entries[store_available_index].packet <= input_packet;
@@ -384,7 +384,7 @@ module reservation_station (
                     end else begin 
                         done <= 0;
                     end
-                end else if(input_packet.funit == BRANCH) begin
+                end else if(input_packet.function_type == BRANCH) begin
                     if (branch_available_index_found) begin
                         branch_entries[branch_available_index].busy <= 1;
                         branch_entries[branch_available_index].packet <= input_packet;
