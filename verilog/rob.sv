@@ -29,7 +29,7 @@ module reorder_buffer(
     /* Signal to indicate we should update free list (TODO connect enqueue_en in free list) */
     output logic update_free_list,
     /* Index of reg in the free list, indicating it's now free (TODO connect to enqueue_pr) */
-    output PREG free_index,
+    output logic [`PHYS_REG_IDX_SZ:0] free_index,
 
     /* Signal to indicate we should update arch map and send packet( reg and corresponding old tag) to arch table */
     // Same as the MAP table 
@@ -37,7 +37,7 @@ module reorder_buffer(
     output logic [`REG_IDX_SZ:0] update_arch_told,
     /* signal to update arch_map*/
     output logic [`REG_IDX_SZ:0] arch_told,
-    input logic [`PHYS_REG_SZ-1:0] phys_told,
+    input logic [`PHYS_REG_IDX_SZ:0] phys_told,
 
     /* Instruction corresponds to entry in ROB */
     // Pass thru pipeline so during branch mispredict, we can roll back to inst_index
@@ -111,7 +111,7 @@ module reorder_buffer(
         // if (inst_buffer[head].done) begin
         if (move_head) begin
             update_free_list = 1;
-            free_index = inst_buffer[head].Told;
+            free_index = inst_buffer[head].Told.reg_num;
             update_arch_map = 1;
             update_arch_told = inst_buffer[head].inst.r.rd;
             // update_phys_told = inst_buffer[head].T;
@@ -123,7 +123,7 @@ module reorder_buffer(
         end else begin
             next_head = head;
             update_free_list = 0;
-            free_index = inst_buffer[head].Told;
+            free_index = inst_buffer[head].Told.reg_num;
             update_arch_map = 0;
             update_arch_told = inst_buffer[head].inst.r.rd;
             // update_phys_told = inst_buffer[head].T;
