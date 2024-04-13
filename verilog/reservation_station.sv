@@ -32,9 +32,17 @@ module reservation_station (
     input logic [`NUM_FU_MULT-1:0]free_mult,
     input logic [`NUM_FU_LOAD-1:0]free_load,
     input logic [`NUM_FU_STORE-1:0]free_store,
-    input logic [`NUM_FU_BRANCH-1:0]free_branch
+    input logic [`NUM_FU_BRANCH-1:0]free_branch,
     // input logic [`MAX_FU_INDEX-1:0] free_fu_index,
     // input function_type free_function_type
+
+    // DEBUG
+    output logic alu_issuable,
+    output logic mult_issuable,
+    output logic load_issuable,
+    output logic store_issuable,
+    output logic branch_issuable
+
 );
 
     /* Reservation Station Entries */
