@@ -18,7 +18,7 @@ module decoder (
     output logic          csr_op, // used for CSR operations, we only use this as a cheap way to get the return code out
     output logic          halt,   // non-zero on a halt
     output logic          illegal, // non-zero on an illegal instruction
-    output logic          function_type
+    output FUNIT          function_type
 );
 
     // Note: I recommend using an IDE's code folding feature on this block
@@ -28,7 +28,7 @@ module decoder (
         opa_select    = OPA_IS_RS1;
         opb_select    = OPB_IS_RS2;
         alu_func      = ALU_ADD;
-        function_type = `ALU
+        function_type = ALU;
         has_dest      = `FALSE;
         csr_op        = `FALSE;
         rd_mem        = `FALSE;
@@ -55,33 +55,33 @@ module decoder (
                     opa_select    = OPA_IS_PC;
                     opb_select    = OPB_IS_J_IMM;
                     uncond_branch = `TRUE;
-                    function_type = `BRANCH;
+                    function_type = BRANCH;
                 end
                 `RV32_JALR: begin
                     has_dest      = `TRUE;
                     opa_select    = OPA_IS_RS1;
                     opb_select    = OPB_IS_I_IMM;
                     uncond_branch = `TRUE;
-                    function_type = `BRANCH;
+                    function_type = BRANCH;
                 end
                 `RV32_BEQ, `RV32_BNE, `RV32_BLT, `RV32_BGE,
                 `RV32_BLTU, `RV32_BGEU: begin
                     opa_select  = OPA_IS_PC;
                     opb_select  = OPB_IS_B_IMM;
                     cond_branch = `TRUE;
-                    function_type = `BRANCH;
+                    function_type = BRANCH;
                 end
                 `RV32_LB, `RV32_LH, `RV32_LW,
                 `RV32_LBU, `RV32_LHU: begin
                     has_dest   = `TRUE;
                     opb_select = OPB_IS_I_IMM;
                     rd_mem     = `TRUE;
-                    function_type = `LOAD;
+                    function_type = LOAD;
                 end
                 `RV32_SB, `RV32_SH, `RV32_SW: begin
                     opb_select = OPB_IS_S_IMM;
                     wr_mem     = `TRUE;
-                    function_type = `STORE;
+                    function_type = STORE;
                 end
                 `RV32_ADDI: begin
                     has_dest   = `TRUE;
@@ -169,22 +169,22 @@ module decoder (
                 `RV32_MUL: begin
                     has_dest   = `TRUE;
                     alu_func   = ALU_MUL;
-                    function_type = `MULT;
+                    function_type = MULT;
                 end
                 `RV32_MULH: begin
                     has_dest   = `TRUE;
                     alu_func   = ALU_MULH;
-                    function_type = `MULT;
+                    function_type = MULT;
                 end
                 `RV32_MULHSU: begin
                     has_dest   = `TRUE;
                     alu_func   = ALU_MULHSU;
-                    function_type = `MULT;
+                    function_type = MULT;
                 end
                 `RV32_MULHU: begin
                     has_dest   = `TRUE;
                     alu_func   = ALU_MULHU;
-                    function_type = `MULT;
+                    function_type = MULT;
                 end
                 `RV32_CSRRW, `RV32_CSRRS, `RV32_CSRRC: begin
                     csr_op = `TRUE;
