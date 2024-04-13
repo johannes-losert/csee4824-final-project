@@ -210,7 +210,7 @@ module dispatch (
     );
 
     //  Declare ROB
-    logic rob_full; // Is the ROB currently full (we should stall)
+   // logic rob_full; // Is the ROB currently full (we should stall)
     
     logic [$clog2(`ROB_SZ)-1:0] head; // Index of the current head printer in the ROB
     logic [$clog2(`ROB_SZ)-1:0] rob_index; // Index of the current instruction in the ROB
