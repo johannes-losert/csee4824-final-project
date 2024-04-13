@@ -1,4 +1,11 @@
+`include "verilog/decoder.sv"
+`include "verilog/map_table.sv"
+`include "verilog/free_list.sv"
+`include "verilog/rob.sv"
+`include "verilog/reservation_station.sv"
+
 module dispatch (
+    input clock, reset, // TODO implement reset everywhere
     input IF_ID_PACKET if_id_packet,    // passed from ifetch stage (new)
    
     // Input from CDB (a Phys reg to mark ready)
@@ -11,63 +18,45 @@ module dispatch (
     // Input from retire stage
     input logic retire_move_head,       // (new) retire signal to move head
 
+    // Input from complete stage, freeing reservation station (TODO make into enum)
+    input logic [`NUM_FU_ALU-1:0]free_alu,              // (new) free ALU entry
+    input logic [`NUM_FU_MULT-1:0]free_mult,             // (new) free MULT entry
+    input logic [`NUM_FU_LOAD-1:0]free_load,             // (new) free LOAD entry
+    input logic [`NUM_FU_STORE-1:0]free_store,            // (new) free STORE entry
+    input logic [`NUM_FU_BRANCH-1:0]free_branch,           // (new) free BRANCH entry
+
+
+
     output ID_IS_PACKET id_packet,      // outputs (new) 
     // if rob or RS is not abvailable, stall will be high, keep all inputs same as pervious cycle.
     output logic stall          // (new) stall signal to ifetch stage 
 );
-    // For counting valid instructions executed
-    // and making the fetch stage die on halts/keeping track of when
-    // to allow the next instruction out of fetch
-    // 0 for HALT, ROB or RS not available, and illegal instructions (end processor on halt)
-    
-    assign id_packet.valid = if_id_packet.valid & ~id_packet.illegal & (!stall);
 
-    //check if rob and rs is available
-    assign stall = (rob_stall | rob_full \
-                              | (alu_entries_full & (id_packet.function_type == `ALU)) \
-                              | (mult_entries_full & (id_packet.function_type == `MULT)) \
-                              | (load_entries_full & (id_packet.function_type == `LOAD)) \
-                              | (store_entries_full & (id_packet.function_type == `STORE)) \
-                              | (branch_entries_full & (id_packet.function_type == `BRANCH)) \
-    );
-
-    // Decode to find ARCHITECTURAL registers
-    logic has_dest_reg;
-    assign arch_dest_reg_idx = (has_dest_reg) ? if_id_packet.inst.r.rd : `ZERO_REG;
-    assign arch_opa_reg_idx = if_id_packet.inst.r.rs1;
-    assign arch_opb_reg_idx = if_id_packet.inst.r.rs2;
-
-
-    // Convert to PHYSICAL registers with map table (and stall if none available)
-
-    assign id_packet.dest_reg_idx = (has_dest_reg) ? if_id_packet.inst.r.rd : `ZERO_REG;
-
-    decoder decoder1 (
-        // inputs
-        .inst(if_id_packet.inst), 
-        .valid(if_id_packet.valid),
-        // outputs
-        .opa_select(id_packet.opa_select),
-        .opb_select(id_packet.opb_select),
-        .has_dest(id_packet.has_dest),
-        .alu_func(id_packet.alufunc),
-        .rd_mem(id_packet.rd_mem),
-        .wr_mem(id_packet.wr_mem),
-        .cond_branch(id_packet.cond_branch),
-        .uncond_branch(id_packet.uncond_branch),
-        .csr_op(id_packet.csr_op),
-        .halt(id_packet.halt),
-        .illegal(id_packet.illegal),
-        .function_type(id_packet.function_type)
-    );
-
-    
-    // BELOW THIS LINE IS NEW
-
-    
     // if_id_packet comes in from fetch stage, mostly passed to decoder
     // decoded_packet is output mostly of decoder, passed to RS/ROB
     // id_packet is output of RS, which is actually issued
+
+        
+    // Basic structure:
+    // Declare RS, ROB, Map Table (and arch map), and Free List
+    // Calculate 'stall' signal based on ROB full, RS full, and Free List empty
+    // Issue an instruction if RS is ready for it 
+    // Update components based on CDB (RS, Map Table?)
+    // On rollback, flush ROB, RS and revert Map Table to Arch Map
+    // Retire stage stuff
+        // Broadcast ROB head pointer (for retire stage)
+        // Pass retire signal (move_head) to ROB, and pass ROB output to update arch map 
+    // If stall is high:
+        // Send stall signal to fetch stage
+        // Keep all inputs same as pervious cycle
+    // If stall is low:
+        // Dequeue from free list (generating a physical dest)
+        // Access map table (convert arch opa/opb to physical) 
+        // Update map table with new dest (if applicable)
+        // Add instruction to ROB,RS
+        
+
+
     
     // Declare Decoder
     
@@ -81,7 +70,7 @@ module dispatch (
         .opa_select(decoded_packet.opa_select),
         .opb_select(decoded_packet.opb_select),
         .has_dest(decoded_packet.has_dest),
-        .alu_func(decoded_packet.alufunc),
+        .alu_func(decoded_packet.alu_func),
         .rd_mem(decoded_packet.rd_mem),
         .wr_mem(decoded_packet.wr_mem),
         .cond_branch(decoded_packet.cond_branch),
@@ -102,9 +91,22 @@ module dispatch (
     PREG mt_preg1_out;
     PREG mt_preg2_out;
 
+    logic [`REG_IDX_SZ:0] mt_arch_map_arch_reg_idx;
+    PREG mt_arch_map_phys_reg_out;
+
+
+    logic [`REG_IDX_SZ:0] mt_arch_dest_idx;
+    logic mt_set_dest_enable;
+    logic [`PHYS_REG_IDX_SZ:0] mt_new_dest_pr_idx;
+
+    PREG mt_old_dest_pr;
+
+    logic [`REG_IDX_SZ:0] mt_retire_arch_reg;
+    logic mt_retire_enable;
+
 
     map_table map_table_0 (
-        .clk(clk),
+        .clk(clock),
         .reset(reset),
         
         /* GET operation 1 (opa) */
@@ -123,7 +125,7 @@ module dispatch (
         // inputs
         .arch_dest_idx(mt_arch_dest_idx),
         .set_dest_enable(mt_set_dest_enable),
-        .new_dest_pr(mt_new_dest_pr),
+        .new_dest_pr_idx(mt_new_dest_pr_idx),
         // output
         .old_dest_pr(mt_old_dest_pr),
 
@@ -149,7 +151,22 @@ module dispatch (
 
 
     // Declare Free List
+
+    // many of these signals are debug signals
     logic free_list_empty;
+
+    logic fl_dequeue_en, fl_was_dequeued;
+    logic [`PHYS_REG_IDX_SZ:0] fl_dequeue_pr, fl_head_pr;
+
+    logic [`PHYS_REG_IDX_SZ:0] fl_enqueue_pr;
+
+    logic fl_enqueue_en, fl_was_enqueued;
+
+    logic fl_is_full;
+
+    logic [`PHYS_REG_IDX_SZ+1:0] fl_back_tail_ptr;
+    logic [`PHYS_REG_IDX_SZ+1:0] fl_front_head_ptr;
+    logic [`PHYS_REG_IDX_SZ:0] fl_free_list[`FREE_LIST_SIZE];
 
     free_list free_list_0 (
         .clk(clock),
@@ -166,7 +183,7 @@ module dispatch (
 
         // debug outputs
         .was_dequeued(fl_was_dequeued),
-        .dequeue_pr(fl_dequeue_pr),
+        .dequeue_pr(fl_dequeue_pr), // TODO combine with fl_head_pr? should always be the same
 
 
         /* WRITE to tail operation */
@@ -188,7 +205,10 @@ module dispatch (
 
     //  Declare ROB
     logic rob_full; // Is the ROB currently full (we should stall)
-      // TODO fixup inputs and outputs
+    
+    logic [$clog2(`ROB_SZ)-1:0] head; // Index of the current head printer in the ROB
+    logic [$clog2(`ROB_SZ)-1:0] rob_index; // Index of the current instruction in the ROB
+
     reorder_buffer reorder_buffer_0(
         .clock(clock),
         .reset(reset),
@@ -228,8 +248,8 @@ module dispatch (
     
     // Declare RS
     PREG rs_ready_reg;
-    rs_ready_reg.reg_num = cdb_ready_reg;
-    rs_ready_reg.ready = cdb_broadcast_en; // TODO this is duplicate
+    assign rs_ready_reg.reg_num = cdb_ready_reg;
+    assign rs_ready_reg.ready = cdb_broadcast_en; // TODO this is duplicate
 
     /* TODO figure out if we ever need to not issue */
     logic issue_enable;
@@ -241,7 +261,7 @@ module dispatch (
         
         /* Allocate */
         .allocate(decoded_packet.valid),
-        .input_packet(decoded),
+        .input_packet(decoded_packet),
 
         .done(alloc_done),
 
@@ -280,11 +300,11 @@ module dispatch (
     /* Calculate STALL logic */
     logic rs_full;
     
-    assign rs_full = (alu_entries_full & (decoded_packet.function_type == `ALU)) \
-                   | (mult_entries_full & (decoded_packet.function_type == `MULT)) \
-                   | (load_entries_full & (decoded_packet.function_type == `LOAD)) \
-                   | (store_entries_full & (decoded_packet.function_type == `STORE)) \
-                   | (branch_entries_full & (decoded_packet.function_type == `BRANCH));
+    assign rs_full = (alu_entries_full & (decoded_packet.function_type == ALU))
+                   | (mult_entries_full & (decoded_packet.function_type == MULT)) 
+                   | (load_entries_full & (decoded_packet.function_type == LOAD)) 
+                   | (store_entries_full & (decoded_packet.function_type == STORE)) 
+                   | (branch_entries_full & (decoded_packet.function_type == BRANCH));
                    
     // rstall if ROB full or RS full or free list empty
     assign stall = (rob_full | rs_full | free_list_empty);
@@ -313,30 +333,6 @@ module dispatch (
     /* Update Map Table with newly dequeued pr dest if it should exist */
     assign mt_set_dest_enable = decoded_packet.valid & decoded_packet.has_dest;
     assign mt_arch_dest_idx = decoded_packet.inst.r.rd;
-    assign mt_new_dest_pr = decoded_packet.dest_reg.reg_num; // TODO should this be PREG?
-
-
-    
-    // TODO:
-    // Declare RS, ROB, Map Table (and arch map), and Free List
-    // Calculate 'stall' signal based on ROB full, RS full, and Free List empty
-    // Issue an instruction if RS is ready for it 
-    // Update components based on CDB (RS, Map Table?)
-    // On rollback, flush ROB, RS and revert Map Table to Arch Map
-    // Retire stage stuff
-        // Broadcast ROB head pointer (for retire stage)
-        // Pass retire signal (move_head) to ROB, and pass ROB output to update arch map 
-    // If stall is high:
-        // Send stall signal to fetch stage
-        // Keep all inputs same as pervious cycle
-    // If stall is low:
-        // Dequeue from free list (generating a physical dest)
-        // Access map table (convert arch opa/opb to physical) 
-        // Update map table with new dest (if applicable)
-        // Add instruction to ROB,RS
-        
-
-
-
+    assign mt_new_dest_pr_idx = decoded_packet.dest_reg.reg_num; // TODO should this be PREG?
 
 endmodule // decoder
