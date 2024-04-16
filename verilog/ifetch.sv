@@ -13,7 +13,7 @@ module ifetch (
     
     //          ***INPUTS***
 
-    input             if_valid,       // only go to next PC when true
+    input             if_valid,       // only pop the the instruction buffer head if valid
     
     // Program Counter Inputs   
     input [`XLEN-1:0] certain_branch_pc, 
@@ -81,49 +81,64 @@ module ifetch (
 
     always_comb begin
 
-        // Select the next PC based four possible sources if we are not busy
-        if (if_valid) begin 
-            if (fetch_available) begin 
-                unique case (gnt)
-                    4'b1000 : n_PC_reg = certain_branch_pc;
-                    4'b0100 : n_PC_reg = rob_target_pc;
-                    4'b0010 : n_PC_reg = branch_pred_pc;
-                    4'b0001 : n_PC_reg = PC_reg + 4;
-                    default : n_PC_reg = 32'hdeadbeef;
-                endcase
-            end else begin 
-                n_PC_reg = PC_reg;
-            end 
+        // if cache can receive new request and the buffer not full, request the next pc
+        if (fetch_available && inst_buffer_tail < `INSN_BUF_SIZE) begin 
+            unique case (gnt)
+                4'b1000 : n_PC_reg = certain_branch_pc;
+                4'b0100 : n_PC_reg = rob_target_pc;
+                4'b0010 : n_PC_reg = branch_pred_pc;
+                4'b0001 : n_PC_reg = PC_reg + 4;
+                default : n_PC_reg = 32'hdeadbeef;
+            endcase
+        end else begin 
+            n_PC_reg = PC_reg;
+        end 
 
-            if (Icache2proc_data_valid && (inst_buffer_tail < `INST_BUF_SIZE)) begin
-                n_inst_buffer[inst_buffer_tail].inst = PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
-                n_inst_buffer[inst_buffer_tail].PC = PC_reg;
-                n_inst_buffer[inst_buffer_tail].NPC = PC_reg + 4;
-                n_inst_buffer[inst_buffer_tail].valid = 1;
+        // if we get a response from cache and there is room in the buffer, add the instruction to the tail of buffer
+        if (Icache2proc_data_valid) begin
+            // pushing to the inst buffer
+            n_inst_buffer[inst_buffer_tail].inst = PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
+            n_inst_buffer[inst_buffer_tail].PC = PC_reg;
+            n_inst_buffer[inst_buffer_tail].NPC = PC_reg + 4;
+            n_inst_buffer[inst_buffer_tail].valid = 1;
+            
+            // if we output, head and input a new instruction the tail is same
+            if (if_valid) begin
                 n_inst_buffer_tail = inst_buffer_tail; // buffer does not grow because releasing and fetching at same time
-                n_fetch_available = 1;
-            end else begin
-                n_inst_buffer[inst_buffer_tail].inst = `NOP;
-                n_inst_buffer[inst_buffer_tail].PC = PC_reg;
-                n_inst_buffer[inst_buffer_tail].NPC = PC_reg + 4;
-                n_inst_buffer[inst_buffer_tail].valid = 0;
-                if (inst_buffer_tail > 0) begin
-                    n_inst_buffer_tail = inst_buffer_tail - 1;
-                end else begin 
-                    n_inst_buffer_tail = 0;
-                end
-                n_fetch_available = 0;
+            // if we don't output a new instruction, tail grows
+            end else begin 
+                n_inst_buffer_tail = inst_buffer_tail + 1;
             end
+        end else if (!Icache2proc_data_valid && if_valid) begin
+            // if we don't get a response from memory but we output the instruction
+            // we need to push a NOP to the tail of buffer
 
+            n_inst_buffer[inst_buffer_tail].inst = `NOP;
+            n_inst_buffer[inst_buffer_tail].PC = PC_reg;
+            n_inst_buffer[inst_buffer_tail].NPC = PC_reg + 4;
+            n_inst_buffer[inst_buffer_tail].valid = 0;
+            
+            // keep the tail above zero while decrementing 
+            if (inst_buffer_tail > 0) begin
+                n_inst_buffer_tail = inst_buffer_tail - 1;
+            end else begin 
+                n_inst_buffer_tail = 0;
+            end
+        end 
+
+        // if we filled the buffer, we can't fetch anymore
+        if (n_inst_buffer_tail == `INST_BUF_SIZE - 1) begin
+            n_fetch_available = 0;
+        end else begin
+            n_fetch_available = 1;
+        end
+
+        if (if_valid && (inst_buffer_tail > 0)) begin 
             for (int i = 0; i < inst_buffer_tail; i++) begin
                 n_inst_buffer[i] = inst_buffer[i+1];
             end
-
         end else begin
-            n_PC_reg = PC_reg;
             n_inst_buffer = inst_buffer;
-            n_fetch_available = fetch_available;
-            n_inst_buffer_tail = inst_buffer_tail;
         end
     end
 
