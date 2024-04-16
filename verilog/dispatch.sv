@@ -307,7 +307,7 @@ module dispatch (
     assign decoded_packet.rob_index = rob_index;
 
     /* Calculate STALL logic */
-    logic rs_full;
+    //logic rs_full;
     
     assign rs_full = (alu_entries_full & (decoded_packet.function_type == ALU))
                    | (mult_entries_full & (decoded_packet.function_type == MULT)) 
