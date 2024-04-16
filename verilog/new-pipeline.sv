@@ -208,7 +208,7 @@ module pipeline (
     logic rollback; // TODO probably more
 
     // Retire stage signals 
-    logic retire_move_head; // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
+    logic rob_move_head; // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
 
     // Signals from functional units (so, complete stage)
     // TODO probably don't need all of these/could compact
@@ -221,6 +221,9 @@ module pipeline (
     // Stall output signal
     // TODO branch addresses?
     logic id_needs_stall;
+
+    // output to retire stage
+    logic [$clog2(`ROB_SZ)-1:0] rob_head_idx;
 
 
     //////////////////////////////////////////////////
@@ -240,6 +243,9 @@ module pipeline (
     assign rs_free_store = co_free_store;
     assign rs_free_branch = co_free_branch;
 
+    assign rob_move_head = retire_move_head;
+
+    assign rollback = 0; // TODO write rollback logic
 
     dispatch dispatch_0 (
         // Inputs 
@@ -254,7 +260,7 @@ module pipeline (
 
         .rollback(rollback), // from somewhere (TODO)
 
-        .retire_move_head(retire_move_head), // from retire stage
+        .retire_move_head(rob_move_head), // from retire stage
 
         // from functional units
         .rs_free_alu(rs_free_alu),
@@ -265,6 +271,9 @@ module pipeline (
 
         // Outputs
         .stall(id_needs_stall),
+
+        .rob_head_idx(rob_head_idx),
+
         .id_packet(id_packet)
     );
 
@@ -466,8 +475,24 @@ module pipeline (
     //          Retire Stage                        //
     //////////////////////////////////////////////////
     // TODO could extract this into the pipeline?
+    assign re_rob_head = rob_head_idx;
+    assign clear_retire_buffer = 0; // TODO write rollback logic
     retire retire_0 (
+        .co_packet(co_packet),
 
+        .mem2proc_response(mem2proc_response),
+        .rob_head(re_rob_head),
+        .clear_retire_buffer(clear_retire_buffer),
+
+        .move_head(retire_move_head),
+
+        // pipeline output
+        .pipeline_completed_insts(pipeline_completed_insts),
+        .pipeline_error_status(pipeline_error_status),
+        .pipeline_commit_wr_idx(pipeline_commit_wr_idx),
+        .pipeline_commit_wr_data(pipeline_commit_wr_data),
+        .pipeline_commit_wr_en(pipeline_commit_wr_en),
+        .pipeline_commit_NPC(pipeline_commit_NPC)
     );
 
 

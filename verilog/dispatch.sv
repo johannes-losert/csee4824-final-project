@@ -32,6 +32,9 @@ module dispatch (
     output logic stall,          // (new) stall signal to ifetch stage 
 
 
+    // Output to retire stage
+    output logic [$clog2(`ROB_SZ)-1:0] rob_head_idx,
+
     // Debug outputs
     output logic rob_full,
     output logic rs_full,
