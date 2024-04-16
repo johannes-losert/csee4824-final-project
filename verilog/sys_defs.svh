@@ -375,21 +375,31 @@ typedef struct packed {
     logic       halt;          // Is this a halt?
     logic       illegal;       // Is this instruction illegal?
     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    
     FUNIT       function_type;
     logic       valid;
 
     logic [$clog2(`ROB_SZ)-1:0] rob_index;
     logic has_dest;
 
+    logic [`MAX_FU_INDEX-1:0] issued_fu_index;
+
 } ID_IS_PACKET;
 
 ID_IS_PACKET INVALID_ID_IS_PACKET = {
     `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    
     {`XLEN{1'b0}}, // PC
     {`XLEN{1'b0}}, // NPC
+    
     OPA_IS_RS1, // opa_select
     OPB_IS_RS2, // opb_select
-    5'b0, // dest_reg_idx
+    
+    // TODO these sizes could be wrong
+    {`PHYS_REG_IDX_SZ{1'b0}, 0}, // dest_reg
+    {`PHYS_REG_IDX_SZ{1'b0}, 0}, // src1_reg
+    {`PHYS_REG_IDX_SZ{1'b0}, 0}, // src2_reg
+
     ALU_ADD, // alu_func
     1'b0, // rd_mem
     1'b0, // wr_mem
@@ -398,10 +408,14 @@ ID_IS_PACKET INVALID_ID_IS_PACKET = {
     1'b0, // halt
     1'b0, // illegal
     1'b0, // csr_op
+
     ALU, // function_type
     1'b0, // valid
-    {`ROB_SZ{1'b0}}, // rob_index
-    1'b0 // has_dest
+
+    {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
+    1'b0, // has_dest
+
+    {`MAX_FU_INDEX-1{1'b0}} // issued_fu_index
 };
 
 
@@ -414,13 +428,14 @@ typedef struct packed {
     logic [`XLEN-1:0] PC;
     logic [`XLEN-1:0] NPC; // PC + 4
 
-    logic [`XLEN-1:0] rs1_value; // reg A value
-    logic [`XLEN-1:0] rs2_value; // reg B value
-
     ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
     ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
 
-    logic [4:0] dest_reg_idx;  // destination (writeback) register index
+    logic [`XLEN-1:0] opa_value; // reg A value
+    logic [`XLEN-1:0] opb_value; // reg B value
+
+    logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
+    
     ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
     logic       rd_mem;        // Does inst read memory?
     logic       wr_mem;        // Does inst write memory?
@@ -429,10 +444,138 @@ typedef struct packed {
     logic       halt;          // Is this a halt?
     logic       illegal;       // Is this instruction illegal?
     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    
     FUNIT function_type;
     logic       valid;
+    
     logic [$clog2(`ROB_SZ)-1:0] rob_index;
+    logic has_dest;
+
+    logic [`MAX_FU_INDEX-1:0] issued_fu_index;
 } IS_EX_PACKET;
+
+IS_EX_PACKET INVALID_IS_EX_PACKET = {
+    `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    
+    {`XLEN{1'b0}}, // PC
+    {`XLEN{1'b0}}, // NPC
+    
+    OPA_IS_RS1, // opa_select
+    OPB_IS_RS2, // opb_select
+    
+    {`XLEN{1'b0}}, // opa_value
+    {`XLEN{1'b0}}, // opb_value
+
+    {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
+
+    ALU_ADD, // alu_func
+    1'b0, // rd_mem
+    1'b0, // wr_mem
+    1'b0, // cond_branch
+    1'b0, // uncond_branch
+    1'b0, // halt
+    1'b0, // illegal
+    1'b0, // csr_op
+
+    ALU, // function_type
+    1'b0, // valid
+    
+    {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
+    1'b0, // has_dest
+
+    {`MAX_FU_INDEX-1{1'b0}} // issued_fu_index
+};
+
+typedef struct packed {
+    // Mostly pass through (TODO a lot is not needed)
+    INST              inst;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC; // PC + 4
+
+    ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
+    ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
+
+    logic [`XLEN-1:0] opa_value; // reg A value
+    logic [`XLEN-1:0] opb_value; // reg B value
+
+    logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
+    
+    ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
+    logic       rd_mem;        // Does inst read memory?
+    logic       wr_mem;        // Does inst write memory?
+    logic       cond_branch;   // Is inst a conditional branch?
+    logic       uncond_branch; // Is inst an unconditional branch?
+    logic       halt;          // Is this a halt?
+    logic       illegal;       // Is this instruction illegal?
+    logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    
+    FUNIT function_type;
+    logic       valid;
+    
+    logic [$clog2(`ROB_SZ)-1:0] rob_index;
+    logic has_dest;
+
+    logic [`MAX_FU_INDEX-1:0] issued_fu_index; // TODO name doesn't make sense anymore, why 'issued'?
+
+    // New stuff from EX stage
+    logic [`XLEN-1:0] result;
+    logic take_branch;
+} EX_CO_PACKET;
+
+
+EX_CO_PACKET INVALID_EX_CO_PACKET = {
+    `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    
+    {`XLEN{1'b0}}, // PC
+    {`XLEN{1'b0}}, // NPC
+    
+    OPA_IS_RS1, // opa_select
+    OPB_IS_RS2, // opb_select
+    
+    {`XLEN{1'b0}}, // opa_value
+    {`XLEN{1'b0}}, // opb_value
+
+    {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
+
+    ALU_ADD, // alu_func
+    1'b0, // rd_mem
+    1'b0, // wr_mem
+    1'b0, // cond_branch
+    1'b0, // uncond_branch
+    1'b0, // halt
+    1'b0, // illegal
+    1'b0, // csr_op
+
+    ALU, // function_type
+    1'b0, // valid
+    
+    {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
+    1'b0, // has_dest
+
+    {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
+
+    {`XLEN{1'b0}}, // result
+    1'b0 // take_branch
+};
+
+// TODO can clean this up, for now just duplicates everything
+typedef CO_RE_PACKET EX_CO_PACKET;
+CO_RE_PACKET INVALID_CO_RE_PACKET = `INVALID_EX_CO_PACKET;
+
+// typedef struct packed {
+//     // OLD
+//     logic [`XLEN-1:0] result;
+//     logic [`XLEN-1:0] NPC;
+//     logic [4:0]       dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
+//     logic             take_branch;
+//     logic             halt;    // not used by wb stage
+//     logic             illegal; // not used by wb stage
+//     logic             valid;
+
+//     logic [$clog2(`ROB_SZ)-1:0] rob_index; // this index is to indicate which instrction we should retire
+// } CO_RE_PACKET;
+
+
 
 /**
  * EX_MEM Packet:
@@ -578,40 +721,6 @@ typedef union packed {
     logic [3:0][15:0] half_level;
     logic [1:0][31:0] word_level;
 } MEM_RETURN;
-
-typedef struct packed {
-    logic [`XLEN-1:0] result;
-    logic [`XLEN-1:0] NPC;
-    logic [4:0]       dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
-    logic             take_branch;
-    logic             halt;    // not used by wb stage
-    logic             illegal; // not used by wb stage
-    logic             valid;
-
-    logic [$clog2(`ROB_SZ)-1:0] rob_index; // this index is to indicate which instrction we should retire
-} CO_RE_PACKET;
-
-
-typedef struct packed {
-    logic [`XLEN-1:0] result;
-    logic [`XLEN-1:0] NPC;
-
-    logic             take_branch; // Is this a taken branch?
-    // Pass-through from decode stage
-    logic [`XLEN-1:0] rs2_value;
-    logic             rd_mem;
-    logic             wr_mem;
-    logic [`PHYS_REG_IDX_SZ:0]       dest_reg_idx;
-    logic             halt;
-    logic             illegal;
-    logic             csr_op;
-    logic             rd_unsigned; // Whether proc2Dmem_data is signed or unsigned
-    MEM_SIZE          mem_size;
-    logic             valid;
-    FUNIT             function_type;
-    logic [$clog2(`ROB_SZ)-1:0] rob_index; // this index is to indicate which instrction we should retire
-} EX_CO_PACKET;
-
 
 typedef struct packed {
     logic [3:0]       completed_insts;
