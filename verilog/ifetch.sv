@@ -82,7 +82,7 @@ module ifetch (
     always_comb begin
 
         // if cache can receive new request and the buffer not full, request the next pc
-        if (fetch_available && inst_buffer_tail < `INSN_BUF_SIZE) begin 
+        if (fetch_available) begin 
             unique case (gnt)
                 4'b1000 : n_PC_reg = certain_branch_pc;
                 4'b0100 : n_PC_reg = rob_target_pc;
@@ -126,10 +126,15 @@ module ifetch (
             end
         end 
 
-        // if we filled the buffer, we can't fetch anymore
-        if (n_inst_buffer_tail == `INST_BUF_SIZE - 1) begin
+        // if we just filled the buffer or 
+        // we are currently requesting, we need to block requests
+        if (n_inst_buffer_tail == `INST_BUF_SIZE - 1 || !Icache2proc_data_valid) begin
             n_fetch_available = 0;
-        end else begin
+        
+        // if the buffer frees up after being full, we can always request again or 
+        // if we get a valid response and there is room in the buffer
+        end else if ((Icache2proc_data_valid && n_inst_buffer_tail < `INST_BUF_SIZE) || 
+        (if_valid && inst_buffer_tail == `INST_BUF_SIZE - 1)) begin
             n_fetch_available = 1;
         end
 
@@ -167,7 +172,3 @@ module ifetch (
     // mem always gives us 8=2^3 bytes, so ignore the last 3 bits
     assign proc2Icache_addr = {PC_reg[`XLEN-1:3], 3'b0};
 endmodule
-
-
-
-

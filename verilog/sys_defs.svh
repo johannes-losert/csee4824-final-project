@@ -558,9 +558,91 @@ EX_CO_PACKET INVALID_EX_CO_PACKET = {
     1'b0 // take_branch
 };
 
-// TODO can clean this up, for now just duplicates everything
-typedef CO_RE_PACKET EX_CO_PACKET;
-CO_RE_PACKET INVALID_CO_RE_PACKET = `INVALID_EX_CO_PACKET;
+typedef struct packed {
+    // Mostly pass through (TODO a lot is not needed)
+    INST              inst;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC; // PC + 4
+
+    ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
+    ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
+
+    logic [`XLEN-1:0] opa_value; // reg A value
+    logic [`XLEN-1:0] opb_value; // reg B value
+
+    logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
+    
+    ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
+    logic       rd_mem;        // Does inst read memory?
+    logic       wr_mem;        // Does inst write memory?
+    logic       cond_branch;   // Is inst a conditional branch?
+    logic       uncond_branch; // Is inst an unconditional branch?
+    logic       halt;          // Is this a halt?
+    logic       illegal;       // Is this instruction illegal?
+    logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    
+    FUNIT function_type;
+    logic       valid;
+    
+    logic [$clog2(`ROB_SZ)-1:0] rob_index;
+    logic has_dest;
+
+    logic [`MAX_FU_INDEX-1:0] issued_fu_index; // TODO name doesn't make sense anymore, why 'issued'?
+
+    // stuff from EX stage
+    logic [`XLEN-1:0] result;
+    logic take_branch;
+
+    // new stuff from complete stage
+    logic regfile_en,
+    logic [`PHYS_REG_IDX_SZ-1:0] regfile_idx,
+    logic [`XLEN-1:0] regfile_data  
+
+} CO_RE_PACKET;
+
+
+CO_RE_PACKET INVALID_CO_RE_PACKET = {
+    `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    
+    {`XLEN{1'b0}}, // PC
+    {`XLEN{1'b0}}, // NPC
+    
+    OPA_IS_RS1, // opa_select
+    OPB_IS_RS2, // opb_select
+    
+    {`XLEN{1'b0}}, // opa_value
+    {`XLEN{1'b0}}, // opb_value
+
+    {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
+
+    ALU_ADD, // alu_func
+    1'b0, // rd_mem
+    1'b0, // wr_mem
+    1'b0, // cond_branch
+    1'b0, // uncond_branch
+    1'b0, // halt
+    1'b0, // illegal
+    1'b0, // csr_op
+
+    ALU, // function_type
+    1'b0, // valid
+    
+    {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
+    1'b0, // has_dest
+
+    {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
+
+    {`XLEN{1'b0}}, // result
+    1'b0, // take_branch
+
+    1'b0, // regfile_en
+    {`PHYS_REG_IDX_SZ{1'b0}}, // regfile_idx
+    {`XLEN{1'b0}} // regfile_data
+};
+
+// // TODO can clean this up, for now just duplicates everything
+// typedef CO_RE_PACKET EX_CO_PACKET;
+// CO_RE_PACKET INVALID_CO_RE_PACKET = `INVALID_EX_CO_PACKET;
 
 // typedef struct packed {
 //     // OLD
