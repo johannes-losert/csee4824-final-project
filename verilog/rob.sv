@@ -142,8 +142,8 @@ module reorder_buffer(
         end
     end
 
-    always_ff @(negedge clock) begin
-        $display("head:%0d tail:%0d", head, tail);
-    end
+    // always_ff @(negedge clock) begin
+    //     $display("head:%0d tail:%0d", head, tail);
+    // end
 
 endmodule
