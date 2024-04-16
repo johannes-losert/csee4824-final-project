@@ -56,13 +56,11 @@ module pipeline (
     //                Pipeline Wires                //
     //////////////////////////////////////////////////
 
-
     // pipeline register enables
     // TODO difference between these and stall signals?
     logic if_id_en, id_is_en, is_ex_en, ex_co_en, co_rt_en;
 
-    // Outputs from IF stage and input to ID stage
-    logic [`XLEN-1:0] if_proc2Icache_addr; 
+    // Outputs from IF stage and input to ID stage 
     IF_ID_PACKET if_packet, if_id_reg;
 
     // Output s from ID stage and input to IS stage
@@ -77,32 +75,22 @@ module pipeline (
     // Outputs from CO stage and input to RT stage
     CO_RT_PACKET co_packet, co_rt_reg;
 
-      //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
     //          Instruction Fetch Signals           //
     //////////////////////////////////////////////////
     // TODO move signals to top and replace this section with assigns
+    
     // Icache input signals
-    logic [3:0] Imem2proc_response, Imem2proc_tag;
-    logic [63:0] Imem2proc_data;
-    logic [`XLEN-1:0] proc2Icache_addr; // Address from fetch stage
+    logic [`XLEN-1:0] icache_input_addr; // Address from fetch stage
 
     // Icache output signals
-    logic [1:0] proc2Imem_command;
-    logic [`XLEN-1:0] proc2Imem_addr;
-
-    logic [63:0] Icache_data_out;
-    logic Icache_valid_out;
+    logic [63:0] icache_data_out;
+    logic icache_data_out_valid;
 
     // Ifetch input signals
     logic if_valid;
     logic [`XLEN-1:0] certain_branch_pc, rob_target_pc, branch_pred_pc;
     logic certain_branch_req, rob_target_req, branch_pred_req;
-
-    logic [63:0] Icache2porc_data;
-    logic Icache2proc_data_valid;
-
-    // Ifetch output signals
-    logic [`XLEN-1:0] if_proc2Icache_addr;
 
     // TODO debug signals?
 
@@ -110,18 +98,12 @@ module pipeline (
     //          Instruction Dispatch Signals        //
     //////////////////////////////////////////////////
 
-    // CDB Signals 
-    logic cdb_broadcast_en;
-    logic [`PHYS_REG_IDX_SZ:0] cdb_ready_reg;
-    logic [`XLEN-1:0] cdb_data;
-
     // Rollback signals 
-    logic rollback; // TODO probably more
+    logic id_rollback; // TODO probably more
 
-    // Retire stage signals 
-    logic rob_move_head; // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
+   // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
 
-    // Signals from functional units (so, complete stage)
+    // Signals from functional units (so, complete stage? or ex stage?)
     // TODO probably don't need all of these/could compact
     logic [`NUM_FU_ALU-1:0] rs_free_alu;
     logic [`NUM_FU_MULT-1:0] rs_free_mult;
@@ -149,13 +131,9 @@ module pipeline (
     // Regfile outputs
     logic [`XLEN-1:0] rf_read_data1, rf_read_data2;
 
-    // Issue inputs
-    logic [`XLEN-1:0] is_opa_data, is_opb_data;
-
     //////////////////////////////////////////////////
     //          Execution Signals                   //
     //////////////////////////////////////////////////
-    // TODO move each FU to just be in the pipeline?
     // ex stage outputs 
     logic [`NUM_FU_ALU-1:0] ex_free_alu;
     logic [`NUM_FU_MULT-1:0] ex_free_mult;
@@ -168,11 +146,6 @@ module pipeline (
     //          Complete Signals                    //
     //////////////////////////////////////////////////
 
-    // Output from Complete Stage to CDB
-    logic co_output_en;
-    logic [`PHYS_REG_IDX_SZ:0] co_output_idx; 
-    logic [`XLEN-1:0] co_output_data;
-
     // Output from Complete Stage to Dispatch/RS
     logic [`NUM_FU_ALU-1:0] co_free_alu;
     logic [`NUM_FU_MULT-1:0] co_free_mult;
@@ -184,9 +157,14 @@ module pipeline (
     //          Retire Signals                      //
     //////////////////////////////////////////////////
 
-    logic [$clog2(`ROB_SZ)-1:0] re_rob_head;
-    logic clear_retire_buffer;
+    logic re_rollback;
 
+    //////////////////////////////////////////////////
+    //          Common Data Bus Signals             //
+    //////////////////////////////////////////////////
+    logic cdb_broadcast_en;
+    logic [`PHYS_REG_IDX_SZ:0] cdb_ready_reg;
+    logic [`XLEN-1:0] cdb_data;
 
     //////////////////////////////////////////////////
     //                Stall Logic                   //
@@ -198,7 +176,7 @@ module pipeline (
 
 
     // TODO implement logic: if stalls if id stage can't accept a new instruction
-    assign if_stall = 0;
+    assign if_stall = id_needs_stall;
 
     // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
     assign id_stall = 0;
@@ -207,36 +185,38 @@ module pipeline (
     assign co_stall = 0;
     assign rt_stall = 0;
 
+    //////////////////////////////////////////////////
+    //                Brach/Interrupt Logic         //
+    //////////////////////////////////////////////////
+    // TODO do this 
+    // TODO also make 'arch free list'
+    assign id_rollback = 0;
+    assign re_rollback = 0;
 
     //////////////////////////////////////////////////
     //          Instruction Fetch Modules           //
     //////////////////////////////////////////////////
 
-    assign proc2Icache_addr = if_proc2Icache_addr;
-
     icache icache_0 (
         .clock(clock),
         .reset(reset),
 
-        // From memory
+        // input from memory
         .Imem2proc_response(mem2proc_response),
         .Imem2proc_data(mem2proc_data),
         .Imem2proc_tag(mem2proc_tag),
 
         // From fetch stage
-        .proc2Icache_addr(proc2Icache_addr),
+        .proc2Icache_addr(icache_input_addr),
 
         // To memory
-        .proc2Imem_command(proc2Imem_command),
-        .proc2Imem_addr(proc2Imem_addr),
+        .proc2Imem_command(proc2mem_command),
+        .proc2Imem_addr(proc2mem_addr),
 
         // To fetch stage
-        .Icache_data_out(Icache_data_out),
-        .Icache_valid_out(Icache_valid_out)
+        .Icache_data_out(icache_data_out),
+        .Icache_valid_out(icache_data_out_valid)
     );
-
-    assign Icache2proc_data = Icache_data_out;
-    assign Icache2proc_data_valid = Icache_valid_out;
 
     ifetch ifetch_0 (
         .clock(clock),
@@ -253,11 +233,14 @@ module pipeline (
         .branch_pred_pc(branch_pred_pc),
         .branch_pred_req(branch_pred_req),
 
-        .Icache2proc_data(Icache2proc_data),
-        .Icache2proc_data_valid(Icache2proc_data_valid),
+        // from icache
+        .Icache2proc_data(icache_data_out),
+        .Icache2proc_data_valid(icache_data_out_valid),
 
-        // Outputs
-        .proc2Icache_addr(proc2Icache_addr),
+        // to icache
+        .proc2Icache_addr(icache_input_addr),
+
+        // output packet
         .if_packet(if_packet)       
     );
 
@@ -283,7 +266,7 @@ module pipeline (
     //          Instruction Dispatch Modules        //
     //////////////////////////////////////////////////
 
-    // TODO figure out which of these is correct--where does free come from
+    // TODO figure out which of these is correct--where does free come from?
     // assign rs_free_alu = ex_free_alu;
     // assign rs_free_mult = ex_free_mult;
     // assign rs_free_load = ex_free_load;
@@ -296,10 +279,6 @@ module pipeline (
     assign rs_free_store = co_free_store;
     assign rs_free_branch = co_free_branch;
 
-    assign rob_move_head = retire_move_head;
-
-    assign rollback = 0; // TODO write rollback logic
-
     dispatch dispatch_0 (
         // Inputs 
         .clock(clock),
@@ -310,12 +289,14 @@ module pipeline (
         // from CDB
         .cdb_broadcast_en(cdb_broadcast_en),
         .cdb_ready_reg(cdb_ready_reg),
+        
+        // from rollback logic
+        .rollback(id_rollback), 
 
-        .rollback(rollback), // from somewhere (TODO)
+        // from retire stage
+        .retire_move_head(retire_move_head), 
 
-        .retire_move_head(rob_move_head), // from retire stage
-
-        // from functional units
+        // from either EX or CO stage? 
         .rs_free_alu(rs_free_alu),
         .rs_free_mult(rs_free_mult),
         .rs_free_load(rs_free_load),
@@ -361,26 +342,25 @@ module pipeline (
         .clock(clock),
         .reset(reset),
 
+        // from issue stage
         .read_idx_1(rf_read_idx1),
         .read_idx_2(rf_read_idx2),
 
+        // from CDB 
         .write_idx(rf_write_idx),
         .write_en(rf_write_en),
         .write_data(rf_write_data),
 
-        //outputs
+        //outputs, to issue stage
         .read_out_1(rf_read_data1),
         .read_out_2(rf_read_data2)
     );
 
-    assign is_opa_data = rf_read_data1;
-    assign is_opb_data = rf_read_data2;
-
     issue issue_0 ( 
         .id_is_reg(id_is_reg),
 
-        .opa_preg_data(is_opa_data),
-        .opb_preg_data(is_opb_data),
+        .opa_preg_data(rf_read_data1),
+        .opb_preg_data(rf_read_data2),
 
         .opa_preg_idx(rf_read_idx1),
         .opb_preg_idx(rf_read_idx2),
@@ -404,6 +384,7 @@ module pipeline (
     //////////////////////////////////////////////////
     //          Execution Stage                     //
     //////////////////////////////////////////////////
+    // TODO move each FU to just be in the pipeline? probably not
     stage_ex stage_ex_0 (
         .clock(clock),
         .reset(reset),
@@ -440,18 +421,14 @@ module pipeline (
     //////////////////////////////////////////////////
     // TODO could extract this into the pipeline?
 
-    assign cdb_broadcast_en = co_output_en;
-    assign cdb_ready_reg = co_output_idx;
-    assign cdb_data = co_output_data;
-
     complete complete_0 (
         .ex_co_reg(ex_co_reg),
         .co_packet(co_packet),
 
         // CDB output
-        .co_output_en(co_output_en),
-        .co_output_idx(co_output_idx),
-        .co_output_data(co_output_data),
+        .co_output_en(cdb_broadcast_en),
+        .co_output_idx(cdb_ready_reg),
+        .co_output_data(cdb_data),
 
         .co_free_alu(co_free_alu),
         .co_free_mult(co_free_mult),
@@ -479,14 +456,12 @@ module pipeline (
     //          Retire Stage                        //
     //////////////////////////////////////////////////
     // TODO could extract this into the pipeline?
-    assign re_rob_head = rob_head_idx;
-    assign clear_retire_buffer = 0; // TODO write rollback logic
     retire retire_0 (
         .co_packet(co_packet),
 
         .mem2proc_response(mem2proc_response),
-        .rob_head(re_rob_head),
-        .clear_retire_buffer(clear_retire_buffer),
+        .rob_head(rob_head_idx),
+        .clear_retire_buffer(re_rollback),
 
         .move_head(retire_move_head),
 
