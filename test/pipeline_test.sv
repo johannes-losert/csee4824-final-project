@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 `include "verilog/sys_defs.svh"
-
+`include "test/mem.sv"
 // P4 TODO: Add your own debugging framework. Basic printing of data structures
 //          is an absolute necessity for the project. You can use C functions
 //          like in test/pipeline_print.c or just do everything in verilog.
@@ -93,14 +93,15 @@ module testbench;
         .proc2mem_command (proc2mem_command),
         .proc2mem_addr    (proc2mem_addr),
         .proc2mem_data    (proc2mem_data),
+`ifndef CACHE_MODE
         .proc2mem_size    (proc2mem_size),
-
+`endif
         .pipeline_completed_insts (pipeline_completed_insts),
         .pipeline_error_status    (pipeline_error_status),
         .pipeline_commit_wr_data  (pipeline_commit_wr_data),
         .pipeline_commit_wr_idx   (pipeline_commit_wr_idx),
         .pipeline_commit_wr_en    (pipeline_commit_wr_en),
-        .pipeline_commit_NPC      (pipeline_commit_NPC),
+        .pipeline_commit_NPC      (pipeline_commit_NPC)
 
         // .if_NPC_dbg       (if_NPC_dbg),
         // .if_inst_dbg      (if_inst_dbg),
@@ -147,7 +148,7 @@ module testbench;
         counter_edges = counter_edges + 1; 
 
         if (counter_edges == mem_latency_edges) begin
-            clk = ~clk;
+            clock = ~clock;
             counter_edges = 0; 
         end
     end
