@@ -77,26 +77,7 @@ module pipeline (
     // Outputs from CO stage and input to RT stage
     CO_RT_PACKET co_packet, co_rt_reg;
 
-    //////////////////////////////////////////////////
-    //                Stall Logic                   //
-    //////////////////////////////////////////////////
-
-    // Logic that controls stalling at each stage 
-    // TODO some of these might not be necessary (probably only need if_stall)
-    logic if_stall, id_stall, is_stall, ex_stall, co_stall, rt_stall;
-
-
-    // TODO implement logic: if stalls if id stage can't accept a new instruction
-    assign if_stall = 0;
-
-    // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
-    assign id_stall = 0;
-    assign is_stall = 0;
-    assign ex_stall = 0;
-    assign co_stall = 0;
-    assign rt_stall = 0;
-
-    //////////////////////////////////////////////////
+      //////////////////////////////////////////////////
     //          Instruction Fetch Signals           //
     //////////////////////////////////////////////////
     // TODO move signals to top and replace this section with assigns
@@ -124,6 +105,108 @@ module pipeline (
     logic [`XLEN-1:0] if_proc2Icache_addr;
 
     // TODO debug signals?
+
+    //////////////////////////////////////////////////
+    //          Instruction Dispatch Signals        //
+    //////////////////////////////////////////////////
+
+    // CDB Signals 
+    logic cdb_broadcast_en;
+    logic [`PHYS_REG_IDX_SZ:0] cdb_ready_reg;
+    logic [`XLEN-1:0] cdb_data;
+
+    // Rollback signals 
+    logic rollback; // TODO probably more
+
+    // Retire stage signals 
+    logic rob_move_head; // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
+
+    // Signals from functional units (so, complete stage)
+    // TODO probably don't need all of these/could compact
+    logic [`NUM_FU_ALU-1:0] rs_free_alu;
+    logic [`NUM_FU_MULT-1:0] rs_free_mult;
+    logic [`NUM_FU_LOAD-1:0] rs_free_load;
+    logic [`NUM_FU_STORE-1:0] rs_free_store;
+    logic [`NUM_FU_BRANCH-1:0] rs_free_branch;
+
+    // Stall output signal
+    // TODO branch addresses?
+    logic id_needs_stall;
+
+    // output to retire stage
+    logic [$clog2(`ROB_SZ)-1:0] rob_head_idx;
+
+    //////////////////////////////////////////////////
+    //          Issue/Regfile Signals               //
+    //////////////////////////////////////////////////
+    
+    // Regfile inputs 
+    logic [`PHYS_REG_IDX_SZ:0] rf_read_idx1, rf_read_idx2, rf_write_idx;
+    
+    logic rf_write_en;
+    logic [`XLEN-1:0] rf_write_data;
+
+    // Regfile outputs
+    logic [`XLEN-1:0] rf_read_data1, rf_read_data2;
+
+    // Issue inputs
+    logic [`XLEN-1:0] is_opa_data, is_opb_data;
+
+    //////////////////////////////////////////////////
+    //          Execution Signals                   //
+    //////////////////////////////////////////////////
+    // TODO move each FU to just be in the pipeline?
+    // ex stage outputs 
+    logic [`NUM_FU_ALU-1:0] ex_free_alu;
+    logic [`NUM_FU_MULT-1:0] ex_free_mult;
+    logic [`NUM_FU_LOAD-1:0] ex_free_load;
+    logic [`NUM_FU_STORE-1:0] ex_free_store;
+    logic [`NUM_FU_BRANCH-1:0] ex_free_branch;
+
+
+    //////////////////////////////////////////////////
+    //          Complete Signals                    //
+    //////////////////////////////////////////////////
+
+    // Output from Complete Stage to CDB
+    logic co_output_en;
+    logic [`PHYS_REG_IDX_SZ:0] co_output_idx; 
+    logic [`XLEN-1:0] co_output_data;
+
+    // Output from Complete Stage to Dispatch/RS
+    logic [`NUM_FU_ALU-1:0] co_free_alu;
+    logic [`NUM_FU_MULT-1:0] co_free_mult;
+    logic [`NUM_FU_BRANCH-1:0] co_free_branch;
+    logic [`NUM_FU_LOAD-1:0] co_free_load;
+    logic [`NUM_FU_STORE-1:0] co_free_store;
+
+    //////////////////////////////////////////////////
+    //          Retire Signals                      //
+    //////////////////////////////////////////////////
+
+    logic [$clog2(`ROB_SZ)-1:0] re_rob_head;
+    logic clear_retire_buffer;
+
+
+    //////////////////////////////////////////////////
+    //                Stall Logic                   //
+    //////////////////////////////////////////////////
+
+    // Logic that controls stalling at each stage 
+    // TODO some of these might not be necessary (probably only need if_stall)
+    logic if_stall, id_stall, is_stall, ex_stall, co_stall, rt_stall;
+
+
+    // TODO implement logic: if stalls if id stage can't accept a new instruction
+    assign if_stall = 0;
+
+    // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
+    assign id_stall = 0;
+    assign is_stall = 0;
+    assign ex_stall = 0;
+    assign co_stall = 0;
+    assign rt_stall = 0;
+
 
     //////////////////////////////////////////////////
     //          Instruction Fetch Modules           //
@@ -195,36 +278,6 @@ module pipeline (
         end
     end
 
-    //////////////////////////////////////////////////
-    //          Instruction Dispatch Signals        //
-    //////////////////////////////////////////////////
-
-    // CDB Signals 
-    logic cdb_broadcast_en;
-    logic [`PHYS_REG_IDX_SZ:0] cdb_ready_reg;
-    logic [`XLEN-1:0] cdb_data;
-
-    // Rollback signals 
-    logic rollback; // TODO probably more
-
-    // Retire stage signals 
-    logic rob_move_head; // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
-
-    // Signals from functional units (so, complete stage)
-    // TODO probably don't need all of these/could compact
-    logic [`NUM_FU_ALU-1:0] rs_free_alu;
-    logic [`NUM_FU_MULT-1:0] rs_free_mult;
-    logic [`NUM_FU_LOAD-1:0] rs_free_load;
-    logic [`NUM_FU_STORE-1:0] rs_free_store;
-    logic [`NUM_FU_BRANCH-1:0] rs_free_branch;
-
-    // Stall output signal
-    // TODO branch addresses?
-    logic id_needs_stall;
-
-    // output to retire stage
-    logic [$clog2(`ROB_SZ)-1:0] rob_head_idx;
-
 
     //////////////////////////////////////////////////
     //          Instruction Dispatch Modules        //
@@ -291,21 +344,6 @@ module pipeline (
             id_is_reg <= id_packet;
         end
     end
-    //////////////////////////////////////////////////
-    //          Issue/Regfile Signals               //
-    //////////////////////////////////////////////////
-    
-    // Regfile inputs 
-    logic [`PHYS_REG_IDX_SZ:0] rf_read_idx1, rf_read_idx2, rf_write_idx;
-    
-    logic rf_write_en;
-    logic [`XLEN-1:0] rf_write_data;
-
-    // Regfile outputs
-    logic [`XLEN-1:0] rf_read_data1, rf_read_data2;
-
-    // Issue inputs
-    logic [`XLEN-1:0] is_opa_data, is_opb_data;
 
     //////////////////////////////////////////////////
     //          Instruction Issue                   //
@@ -364,17 +402,6 @@ module pipeline (
     end
     
     //////////////////////////////////////////////////
-    //          Execution Signals                   //
-    //////////////////////////////////////////////////
-    // TODO move each FU to just be in the pipeline?
-    // ex stage outputs 
-    logic [`NUM_FU_ALU-1:0] ex_free_alu;
-    logic [`NUM_FU_MULT-1:0] ex_free_mult;
-    logic [`NUM_FU_LOAD-1:0] ex_free_load;
-    logic [`NUM_FU_STORE-1:0] ex_free_store;
-    logic [`NUM_FU_BRANCH-1:0] ex_free_branch;
-
-    //////////////////////////////////////////////////
     //          Execution Stage                     //
     //////////////////////////////////////////////////
     stage_ex stage_ex_0 (
@@ -407,22 +434,6 @@ module pipeline (
             ex_co_reg      <= ex_packet;
         end
     end
-
-    //////////////////////////////////////////////////
-    //          Complete Signals                    //
-    //////////////////////////////////////////////////
-
-    // Output from Complete Stage to CDB
-    logic co_output_en;
-    logic [`PHYS_REG_IDX_SZ:0] co_output_idx; 
-    logic [`XLEN-1:0] co_output_data;
-
-    // Output from Complete Stage to Dispatch/RS
-    logic [`NUM_FU_ALU-1:0] co_free_alu;
-    logic [`NUM_FU_MULT-1:0] co_free_mult;
-    logic [`NUM_FU_BRANCH-1:0] co_free_branch;
-    logic [`NUM_FU_LOAD-1:0] co_free_load;
-    logic [`NUM_FU_STORE-1:0] co_free_store;
 
     //////////////////////////////////////////////////
     //          Complete Stage                      //
@@ -463,13 +474,6 @@ module pipeline (
             co_re_reg      <= co_packet;
         end
     end
-
-    //////////////////////////////////////////////////
-    //          Retire Signals                      //
-    //////////////////////////////////////////////////
-
-    logic [$clog2(`ROB_SZ)-1:0] re_rob_head;
-    logic clear_retire_buffer;
 
     //////////////////////////////////////////////////
     //          Retire Stage                        //
