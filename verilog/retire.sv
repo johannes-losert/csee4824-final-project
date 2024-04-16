@@ -1,4 +1,7 @@
 module retire(
+    input logic clock,
+    input logic reset,
+
     input CO_RE_PACKET      co_packet, //need to add type
 
     // input logic             regfile_en,  // register write enable
@@ -23,39 +26,107 @@ module retire(
 
     RETIRE_ENTRY [`ROB_SZ-1:0] retire_buffer;
 
+    RETIRE_ENTRY incoming_entry, outgoing_entry;
 
+    logic do_forward;
+
+    // If incoming packet is valid and also head of ROB, then forward 
+    assign do_forward = co_packet.valid && (co_packet.rob_index == rob_head);
+
+    // Populate incoming entry, from the pipeline
+    always_comb begin 
+        incoming_entry.valid = co_packet.valid;
+        incoming_entry.completed_insts = {3'b0, co_packet.valid};
+        incoming_entry.NPC = co_packet.NPC;
+        incoming_entry.error_status = co_packet.illegal ? ILLEGAL_INST :
+                                      co_packet.halt    ? HALTED_ON_WFI :
+                                      (mem2proc_response==4'h0) ? LOAD_ACCESS_FAULT :
+                                      NO_ERROR;
+        incoming_entry.regfile_en = co_packet.regfile_en;
+        incoming_entry.regfile_idx = co_packet.regfile_idx;
+        incoming_entry.regfile_data = co_packet.regfile_data;
+    end 
+
+    // Populate outgoing entry, from the buffer
     always_comb begin
-        if (co_packet.valid) begin
-            retire_buffer[co_packet.rob_index].valid                 = 1;
-            retire_buffer[co_packet.rob_index].completed_insts       =  {3'b0, co_packet.valid};
-            retire_buffer[co_packet.rob_index].NPC                   = co_packet.NPC;
-            retire_buffer[co_packet.rob_index].error_status = co_packet.illegal        ? ILLEGAL_INST :
-                                                                       co_packet.halt           ? HALTED_ON_WFI :
-                                                                       (mem2proc_response==4'h0) ? LOAD_ACCESS_FAULT : NO_ERROR;
-            retire_buffer[co_packet.rob_index].regfile_en    = co_packet.regfile_en;
-            retire_buffer[co_packet.rob_index].regfile_idx   = co_packet.regfile_idx;
-            retire_buffer[co_packet.rob_index].regfile_data  = co_packet.regfile_data;
+        if (do_forward) begin
+            outgoing_entry = incoming_entry;
+        end else begin 
+            outgoing_entry = retire_buffer[rob_head];
         end 
-        if (retire_buffer[rob_head].valid) begin
-            move_head = 1;
-            pipeline_completed_insts = retire_buffer[rob_head].completed_insts;
-            pipeline_error_status    = retire_buffer[rob_head].error_status;
-            pipeline_commit_wr_idx   = retire_buffer[rob_head].regfile_idx;
-            pipeline_commit_wr_data  = retire_buffer[rob_head].regfile_data;
-            pipeline_commit_wr_en    = retire_buffer[rob_head].regfile_en;
-            pipeline_commit_NPC      = retire_buffer[rob_head].NPC;
-            retire_buffer[rob_head].valid = 0;
-        end else begin
-            move_head = 0;
-        end
-    end
+   end
 
-    always_comb begin
-        if (take_branch) begin
-            for (int i; i < `ROB_SZ; i++) begin
+   // Move head if outgoing entry is valid
+   assign move_head = ~reset && ~clear_retire_buffer && outgoing_entry.valid;
+
+    always @(posedge clock) begin
+        if (reset || clear_retire_buffer) begin
+            for (int i=0; i < `ROB_SZ; i++) begin
                 retire_buffer[i].valid = 0;
             end
-        end   
+        end else begin 
+            // Adding to retire buffer
+            if (do_forward) begin 
+                // If forwarding, we do not add to buffer 
+                assert(retire_buffer[rob_head].valid == 0'b1); // Make sure we are not overwriting? Maybe is OK            
+            end else if (incoming_entry.valid) begin 
+                // Add completed packet to retire buffer
+                assert(retire_buffer[co_packet.rob_index].valid == 0'b0); // Make sure we are not overwriting
+                retire_buffer[co_packet.rob_index] <= incoming_entry;
+            end
+
+            if (outgoing_entry.valid) begin
+                // Remove from retire buffer
+                if (!do_forward) begin 
+                    // If we are forwarding, do not remove head from buffer? TODO this is weird b/c move head will still be raised
+                    retire_buffer[rob_head].valid <= 0;
+                end
+
+                // Update pipeline outputs with outgoing entry
+                pipeline_completed_insts <= outgoing_entry.completed_insts;
+                pipeline_error_status    <= outgoing_entry.error_status;
+                pipeline_commit_wr_idx   <= outgoing_entry.regfile_idx;
+                pipeline_commit_wr_data  <= outgoing_entry.regfile_data;
+                pipeline_commit_wr_en    <= outgoing_entry.regfile_en;
+                pipeline_commit_NPC      <= outgoing_entry.NPC;
+            end 
+        end  
     end
+
+    // old
+
+    // always_comb begin
+    //     if (co_packet.valid) begin
+    //         retire_buffer[co_packet.rob_index].valid                 = 1;
+    //         retire_buffer[co_packet.rob_index].completed_insts       =  {3'b0, co_packet.valid};
+    //         retire_buffer[co_packet.rob_index].NPC                   = co_packet.NPC;
+    //         retire_buffer[co_packet.rob_index].error_status = co_packet.illegal        ? ILLEGAL_INST :
+    //                                                                    co_packet.halt           ? HALTED_ON_WFI :
+    //                                                                    (mem2proc_response==4'h0) ? LOAD_ACCESS_FAULT : NO_ERROR;
+    //         retire_buffer[co_packet.rob_index].regfile_en    = co_packet.regfile_en;
+    //         retire_buffer[co_packet.rob_index].regfile_idx   = co_packet.regfile_idx;
+    //         retire_buffer[co_packet.rob_index].regfile_data  = co_packet.regfile_data;
+    //     end 
+    //     if (retire_buffer[rob_head].valid) begin
+    //         move_head = 1;
+    //         pipeline_completed_insts = retire_buffer[rob_head].completed_insts;
+    //         pipeline_error_status    = retire_buffer[rob_head].error_status;
+    //         pipeline_commit_wr_idx   = retire_buffer[rob_head].regfile_idx;
+    //         pipeline_commit_wr_data  = retire_buffer[rob_head].regfile_data;
+    //         pipeline_commit_wr_en    = retire_buffer[rob_head].regfile_en;
+    //         pipeline_commit_NPC      = retire_buffer[rob_head].NPC;
+    //         retire_buffer[rob_head].valid = 0;
+    //     end else begin
+    //         move_head = 0;
+    //     end
+    // end
+
+    // always_comb begin
+    //     if (clear_retire_buffer) begin
+    //         for (int i=0; i < `ROB_SZ; i++) begin
+    //             retire_buffer[i].valid = 0;
+    //         end
+    //     end   
+    // end
 
 endmodule //retire
