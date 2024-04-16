@@ -12,7 +12,7 @@
 
 `include "verilog/sys_defs.svh"
 `include "verilog/ISA.svh"
-`include "verilog/functional_units.sv"
+// `include "verilog/functional_units.sv"
 
 module stage_ex (
     
