@@ -68,10 +68,10 @@ module retire(
             // Adding to retire buffer
             if (do_forward) begin 
                 // If forwarding, we do not add to buffer 
-                assert(retire_buffer[rob_head].valid == 0'b1); // Make sure we are not overwriting? Maybe is OK            
+                assert(retire_buffer[rob_head].valid == 1'b0); // Make sure we are not overwriting? Maybe is OK            
             end else if (incoming_entry.valid) begin 
                 // Add completed packet to retire buffer
-                assert(retire_buffer[co_packet.rob_index].valid == 0'b0); // Make sure we are not overwriting
+                assert(retire_buffer[co_packet.rob_index].valid == 1'b0); // Make sure we are not overwriting
                 retire_buffer[co_packet.rob_index] <= incoming_entry;
             end
 
