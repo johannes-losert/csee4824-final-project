@@ -1,6 +1,6 @@
 `include "verilog/sys_defs.svh"
 `include "verilog/ISA.svh"
-`include "verilog/mult.sv"
+// `include "verilog/mult.sv"
 
 // ALU: computes the result of FUNC applied with operands A and B
 module alu (
