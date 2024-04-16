@@ -1,12 +1,18 @@
 //TODO: add signals to free RS
 
 module complete(
-    input EX_CO_PACKAGE ex_co_reg; //need to add type
-    input [`MAX_FU_INDEX-1:0] fu_index;
-    output CO_RE_PACKAGE co_package;
+    input EX_CO_PACKET ex_co_reg; //need to add type
+    
+    // input [`MAX_FU_INDEX-1:0] fu_index;
+    
+    output CO_RE_PACKET co_packet;
+
+    // Completed instruction info (to CDB)
     output logic             regfile_en,  // register write enable
     output logic [`PHYS_REG_SZ-1:0]              regfile_idx, // register write index
     output logic [`XLEN-1:0] regfile_data, // register write data 
+    
+    // Newly freed FU info (to dispatch/RS)
     output [`NUM_FU_ALU-1:0] free_alu,
     output [`NUM_FU_ALU-1:0] free_mult,
     output [`NUM_FU_ALU-1:0] free_branch,
@@ -14,14 +20,42 @@ module complete(
     output [`NUM_FU_ALU-1:0] free_store,
 );
 
-    assign co_package.result = ex_co_reg.result;
-    assign co_package.NPC = ex_co_reg.NPC;
-    assign co_package.dest_reg_idx = ex_co_reg.dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
-    assign co_package.take_branch = ex_co_reg.take_branch;
-    assign co_package.halt = ex_co_reg.halt;    // not used by wb stage
-    assign co_package.illegal = ex_co_reg.illegal; // not used by wb stage
-    assign co_package.valid = ex_co_reg.valid;
-    assign co_package.rob_index = ex_co_reg.rob_index;
+    logic [`MAX_FU_INDEX-1:0] fu_index;
+    assign fu_index = ex_co_reg.issued_fu_index;
+
+    // Passthrough
+    assign co_packet.inst = ex_co_reg.inst;
+    assign co_packet.PC = ex_co_reg.PC;
+    assing co_packet.NPC = ex_co_reg.NPC;
+
+    assign co_packet.opa_select = ex_co_reg.opa_select;
+    assign co_packet.opb_select = ex_co_reg.opb_select;
+
+    assign co_packet.opa_value = ex_co_reg.opa_value;
+    assign co_packet.opb_value = ex_co_reg.opb_value;
+
+    assign co_packet.alu_func = ex_co_reg.alu_func;
+    assign co_packet.rd_mem = ex_co_reg.rd_mem;
+    assign co_packet.wr_mem = ex_co_reg.wr_mem;
+    assign co_packet.cond_branch = ex_co_reg.cond_branch;
+    assign co_packet.uncond_branch = ex_co_reg.uncond_branch;
+    assign co_packet.halt = ex_co_reg.halt;
+    assign co_packet.illegal = ex_co_reg.illegal;
+    assign co_packet.csr_op = ex_co_reg.csr_op;
+
+    assign co_packet.function_type = ex_co_reg.function_type;
+    assign co_packet.valid = ex_co_reg.valid;
+
+    
+
+    // assign co_packet.result = ex_co_reg.result;
+    // assign co_packet.NPC = ex_co_reg.NPC;
+    // assign co_packet.dest_reg_idx = ex_co_reg.dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
+    // assign co_packet.take_branch = ex_co_reg.take_branch;
+    // assign co_packet.halt = ex_co_reg.halt;    // not used by wb stage
+    // assign co_packet.illegal = ex_co_reg.illegal; // not used by wb stage
+    // assign co_packet.valid = ex_co_reg.valid;
+    // assign co_packet.rob_index = ex_co_reg.rob_index;
 
     always_comb begin : 
         free_alu = 0;
