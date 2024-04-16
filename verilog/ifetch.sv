@@ -34,7 +34,8 @@ module ifetch (
     // To cache to get inst from memory
     output [`XLEN-1:0] proc2Icache_addr,
     // To decode
-    output IF_ID_PACKET if_packet,    
+    output IF_ID_PACKET if_packet,
+    output [`XLEN-1:0] if_PC_reg,    
     
     //          *** DEBUG ***
     output [3:0] req_debug,
@@ -45,6 +46,7 @@ module ifetch (
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
+    assign if_PC_reg = PC_reg;
     logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching
     
     logic fetch_available; // if we are currently fetching an instruction in current cycle
