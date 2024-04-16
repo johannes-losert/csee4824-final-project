@@ -1,28 +1,28 @@
 //TODO: add signals to free RS
 
 module complete(
-    input EX_CO_PACKET ex_co_reg; //need to add type
+    input EX_CO_PACKET ex_co_reg, //need to add type
     
     // input [`MAX_FU_INDEX-1:0] fu_index;
     
-    output CO_RE_PACKET co_packet;
+    output CO_RE_PACKET co_packet,
 
     // Completed instruction info (to CDB)
-    output logic             regfile_en,  // register write enable
-    output logic [`PHYS_REG_SZ-1:0]              regfile_idx, // register write index
-    output logic [`XLEN-1:0] regfile_data, // register write data 
+    output logic co_output_en,  // register write enable
+    output logic [`PHYS_REG_IDX_SZ:0] co_output_idx, // register write index
+    output logic [`XLEN-1:0] co_output_data, // register write data 
     
     // Newly freed FU info (to dispatch/RS)
-    output [`NUM_FU_ALU-1:0] free_alu,
-    output [`NUM_FU_MULT-1:0] free_mult,
-    output [`NUM_FU_BRANCH-1:0] free_branch,
-    output [`NUM_FU_LOAD-1:0] free_load,
-    output [`NUM_FU_STORE-1:0] free_store,
+    output logic [`NUM_FU_ALU-1:0] free_alu,
+    output logic [`NUM_FU_MULT-1:0] free_mult,
+    output logic [`NUM_FU_BRANCH-1:0] free_branch,
+    output logic [`NUM_FU_LOAD-1:0] free_load,
+    output logic [`NUM_FU_STORE-1:0] free_store
 );
     
-    assign co_packet.regfile_en = regfile_en;
-    assign co_packet.regfile_idx = regfile_idx;
-    assign co_packet.regfile_data = regfile_data;
+    assign co_packet.regfile_en = co_output_en;
+    assign co_packet.regfile_idx = co_output_idx;
+    assign co_packet.regfile_data = co_output_data;
     
     // Passthrough
     assign co_packet.inst = ex_co_reg.inst;
@@ -71,7 +71,7 @@ module complete(
     logic [`MAX_FU_INDEX-1:0] fu_index;
     assign fu_index = ex_co_reg.issued_fu_index;
 
-    always_comb begin : 
+    always_comb begin
         free_alu = 0;
         free_mult = 0;
         free_load = 0;
@@ -94,9 +94,9 @@ module complete(
     // This enable computation is sort of overkill since the reg file
     // also handles the `ZERO_REG case, but there's no harm in putting this here
     // the valid check is also somewhat redundant
-    assign regfile_en = ex_co_reg.valid && (ex_co_reg.dest_reg_idx != `ZERO_REG);
+    assign co_output_en = ex_co_reg.valid && (ex_co_reg.dest_reg_idx != `ZERO_REG);
 
-    assign regfile_idx = ex_co_reg.dest_reg_idx; // PHYSICAL register index 
+    assign co_output_idx = ex_co_reg.dest_reg_idx; // PHYSICAL register index 
 
     // Select register writeback data:
     // ALU/MEM result, unless taken branch, in which case we write
@@ -104,6 +104,6 @@ module complete(
     // and jumps write back the 'link' value, but those that don't
     // use it specify ZERO_REG as the destination.
     // TODO make sure this is still right?
-    assign regfile_data = (ex_co_reg.take_branch) ? ex_co_reg.NPC : ex_co_reg.result;
+    assign co_output_data = (ex_co_reg.take_branch) ? ex_co_reg.NPC : ex_co_reg.result;
     
 endmodule // complete
