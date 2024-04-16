@@ -9,6 +9,15 @@
 /////////////////////////////////////////////////////////////////////////
 
 `include "verilog/sys_defs.svh"
+`include "verilog/icache.sv"
+`include "verilog/ifetch.sv"
+`include "verilog/dispatch.sv"
+`include "verilog/issue.sv"
+`include "verilog/stage_ex.sv"
+`include "verilog/complete.sv"
+`include "verilog/retire.sv"
+`include "verilog/regfile.sv"
+
 
 module pipeline (
     input        clock,             // System clock
@@ -30,7 +39,7 @@ module pipeline (
     output logic [4:0]       pipeline_commit_wr_idx,
     output logic [`XLEN-1:0] pipeline_commit_wr_data,
     output logic             pipeline_commit_wr_en,
-    output logic [`XLEN-1:0] pipeline_commit_NPC,
+    output logic [`XLEN-1:0] pipeline_commit_NPC
 
     // Debug outputs: these signals are solely used for debugging in testbenches
     // Do not change for project 3
@@ -58,7 +67,7 @@ module pipeline (
 
     // pipeline register enables
     // TODO difference between these and stall signals?
-    logic if_id_en, id_is_en, is_ex_en, ex_co_en, co_rt_en;
+    logic if_id_en, id_is_en, is_ex_en, ex_co_en, co_re_en;
 
     // Outputs from IF stage and input to ID stage 
     IF_ID_PACKET if_packet, if_id_reg;
@@ -73,7 +82,7 @@ module pipeline (
     EX_CO_PACKET ex_packet, ex_co_reg;
 
     // Outputs from CO stage and input to RT stage
-    CO_RT_PACKET co_packet, co_rt_reg;
+    CO_RE_PACKET co_packet, co_re_reg;
 
     //////////////////////////////////////////////////
     //          Instruction Fetch Signals           //
@@ -243,6 +252,11 @@ module pipeline (
         // output packet
         .if_packet(if_packet)       
     );
+    
+    //////////////////////////////////////////////////
+    //              Branch Modules                  //
+    //////////////////////////////////////////////////
+
 
     //////////////////////////////////////////////////
     //          IF ID Pipeline Register             //
@@ -284,7 +298,7 @@ module pipeline (
         .clock(clock),
         .reset(reset),
 
-        .if_id_packet(if_id_packet), // From pipeline reg
+        .if_id_packet(if_id_reg), // From pipeline reg
 
         // from CDB
         .cdb_broadcast_en(cdb_broadcast_en),
@@ -297,11 +311,11 @@ module pipeline (
         .retire_move_head(retire_move_head), 
 
         // from either EX or CO stage? 
-        .rs_free_alu(rs_free_alu),
-        .rs_free_mult(rs_free_mult),
-        .rs_free_load(rs_free_load),
-        .rs_free_store(rs_free_store),
-        .rs_free_branch(rs_free_branch),
+        .free_alu(rs_free_alu),
+        .free_mult(rs_free_mult),
+        .free_load(rs_free_load),
+        .free_store(rs_free_store),
+        .free_branch(rs_free_branch),
 
         // Outputs
         .stall(id_needs_stall),
@@ -320,7 +334,7 @@ module pipeline (
     assign id_is_enable = 1'b1; 
     always_ff @(posedge clock) begin
         if (reset) begin   
-            id_is_reg <= `INVALID_ID_IS_PACKET;
+            id_is_reg <= INVALID_ID_IS_PACKET;
         end else if (id_is_enable) begin
             id_is_reg <= id_packet;
         end
@@ -340,7 +354,7 @@ module pipeline (
 
     regfile regfile_0 (
         .clock(clock),
-        .reset(reset),
+      //  .reset(reset),
 
         // from issue stage
         .read_idx_1(rf_read_idx1),
@@ -375,7 +389,7 @@ module pipeline (
     assign is_ex_enable = 1'b1; 
     always_ff @(posedge clock) begin
         if (reset) begin   
-            is_ex_reg <= `INVALID_ID_IS_PACKET;
+            is_ex_reg <= INVALID_ID_IS_PACKET;
         end else if (id_is_enable) begin
             is_ex_reg <= is_packet;
         end
@@ -394,11 +408,11 @@ module pipeline (
         // outputs
         .ex_packet(ex_packet),
 
-        .ex_free_alu(ex_free_alu),
-        .ex_free_mult(ex_free_mult),
-        .ex_free_load(ex_free_load),
-        .ex_free_store(ex_free_store),
-        .ex_free_branch(ex_free_branch)
+        .free_alu(ex_free_alu),
+        .free_mult(ex_free_mult),
+        .free_load(ex_free_load),
+        .free_store(ex_free_store),
+        .free_branch(ex_free_branch)
     );
 
     //////////////////////////////////////////////////
@@ -409,7 +423,7 @@ module pipeline (
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
-            ex_co_reg      <= `INVALID_EX_CO_PACKET;
+            ex_co_reg      <= INVALID_EX_CO_PACKET;
         end else if (ex_co_enable) begin
       //      ex_co_inst_dbg <= id_ex_inst_dbg; // debug output, just forwarded from ID
             ex_co_reg      <= ex_packet;
@@ -430,11 +444,11 @@ module pipeline (
         .co_output_idx(cdb_ready_reg),
         .co_output_data(cdb_data),
 
-        .co_free_alu(co_free_alu),
-        .co_free_mult(co_free_mult),
-        .co_free_branch(co_free_branch),
-        .co_free_load(co_free_load),
-        .co_free_store(co_free_store)
+        .free_alu(co_free_alu),
+        .free_mult(co_free_mult),
+        .free_branch(co_free_branch),
+        .free_load(co_free_load),
+        .free_store(co_free_store)
     );
 
     //////////////////////////////////////////////////
@@ -445,7 +459,7 @@ module pipeline (
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
-            co_re_reg      <= `INVALID_CO_RE_PACKET;
+            co_re_reg      <= INVALID_CO_RE_PACKET;
         end else if (ex_co_enable) begin
       //      ex_co_inst_dbg <= id_ex_inst_dbg; // debug output, just forwarded from ID
             co_re_reg      <= co_packet;
