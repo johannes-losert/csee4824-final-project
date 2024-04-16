@@ -227,12 +227,19 @@ module pipeline (
     //          Instruction Dispatch Modules        //
     //////////////////////////////////////////////////
 
+    // TODO figure out which of these is correct--where does free come from
+    // assign rs_free_alu = ex_free_alu;
+    // assign rs_free_mult = ex_free_mult;
+    // assign rs_free_load = ex_free_load;
+    // assign rs_free_store = ex_free_store;
+    // assign rs_free_branch = ex_free_branch;
 
-    assign rs_free_alu = ex_free_alu;
-    assign rs_free_mult = ex_free_mult;
-    assign rs_free_load = ex_free_load;
-    assign rs_free_store = ex_free_store;
-    assign rs_free_branch = ex_free_branch;
+    assign rs_free_alu = co_free_alu;
+    assign rs_free_mult = co_free_mult;
+    assign rs_free_load = co_free_load;
+    assign rs_free_store = co_free_store;
+    assign rs_free_branch = co_free_branch;
+
 
     dispatch dispatch_0 (
         // Inputs 
@@ -396,11 +403,72 @@ module pipeline (
     //          Complete Signals                    //
     //////////////////////////////////////////////////
 
-    // input to complete stage
-    logic [`MAX_FU_INDEX-1:0] fu_index;
-    
+    // Output from Complete Stage to CDB
+    logic co_output_en;
+    logic [`PHYS_REG_IDX_SZ:0] co_output_idx; 
+    logic [`XLEN-1:0] co_output_data;
 
+    // Output from Complete Stage to Dispatch/RS
+    logic [`NUM_FU_ALU-1:0] co_free_alu;
+    logic [`NUM_FU_MULT-1:0] co_free_mult;
+    logic [`NUM_FU_BRANCH-1:0] co_free_branch;
+    logic [`NUM_FU_LOAD-1:0] co_free_load;
+    logic [`NUM_FU_STORE-1:0] co_free_store;
 
+    //////////////////////////////////////////////////
+    //          Complete Stage                      //
+    //////////////////////////////////////////////////
+    // TODO could extract this into the pipeline?
+
+    assign cdb_broadcast_en = co_output_en;
+    assign cdb_ready_reg = co_output_idx;
+    assign cdb_data = co_output_data;
+
+    complete complete_0 (
+        .ex_co_reg(ex_co_reg),
+        .co_packet(co_packet),
+
+        // CDB output
+        .co_output_en(co_output_en),
+        .co_output_idx(co_output_idx),
+        .co_output_data(co_output_data),
+
+        .co_free_alu(co_free_alu),
+        .co_free_mult(co_free_mult),
+        .co_free_branch(co_free_branch),
+        .co_free_load(co_free_load),
+        .co_free_store(co_free_store)
+    );
+
+    //////////////////////////////////////////////////
+    //          CO RE Pipeline Register             //
+    //////////////////////////////////////////////////
+    // TODO figure out this logic
+    assign co_re_enable = 1'b1; // always enabled
+    // synopsys sync_set_reset "reset"
+    always_ff @(posedge clock) begin
+        if (reset) begin
+            co_re_reg      <= `INVALID_CO_RE_PACKET;
+        end else if (ex_co_enable) begin
+      //      ex_co_inst_dbg <= id_ex_inst_dbg; // debug output, just forwarded from ID
+            co_re_reg      <= co_packet;
+        end
+    end
+
+    //////////////////////////////////////////////////
+    //          Retire Signals                      //
+    //////////////////////////////////////////////////
+
+    logic [$clog2(`ROB_SZ)-1:0] re_rob_head;
+    logic clear_retire_buffer;
+
+    //////////////////////////////////////////////////
+    //          Retire Stage                        //
+    //////////////////////////////////////////////////
+    // TODO could extract this into the pipeline?
+    retire retire_0 (
+
+    );
 
 
 
