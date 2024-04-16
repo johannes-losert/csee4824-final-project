@@ -168,6 +168,7 @@ module mem (
 
     // Initialise the entire memory
     initial begin
+        $display("Initializing memory");
         for(int i=0; i<`MEM_64BIT_LINES; i=i+1) begin
             unified_memory[i] = 64'h0;
         end
