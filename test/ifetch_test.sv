@@ -1,7 +1,7 @@
 
 `include "verilog/sys_defs.svh"
 `include "test/mem.sv"
-`include "verilog/icache.sv"
+// `include "verilog/icache.sv"
 
 module testbench;
     logic clock, reset;
