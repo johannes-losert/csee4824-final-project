@@ -173,9 +173,19 @@ DEPS = $(1).simv $(1).cov synth/$(1).vg
 MULT_DEPS = verilog/mult_stage.sv
 $(call DEPS,mult): $(MULT_DEPS)
 
-# No dependencies for the rob (TODO: add any you create)
-ROB_DEPS =
-$(call DEPS,rob): $(ROB_DEPS)
+STAGE_EX_DEPS = verilog/functional_units.sv verilog/mult.sv $(MULT_DEPS)
+$(call DEPS,stage_ex): $(STAGE_EX_DEPS)
+
+IFETCH_DEPS = verilog/psel_gen.sv
+$(call DEPS,ifetch): $(IFETCH_DEPS)
+
+DISPATCH_DEPS = verilog/decoder.sv verilog/map_table.sv verilog/free_list.sv verilog/rob.sv verilog/reservation_station.sv
+$(call DEPS,dispatch): $(DISPATCH_DEPS)
+
+PIPELINE_DEPS = verilog/icache.sv verilog/ifetch.sv $(IFETCH_DEPS) verilog/dispatch.sv $(DISPATCH_DEPS) verilog/issue.sv verilog/stage_ex.sv $(STAGE_EX_DEPS) verilog/complete.sv verilog/retire.sv verilog/regfile.sv
+$(call DEPS,pipeline): $(PIPELINE_DEPS)
+
+
 
 # This allows you to use the following make targets:
 # make <module>.pass   <- greps for "@@@ Passed" or "@@@ Incorrect" in the output
@@ -313,6 +323,20 @@ SOURCES = verilog/pipeline.sv \
           verilog/icache.sv \
           verilog/mult.sv \
           verilog/mult_stage.sv \
+		  verilog/complete.sv \
+		  verilog/decoder.sv \
+		  verilog/dispatch.sv \
+		  verilog/free_list.sv \
+		  verilog/functional_units.sv \
+		  verilog/ifetch.sv \
+		  verilog/issue.sv \
+		  verilog/map_table.sv \
+		  verilog/mem_controller.sv \
+		  verilog/psel_gen.sv \
+		  verilog/reservation_station.sv \
+		  verilog/retire.sv \
+		  verilog/rob.sv \
+		  verilog/stage_ex.sv
 
 SYNTH_FILES = synth/pipeline.vg
 
