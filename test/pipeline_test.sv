@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 `include "verilog/sys_defs.svh"
-`include "test/mem.sv"
+// `include "test/mem.sv"
 // P4 TODO: Add your own debugging framework. Basic printing of data structures
 //          is an absolute necessity for the project. You can use C functions
 //          like in test/pipeline_print.c or just do everything in verilog.
@@ -139,18 +139,18 @@ module testbench;
     );
 
 
-    integer mem_latency_edges = `MEM_LATENCY_IN_CYCLES * 2;
-    integer counter_edges = 0; 
+    // integer mem_latency_edges = `MEM_LATENCY_IN_CYCLES * 2;
+    // integer counter_edges = 0; 
 
     always begin       
         #(`CLOCK_PERIOD/2.0);
         clock = ~clock;
-        counter_edges = counter_edges + 1; 
+        // counter_edges = counter_edges + 1; 
 
-        if (counter_edges == mem_latency_edges) begin
-            clock = ~clock;
-            counter_edges = 0; 
-        end
+        // if (counter_edges == mem_latency_edges) begin
+        //     clock = ~clock;
+        //     counter_edges = 0; 
+        // end
     end
 
 
@@ -190,7 +190,8 @@ module testbench;
 
 
     initial begin
-        //$dumpvars;
+        $display("BEGINNING");
+        // $dumpvars;
 
         // P4 NOTE: You must keep memory loading here the same for the autograder
         //          Other things can be tampered with somewhat
