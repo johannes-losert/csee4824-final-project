@@ -185,8 +185,7 @@ module pipeline (
 
 
     // TODO implement logic: if stalls if id stage can't accept a new instruction
-    assign if_stall = id_needs_stall;
-    assign if_valid = ~if_stall; //TODO fix if valid logic
+    assign if_valid = ~id_needs_stall; //TODO fix if valid logic
 
     // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
     assign id_stall = 0;
