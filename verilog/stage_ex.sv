@@ -19,9 +19,10 @@ module stage_ex (
     input                               clock,
     input                               reset,
     input IS_EX_PACKET                  is_ex_reg,
-    input logic [`MAX_FU_INDEX-1:0]     issue_fu_index, // add this to packet at earlier stage of the pipeline
+    // input logic [`MAX_FU_INDEX-1:0]     issue_fu_index, // add this to packet at earlier stage of the pipeline
 
     output EX_CO_PACKET ex_packet,
+
     output logic [`NUM_FU_ALU-1:0]    free_alu,
     output logic [`NUM_FU_MULT-1:0]   free_mult,
     output logic [`NUM_FU_LOAD-1:0]   free_load,
@@ -43,7 +44,7 @@ module stage_ex (
     // ALU opA mux
     always_comb begin
         case (is_ex_reg.opa_select)
-            OPA_IS_RS1:  opa_mux_out = is_ex_reg.rs1_value;
+            OPA_IS_RS1:  opa_mux_out = is_ex_reg.opa_value;
             OPA_IS_NPC:  opa_mux_out = is_ex_reg.NPC;
             OPA_IS_PC:   opa_mux_out = is_ex_reg.PC;
             OPA_IS_ZERO: opa_mux_out = 0;
@@ -54,7 +55,7 @@ module stage_ex (
     // ALU opB mux
     always_comb begin
         case (is_ex_reg.opb_select)
-            OPB_IS_RS2:   opb_mux_out = is_ex_reg.rs2_value;
+            OPB_IS_RS2:   opb_mux_out = is_ex_reg.opb_value;
             OPB_IS_I_IMM: opb_mux_out = `RV32_signext_Iimm(is_ex_reg.inst);
             OPB_IS_S_IMM: opb_mux_out = `RV32_signext_Simm(is_ex_reg.inst);
             OPB_IS_B_IMM: opb_mux_out = `RV32_signext_Bimm(is_ex_reg.inst);
@@ -70,6 +71,10 @@ module stage_ex (
     logic [`XLEN-1:0] tmp_alu_result; 
     logic [`XLEN-1:0] tmp_mult_result;
     logic [`XLEN-1:0] tmp_branch_result;
+
+    logic [`MAX_FU_INDEX-1:0] issue_fu_index;
+
+    assign issue_fu_index = is_ex_reg.issued_fu_index;
 
     // Instantiate the ALU
     alu alu_0 (
@@ -110,8 +115,8 @@ module stage_ex (
         .clock      (clock),
         .reset      (reset),
         .func       (is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
-        .rs1        (is_ex_reg.rs1_value),
-        .rs2        (is_ex_reg.rs2_value),
+        .rs1        (is_ex_reg.opa_value),
+        .rs2        (is_ex_reg.opb_value),
         .cond_en    (is_ex_reg.function_type == BRANCH && is_ex_reg.valid && issue_fu_index == 0),
 
         // Output
@@ -149,51 +154,140 @@ module stage_ex (
         if(alu_done_process) begin
             ex_packet.result        = tmp_alu_result;
             ex_packet.take_branch   = 0;
+
             // Pass throughs 
-            ex_packet.NPC           = tmp_alu_packet.NPC;
-            ex_packet.rs2_value     = tmp_alu_packet.rs2_value;
-            ex_packet.rd_mem        = tmp_alu_packet.rd_mem;
-            ex_packet.wr_mem        = tmp_alu_packet.wr_mem;
-            ex_packet.dest_reg_idx  = tmp_alu_packet.dest_reg_idx;
-            ex_packet.halt          = tmp_alu_packet.halt;
-            ex_packet.illegal       = tmp_alu_packet.illegal;
-            ex_packet.csr_op        = tmp_alu_packet.csr_op;
-            ex_packet.rd_unsigned   = tmp_alu_packet.inst.r.funct3[2];
-            ex_packet.mem_size      = MEM_SIZE'(tmp_alu_packet.inst.r.funct3[1:0]);
-            ex_packet.valid         = tmp_alu_packet.valid;
-            ex_packet.rob_index     = tmp_alu_packet.rob_index;
+            ex_packet.inst = tmp_alu_packet.inst;
+            ex_packet.PC = tmp_alu_packet.PC;
+            ex_packet.NPC = tmp_alu_packet.NPC;
+
+            ex_packet.opa_select = tmp_alu_packet.opa_select;
+            ex_packet.opb_select = tmp_alu_packet.opb_select;
+
+            ex_packet.opa_value = tmp_alu_packet.opa_value;
+            ex_packet.opb_value = tmp_alu_packet.opb_value;
+
+            ex_packet.dest_reg_idx = tmp_alu_packet.dest_reg_idx;
+        
+            ex_packet.alu_func = tmp_alu_packet.alu_func;
+            ex_packet.rd_mem = tmp_alu_packet.rd_mem;
+            ex_packet.wr_mem = tmp_alu_packet.wr_mem;
+            ex_packet.cond_branch = tmp_alu_packet.cond_branch;
+            ex_packet.uncond_branch = tmp_alu_packet.uncond_branch;
+            ex_packet.halt = tmp_alu_packet.halt;
+            ex_packet.illegal = tmp_alu_packet.illegal;
+            ex_packet.csr_op = tmp_alu_packet.csr_op;
+
+            ex_packet.function_type = tmp_alu_packet.function_type;
+            ex_packet.valid = tmp_alu_packet.valid;
+
+            ex_packet.rob_index = tmp_alu_packet.rob_index;
+            ex_packet.has_dest = tmp_alu_packet.has_dest;
+
+            ex_packet.issued_fu_index = tmp_alu_packet.issued_fu_index;
+
+            // ex_packet.NPC           = tmp_alu_packet.NPC;
+            // ex_packet.rs2_value     = tmp_alu_packet.rs2_value;
+            // ex_packet.rd_mem        = tmp_alu_packet.rd_mem;
+            // ex_packet.wr_mem        = tmp_alu_packet.wr_mem;
+            // ex_packet.dest_reg_idx  = tmp_alu_packet.dest_reg_idx;
+            // ex_packet.halt          = tmp_alu_packet.halt;
+            // ex_packet.illegal       = tmp_alu_packet.illegal;
+            // ex_packet.csr_op        = tmp_alu_packet.csr_op;
+            // ex_packet.rd_unsigned   = tmp_alu_packet.inst.r.funct3[2];
+            // ex_packet.mem_size      = MEM_SIZE'(tmp_alu_packet.inst.r.funct3[1:0]);
+            // ex_packet.valid         = tmp_alu_packet.valid;
+            // ex_packet.rob_index     = tmp_alu_packet.rob_index;
         end else if (mult_done_process) begin
             ex_packet.result        = tmp_mult_result;
             ex_packet.take_branch   = 0;
+            
             // Pass throughs
-            ex_packet.NPC           = tmp_mult_packet.NPC;
-            ex_packet.rs2_value     = tmp_mult_packet.rs2_value;
-            ex_packet.rd_mem        = tmp_mult_packet.rd_mem;
-            ex_packet.wr_mem        = tmp_mult_packet.wr_mem;
-            ex_packet.dest_reg_idx  = tmp_mult_packet.dest_reg_idx;
-            ex_packet.halt          = tmp_mult_packet.halt;
-            ex_packet.illegal       = tmp_mult_packet.illegal;
-            ex_packet.csr_op        = tmp_mult_packet.csr_op;
-            ex_packet.rd_unsigned   = tmp_mult_packet.inst.r.funct3[2];
-            ex_packet.mem_size      = MEM_SIZE'(tmp_mult_packet.inst.r.funct3[1:0]);
-            ex_packet.valid         = tmp_mult_packet.valid;
-            ex_packet.rob_index     = tmp_mult_packet.rob_index;
+            ex_packet.inst = tmp_mult_packet.inst;
+            ex_packet.PC = tmp_mult_packet.PC;
+            ex_packet.NPC = tmp_mult_packet.NPC;
+
+            ex_packet.opa_select = tmp_mult_packet.opa_select;
+            ex_packet.opb_select = tmp_mult_packet.opb_select;
+
+            ex_packet.opa_value = tmp_mult_packet.opa_value;
+            ex_packet.opb_value = tmp_mult_packet.opb_value;
+
+            ex_packet.dest_reg_idx = tmp_mult_packet.dest_reg_idx;
+
+            ex_packet.alu_func = tmp_mult_packet.alu_func;
+            ex_packet.rd_mem = tmp_mult_packet.rd_mem;
+            ex_packet.wr_mem = tmp_mult_packet.wr_mem;
+            ex_packet.cond_branch = tmp_mult_packet.cond_branch;
+            ex_packet.uncond_branch = tmp_mult_packet.uncond_branch;
+            ex_packet.halt = tmp_mult_packet.halt;
+            ex_packet.illegal = tmp_mult_packet.illegal;
+            ex_packet.csr_op = tmp_mult_packet.csr_op;
+
+            ex_packet.function_type = tmp_mult_packet.function_type;
+            ex_packet.valid = tmp_mult_packet.valid;
+
+            ex_packet.rob_index = tmp_mult_packet.rob_index;
+            ex_packet.has_dest = tmp_mult_packet.has_dest;
+
+            ex_packet.issued_fu_index = tmp_mult_packet.issued_fu_index;
+            // ex_packet.NPC           = tmp_mult_packet.NPC;
+            // ex_packet.rs2_value     = tmp_mult_packet.rs2_value;
+            // ex_packet.rd_mem        = tmp_mult_packet.rd_mem;
+            // ex_packet.wr_mem        = tmp_mult_packet.wr_mem;
+            // ex_packet.dest_reg_idx  = tmp_mult_packet.dest_reg_idx;
+            // ex_packet.halt          = tmp_mult_packet.halt;
+            // ex_packet.illegal       = tmp_mult_packet.illegal;
+            // ex_packet.csr_op        = tmp_mult_packet.csr_op;
+            // ex_packet.rd_unsigned   = tmp_mult_packet.inst.r.funct3[2];
+            // ex_packet.mem_size      = MEM_SIZE'(tmp_mult_packet.inst.r.funct3[1:0]);
+            // ex_packet.valid         = tmp_mult_packet.valid;
+            // ex_packet.rob_index     = tmp_mult_packet.rob_index;
         end else if (branch_done_process) begin
             ex_packet.result        = tmp_branch_result;
             ex_packet.take_branch   = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
             // Pass throughs
-            ex_packet.NPC           = tmp_branch_packet.NPC;
-            ex_packet.rs2_value     = tmp_branch_packet.rs2_value;
-            ex_packet.rd_mem        = tmp_branch_packet.rd_mem;
-            ex_packet.wr_mem        = tmp_branch_packet.wr_mem;
-            ex_packet.dest_reg_idx  = tmp_branch_packet.dest_reg_idx;
-            ex_packet.halt          = tmp_branch_packet.halt;
-            ex_packet.illegal       = tmp_branch_packet.illegal;
-            ex_packet.csr_op        = tmp_branch_packet.csr_op;
-            ex_packet.rd_unsigned   = tmp_mult_packet.inst.r.funct3[2];
-            ex_packet.mem_size      = MEM_SIZE'(tmp_branch_packet.inst.r.funct3[1:0]);
-            ex_packet.valid         = tmp_branch_packet.valid;
-            ex_packet.rob_index     = tmp_branch_packet.rob_index;
+
+            ex_packet.inst = tmp_branch_packet.inst;
+            ex_packet.PC = tmp_branch_packet.PC;
+            ex_packet.NPC = tmp_branch_packet.NPC;
+
+            ex_packet.opa_select = tmp_branch_packet.opa_select;
+            ex_packet.opb_select = tmp_branch_packet.opb_select;
+
+            ex_packet.opa_value = tmp_branch_packet.opa_value;
+            ex_packet.opb_value = tmp_branch_packet.opb_value;
+
+            ex_packet.dest_reg_idx = tmp_branch_packet.dest_reg_idx;
+
+            ex_packet.alu_func = tmp_branch_packet.alu_func;
+            ex_packet.rd_mem = tmp_branch_packet.rd_mem;
+            ex_packet.wr_mem = tmp_branch_packet.wr_mem;
+            ex_packet.cond_branch = tmp_branch_packet.cond_branch;
+            ex_packet.uncond_branch = tmp_branch_packet.uncond_branch;
+            ex_packet.halt = tmp_branch_packet.halt;
+            ex_packet.illegal = tmp_branch_packet.illegal;
+            ex_packet.csr_op = tmp_branch_packet.csr_op;
+
+            ex_packet.function_type = tmp_branch_packet.function_type;
+            ex_packet.valid = tmp_branch_packet.valid;
+
+            ex_packet.rob_index = tmp_branch_packet.rob_index;
+            ex_packet.has_dest = tmp_branch_packet.has_dest;
+
+            ex_packet.issued_fu_index = tmp_branch_packet.issued_fu_index;
+
+            // ex_packet.NPC           = tmp_branch_packet.NPC;
+            // ex_packet.rs2_value     = tmp_branch_packet.rs2_value;
+            // ex_packet.rd_mem        = tmp_branch_packet.rd_mem;
+            // ex_packet.wr_mem        = tmp_branch_packet.wr_mem;
+            // ex_packet.dest_reg_idx  = tmp_branch_packet.dest_reg_idx;
+            // ex_packet.halt          = tmp_branch_packet.halt;
+            // ex_packet.illegal       = tmp_branch_packet.illegal;
+            // ex_packet.csr_op        = tmp_branch_packet.csr_op;
+            // ex_packet.rd_unsigned   = tmp_mult_packet.inst.r.funct3[2];
+            // ex_packet.mem_size      = MEM_SIZE'(tmp_branch_packet.inst.r.funct3[1:0]);
+            // ex_packet.valid         = tmp_branch_packet.valid;
+            // ex_packet.rob_index     = tmp_branch_packet.rob_index;
         end
     end
 
