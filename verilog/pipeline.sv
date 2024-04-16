@@ -9,14 +9,14 @@
 /////////////////////////////////////////////////////////////////////////
 
 `include "verilog/sys_defs.svh"
-`include "verilog/icache.sv"
-`include "verilog/ifetch.sv"
-`include "verilog/dispatch.sv"
-`include "verilog/issue.sv"
-`include "verilog/stage_ex.sv"
-`include "verilog/complete.sv"
-`include "verilog/retire.sv"
-`include "verilog/regfile.sv"
+// `include "verilog/icache.sv"
+// `include "verilog/ifetch.sv"
+// `include "verilog/dispatch.sv"
+// `include "verilog/issue.sv"
+// `include "verilog/stage_ex.sv"
+// `include "verilog/complete.sv"
+// `include "verilog/retire.sv"
+// `include "verilog/regfile.sv"
 
 
 module pipeline (
@@ -186,6 +186,7 @@ module pipeline (
 
     // TODO implement logic: if stalls if id stage can't accept a new instruction
     assign if_stall = id_needs_stall;
+    assign if_valid = ~if_stall; //TODO fix if valid logic
 
     // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
     assign id_stall = 0;
@@ -201,6 +202,11 @@ module pipeline (
     // TODO also make 'arch free list'
     assign id_rollback = 0;
     assign re_rollback = 0;
+
+    assign certain_branch_req = 0;
+    assign rob_target_req = 0;
+    assign branch_pred_req = 0;
+    
 
     //////////////////////////////////////////////////
     //          Instruction Fetch Modules           //
