@@ -14,19 +14,20 @@ module complete(
     
     // Newly freed FU info (to dispatch/RS)
     output [`NUM_FU_ALU-1:0] free_alu,
-    output [`NUM_FU_ALU-1:0] free_mult,
-    output [`NUM_FU_ALU-1:0] free_branch,
-    output [`NUM_FU_ALU-1:0] free_load,
-    output [`NUM_FU_ALU-1:0] free_store,
+    output [`NUM_FU_MULT-1:0] free_mult,
+    output [`NUM_FU_BRANCH-1:0] free_branch,
+    output [`NUM_FU_LOAD-1:0] free_load,
+    output [`NUM_FU_STORE-1:0] free_store,
 );
-
-    logic [`MAX_FU_INDEX-1:0] fu_index;
-    assign fu_index = ex_co_reg.issued_fu_index;
-
+    
+    assign co_packet.regfile_en = regfile_en;
+    assign co_packet.regfile_idx = regfile_idx;
+    assign co_packet.regfile_data = regfile_data;
+    
     // Passthrough
     assign co_packet.inst = ex_co_reg.inst;
     assign co_packet.PC = ex_co_reg.PC;
-    assing co_packet.NPC = ex_co_reg.NPC;
+    assign co_packet.NPC = ex_co_reg.NPC;
 
     assign co_packet.opa_select = ex_co_reg.opa_select;
     assign co_packet.opb_select = ex_co_reg.opb_select;
@@ -46,6 +47,14 @@ module complete(
     assign co_packet.function_type = ex_co_reg.function_type;
     assign co_packet.valid = ex_co_reg.valid;
 
+    assign co_packet.rob_index = ex_co_reg.rob_index;
+    assign co_packet.has_dest = ex_co_reg.has_dest;
+
+    assign co_packet.issued_fu_index = ex_co_reg.issued_fu_index;
+
+    assign co_packet.result = ex_co_reg.result;
+    assign co_packet.take_branch = ex_co_reg.take_branch;
+
     
 
     // assign co_packet.result = ex_co_reg.result;
@@ -56,6 +65,11 @@ module complete(
     // assign co_packet.illegal = ex_co_reg.illegal; // not used by wb stage
     // assign co_packet.valid = ex_co_reg.valid;
     // assign co_packet.rob_index = ex_co_reg.rob_index;
+
+
+
+    logic [`MAX_FU_INDEX-1:0] fu_index;
+    assign fu_index = ex_co_reg.issued_fu_index;
 
     always_comb begin : 
         free_alu = 0;
@@ -89,6 +103,7 @@ module complete(
     // back the old NPC as the return address. Note that ALL branches
     // and jumps write back the 'link' value, but those that don't
     // use it specify ZERO_REG as the destination.
+    // TODO make sure this is still right?
     assign regfile_data = (ex_co_reg.take_branch) ? ex_co_reg.NPC : ex_co_reg.result;
     
 endmodule // complete
