@@ -396,9 +396,9 @@ ID_IS_PACKET INVALID_ID_IS_PACKET = {
     OPB_IS_RS2, // opb_select
     
     // TODO these sizes could be wrong
-    {`PHYS_REG_IDX_SZ{1'b0}, 0}, // dest_reg
-    {`PHYS_REG_IDX_SZ{1'b0}, 0}, // src1_reg
-    {`PHYS_REG_IDX_SZ{1'b0}, 0}, // src2_reg
+    {`PHYS_REG_IDX_SZ+1{1'b0}}, // dest_reg
+    {`PHYS_REG_IDX_SZ+1{1'b0}}, // src1_reg
+    {`PHYS_REG_IDX_SZ+1{1'b0}}, // src2_reg
 
     ALU_ADD, // alu_func
     1'b0, // rd_mem
@@ -594,10 +594,9 @@ typedef struct packed {
     logic take_branch;
 
     // new stuff from complete stage
-    logic regfile_en,
-    logic [`PHYS_REG_IDX_SZ-1:0] regfile_idx,
-    logic [`XLEN-1:0] regfile_data  
-
+    logic regfile_en;
+    logic [`PHYS_REG_IDX_SZ-1:0] regfile_idx;
+    logic [`XLEN-1:0] regfile_data;
 } CO_RE_PACKET;
 
 
