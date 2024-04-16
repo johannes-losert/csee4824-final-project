@@ -1,8 +1,8 @@
-`include "verilog/decoder.sv"
-`include "verilog/map_table.sv"
-`include "verilog/free_list.sv"
-`include "verilog/rob.sv"
-`include "verilog/reservation_station.sv"
+// `include "verilog/decoder.sv"
+// `include "verilog/map_table.sv"
+// `include "verilog/free_list.sv"
+// `include "verilog/rob.sv"
+// `include "verilog/reservation_station.sv"
 
 module dispatch (
     input clock, reset, // TODO implement reset everywhere
