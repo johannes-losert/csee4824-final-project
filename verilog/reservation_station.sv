@@ -50,31 +50,31 @@ module reservation_station (
     logic [$clog2(`NUM_FU_ALU)-1:0] alu_available_index;
     logic alu_available_index_found;
     logic [$clog2(`NUM_FU_ALU)-1:0] alu_issue_index;
-    logic alu_issuable;
+    //logic alu_issuable;
 
     RS_ENTRY mult_entries[`NUM_FU_MULT-1:0];
     logic [$clog2(`NUM_FU_MULT)-1:0] mult_available_index;
     logic mult_available_index_found;
     logic [$clog2(`NUM_FU_MULT)-1:0] mult_issue_index;
-    logic mult_issuable;
+  //  logic mult_issuable;
 
     RS_ENTRY load_entries[`NUM_FU_LOAD-1:0];
     logic [$clog2(`NUM_FU_LOAD)-1:0] load_available_index;
     logic load_available_index_found;
     logic [$clog2(`NUM_FU_LOAD)-1:0] load_issue_index;
-    logic load_issuable;
+   // logic load_issuable;
 
     RS_ENTRY store_entries[`NUM_FU_STORE-1:0];
     logic [$clog2(`NUM_FU_STORE)-1:0] store_available_index;
     logic store_available_index_found;
     logic [$clog2(`NUM_FU_STORE)-1:0] store_issue_index;
-    logic store_issuable;
+    //logic store_issuable;
 
     RS_ENTRY branch_entries[`NUM_FU_BRANCH-1:0];
     logic [$clog2(`NUM_FU_BRANCH)-1:0] branch_available_index;
     logic branch_available_index_found;
     logic [$clog2(`NUM_FU_BRANCH)-1:0] branch_issue_index;
-    logic branch_issuable;
+  //  logic branch_issuable;
 
    // combinational: calculate issuing output (searches for ready operands)
       // check all entries for first with both operands ready 
