@@ -1,5 +1,5 @@
 `include "verilog/sys_defs.svh"
-`include "verilog/psel_gen.sv"
+// `include "verilog/psel_gen.sv"
 
 // 1. EX_Branch 2. ROB_Target 3. Branch_Predictor 4. (PC+4)  = 4
 
@@ -42,11 +42,12 @@ module ifetch (
     output [3:0] gnt_debug,
     output [`XLEN-1:0] PC_reg_debug,
     output fetch_available_debug,
-    output IF_ID_PACKET inst_buffer_debug [`INST_BUF_SIZE-1:0]
+    output IF_ID_PACKET inst_buffer_debug [`INST_BUF_SIZE-1:0],
+    output IF_ID_PACKET n_inst_buffer_debug [`INST_BUF_SIZE-1:0]
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
-    assign if_PC_reg = PC_reg;
+    assign if_PC = PC_reg;
     logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching
     
     logic fetch_available; // if we are currently fetching an instruction in current cycle
@@ -57,6 +58,7 @@ module ifetch (
     IF_ID_PACKET inst_buffer [`INST_BUF_SIZE-1:0];
     IF_ID_PACKET n_inst_buffer [`INST_BUF_SIZE-1:0];
     assign inst_buffer_debug = inst_buffer;
+    assign n_inst_buffer_debug = n_inst_buffer;
 
     logic[`INST_INDEX_SIZE-1:0] inst_buffer_tail;
     logic[`INST_INDEX_SIZE-1:0] n_inst_buffer_tail;
@@ -95,6 +97,14 @@ module ifetch (
         end else begin 
             n_PC_reg = PC_reg;
         end 
+
+        if (if_valid && (inst_buffer_tail > 0)) begin 
+            for (int i = 0; i < inst_buffer_tail; i++) begin
+                n_inst_buffer[i] = inst_buffer[i+1];
+            end
+        end else begin
+            n_inst_buffer = inst_buffer;
+        end
 
         // if we get a response from cache and there is room in the buffer, add the instruction to the tail of buffer
         if (Icache2proc_data_valid) begin
@@ -138,14 +148,6 @@ module ifetch (
         end else if ((Icache2proc_data_valid && n_inst_buffer_tail < `INST_BUF_SIZE) || 
         (if_valid && inst_buffer_tail == `INST_BUF_SIZE - 1)) begin
             n_fetch_available = 1;
-        end
-
-        if (if_valid && (inst_buffer_tail > 0)) begin 
-            for (int i = 0; i < inst_buffer_tail; i++) begin
-                n_inst_buffer[i] = inst_buffer[i+1];
-            end
-        end else begin
-            n_inst_buffer = inst_buffer;
         end
     end
 
