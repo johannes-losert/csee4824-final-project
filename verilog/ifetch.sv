@@ -120,7 +120,7 @@ module ifetch (
                 n_inst_buffer_tail = inst_buffer_tail;
             end
             
-            if (n_inst_buffer_tail < `INST_BUF_SIZE) begin
+            if (n_inst_buffer_tail < `INST_BUF_SIZE - 1) begin
             	n_inst_buffer[n_inst_buffer_tail].inst = PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
             	n_inst_buffer[n_inst_buffer_tail].PC = PC_reg;
             	n_inst_buffer[n_inst_buffer_tail].NPC = PC_reg + 4;
@@ -129,21 +129,21 @@ module ifetch (
             
         end else if (!Icache2proc_data_valid) begin
 
-	    // if we pop from the buffer and don't receive a new instruction,
+            // if we pop from the buffer and don't receive a new instruction,
             // last inst in tail is a NOP
-	    // keep the tail above zero while decrementing 
-        if (if_valid && inst_buffer_tail > 0) begin
-            n_inst_buffer_tail = inst_buffer_tail - 1;
-        end else if (!if_valid || inst_buffer_tail == 0) begin 
-            n_inst_buffer_tail = inst_buffer_tail;
-        end
-        // ensure that the instruction behind the last instruction is always nop
-        if (n_inst_buffer_tail < `INST_BUF_SIZE - 1) begin
-            n_inst_buffer[n_inst_buffer_tail+1].inst = `NOP;
-            n_inst_buffer[n_inst_buffer_tail+1].PC = PC_reg;
-            n_inst_buffer[n_inst_buffer_tail+1].NPC = PC_reg + 4;
-            n_inst_buffer[n_inst_buffer_tail+1].valid = 0;
-        end
+            // keep the tail above zero while decrementing 
+            if (if_valid && inst_buffer_tail > 0) begin
+                n_inst_buffer_tail = inst_buffer_tail - 1;
+            end else if (!if_valid || inst_buffer_tail == 0) begin 
+                n_inst_buffer_tail = inst_buffer_tail;
+            end
+            // ensure that the instruction behind the last instruction is always nop
+            if (n_inst_buffer_tail < `INST_BUF_SIZE - 1) begin
+                n_inst_buffer[n_inst_buffer_tail+1].inst = `NOP;
+                n_inst_buffer[n_inst_buffer_tail+1].PC = PC_reg;
+                n_inst_buffer[n_inst_buffer_tail+1].NPC = PC_reg + 4;
+                n_inst_buffer[n_inst_buffer_tail+1].valid = 0;
+            end
     end
 
         
@@ -152,8 +152,8 @@ module ifetch (
         if (((fetch_available == 0) && Icache2proc_data_valid && (n_inst_buffer_tail < `INST_BUF_SIZE)) || ((fetch_available == 0) &&  if_valid && (n_inst_buffer_tail == `INST_BUF_SIZE - 1))) begin
             n_fetch_available = 1;
     	end else begin 
-	    n_fetch_available = 0;
-	end
+	        n_fetch_available = 0;
+	    end
     end
 
     // synopsys sync_set_reset "reset"
