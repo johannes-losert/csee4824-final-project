@@ -117,9 +117,11 @@ module ifetch_basic (
         if (reset) begin
             waiting_on_inst <= 1;
             PC_reg <= 0;
+            if_packet <= 0;
         end else begin
             PC_reg <= n_PC_reg;
             waiting_on_inst <= n_waiting_on_inst;
+            if_packet <= n_if_packet;
         end
     end
 

@@ -137,26 +137,30 @@ module testbench;
         rob_target_req = 0;
         branch_pred_req = 0;
         
-        @(posedge if_packet.valid)
-
-        $display("if_packet.valid = %b", if_packet.valid);
-        $display("if_packet.PC = %h", if_packet.PC);
-        assert(if_packet.PC == 32'h0000_0000) else exit_on_error;
-        assert(if_packet.valid == 1) else exit_on_error;
+        for (int i = 0; i < 100; i++) begin
+            @(posedge if_packet.valid)
+            $display("if_packet.valid = %b", if_packet.valid);
+            $display("if_packet.PC = %h", if_packet.PC);
+            assert(if_packet.PC == 4 * i) else exit_on_error;
+            assert(if_packet.valid == 1) else exit_on_error;
+        end
         
-        @(posedge if_packet.valid)
+        // \
+        // @(posedge if_packet.valid)
 
-        $display("if_packet.valid = %b", if_packet.valid);
-        $display("if_packet.PC = %h", if_packet.PC);
-        assert(if_packet.PC == 32'h0000_0004) else exit_on_error;
-        assert(if_packet.valid == 1) else exit_on_error;
+        // $display("if_packet.valid = %b", if_packet.valid);
+        // $display("if_packet.PC = %h", if_packet.PC);
+        // assert(if_packet.PC == 32'h0000_0004) else exit_on_error;
+        // assert(if_packet.valid == 1) else exit_on_error;
         
-        @(posedge if_packet.valid)
+        // @(posedge if_packet.valid)
 
-        $display("if_packet.valid = %b", if_packet.valid);
-        $display("if_packet.PC = %h", if_packet.PC);
-        assert(if_packet.PC == 32'h0000_0008) else exit_on_error;
-        assert(if_packet.valid == 1) else exit_on_error;
+        // $display("if_packet.valid = %b", if_packet.valid);
+        // $display("if_packet.PC = %h", if_packet.PC);
+        // assert(if_packet.PC == 32'h0000_0008) else exit_on_error;
+        // assert(if_packet.valid == 1) else exit_on_error;
+
+        
         
         $display("@@@Passed");
         $finish;
