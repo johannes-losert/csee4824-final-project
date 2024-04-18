@@ -41,7 +41,7 @@ module testbench;
     logic [3:0]  mem2proc_tag;       // 0 = no value, other=tag of transaction
 
 
-    ifetch dut(
+    ifetch_basic dut(
         .clock(clock),
         .reset(reset),
         

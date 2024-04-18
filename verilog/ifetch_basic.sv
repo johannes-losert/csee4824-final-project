@@ -7,7 +7,7 @@
 `define INST_BUF_SIZE 8
 `define INST_INDEX_SIZE $clog2(`INST_BUF_SIZE)
 
-module ifetch (
+module ifetch_basic (
     input             clock,          // system clock
     input             reset,          // system reset
     
