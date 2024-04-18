@@ -43,7 +43,8 @@ module ifetch (
     output waiting_on_inst_debug,
     output IF_ID_PACKET inst_buffer_debug [`INST_BUF_SIZE-1:0],
     output IF_ID_PACKET n_inst_buffer_debug [`INST_BUF_SIZE-1:0],
-    output [`INST_INDEX_SIZE-1:0] inst_buffer_tail_debug
+    output [`INST_INDEX_SIZE-1:0] inst_buffer_tail_debug,
+    output new_inst_accepted_debug
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
@@ -53,6 +54,9 @@ module ifetch (
     logic n_waiting_on_inst;  
     assign waiting_on_inst_debug = waiting_on_inst;
     
+    logic n_new_inst_accepted;
+    assign new_inst_accepted_debug = n_new_inst_accepted;
+
     IF_ID_PACKET inst_buffer [`INST_BUF_SIZE-1:0];
     IF_ID_PACKET n_inst_buffer [`INST_BUF_SIZE-1:0];
     logic inst_buffer_full;
@@ -97,11 +101,16 @@ module ifetch (
             endcase
             
             n_waiting_on_inst = 1;
-            n_inst_buffer_tail = inst_buffer_tail;
             n_inst_buffer_full = inst_buffer_full;
+            n_inst_buffer_tail = inst_buffer_tail;
+
+            n_inst_buffer[n_inst_buffer_tail].inst = `NOP;
+            n_inst_buffer[n_inst_buffer_tail].PC = 0;
+            n_inst_buffer[n_inst_buffer_tail].NPC = 0;
+            n_inst_buffer[n_inst_buffer_tail].valid = 0;
         end else if (waiting_on_inst) begin 
             n_PC_reg = PC_reg;
-            if (Icache2proc_data_valid) begin
+            if (Icache2proc_data_valid && waiting_on_inst) begin
                 // pushing to the tail of inst buffer
                 n_waiting_on_inst = 0; 
                 
@@ -124,11 +133,22 @@ module ifetch (
                     n_inst_buffer[n_inst_buffer_tail].PC = PC_reg;
                     n_inst_buffer[n_inst_buffer_tail].NPC = PC_reg + 4;
                     n_inst_buffer[n_inst_buffer_tail].valid = 1;
+                    n_new_inst_accepted = 1;
+                end else begin
+                    n_new_inst_accepted = 0;
                 end
-            end else if (!Icache2proc_data_valid) begin
+            end else if (!Icache2proc_data_valid && waiting_on_inst) begin
                 n_waiting_on_inst = waiting_on_inst;
                 n_inst_buffer_tail = inst_buffer_tail;
                 n_inst_buffer_full = inst_buffer_full;
+
+                if (!inst_buffer_full) begin
+                    n_inst_buffer[n_inst_buffer_tail].inst = `NOP;
+                    n_inst_buffer[n_inst_buffer_tail].PC = PC_reg;
+                    n_inst_buffer[n_inst_buffer_tail].NPC = PC_reg + 4;
+                    n_inst_buffer[n_inst_buffer_tail].valid = 0;
+                    n_new_inst_accepted = 1;
+                end
             end
         end 
 
@@ -151,7 +171,7 @@ module ifetch (
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
-            waiting_on_inst <= 1;
+            waiting_on_inst <= 0;
             PC_reg <= 0;
             for (int i = 0; i < `INST_BUF_SIZE; i++) begin
                 inst_buffer[i].inst <= `NOP;
@@ -171,6 +191,6 @@ module ifetch (
     end
 
     // address of the instruction we're fetching (64 bit memory lines)
-    // mem always gives us 8=2^3 bytes, so ignore the last 3 bits
+    // mem always gives us 8=2^1 words, so ignore the last bit
     assign proc2Icache_addr = {PC_reg[`XLEN-1:2], 2'b0};
 endmodule

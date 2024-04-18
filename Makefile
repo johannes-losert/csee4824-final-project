@@ -182,7 +182,7 @@ $(call DEPS,ifetch): $(IFETCH_DEPS)
 DISPATCH_DEPS = verilog/decoder.sv verilog/map_table.sv verilog/free_list.sv verilog/rob.sv verilog/reservation_station.sv
 $(call DEPS,dispatch): $(DISPATCH_DEPS)
 
-PIPELINE_DEPS = verilog/icache.sv verilog/ifetch_basic.sv $(IFETCH_DEPS) verilog/dispatch.sv $(DISPATCH_DEPS) verilog/issue.sv verilog/stage_ex.sv $(STAGE_EX_DEPS) verilog/complete.sv verilog/retire.sv verilog/regfile.sv
+PIPELINE_DEPS = verilog/icache.sv verilog/ifetch_basic.sv $(IFETCH_DEPS) verilog/dispatch.sv $(DISPATCH_DEPS) verilog/issue.sv verilog/stage_ex.sv $(STAGE_EX_DEPS) verilog/complete.sv verilog/retire.sv verilog/regfile.sv verilog/mem_controller.sv
 $(call DEPS,pipeline): $(PIPELINE_DEPS)
 
 
