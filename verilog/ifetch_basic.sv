@@ -1,5 +1,5 @@
-`include "verilog/sys_defs.svh"
-`include "verilog/psel_gen.sv"
+// `include "verilog/sys_defs.svh"
+// `include "verilog/psel_gen.sv"
 
 // 1. EX_Branch 2. ROB_Target 3. Branch_Predictor 4. (PC+4)  = 4
 

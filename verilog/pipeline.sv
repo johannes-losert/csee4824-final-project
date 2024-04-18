@@ -17,6 +17,7 @@
 // `include "verilog/complete.sv"
 // `include "verilog/retire.sv"
 // `include "verilog/regfile.sv"
+//`include "verilog/ifetch_basic.sv"
 
 
 module pipeline (
@@ -232,7 +233,7 @@ module pipeline (
         .Icache_valid_out(icache_data_out_valid)
     );
 
-    ifetch ifetch_0 (
+    ifetch_basic ifetch_0 (
         .clock(clock),
         .reset(reset),
 

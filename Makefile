@@ -163,7 +163,7 @@ GREP = grep -E --color=auto
 # - with dependencies: 'rob.simv', 'rob.cov', and 'synth/rob.vg'
 
 # TODO: add more modules here
-TESTED_MODULES = mult rob reservation_station map_table free_list stage_ex ifetch ifetch_basic btb branch_predictor mem_controller dispatch pipeline
+TESTED_MODULES = mult rob reservation_station map_table free_list stage_ex ifetch ifetch_basic btb branch_predictor dispatch pipeline
 
 # TODO: add verilog module dependencies here:
 # (do not include header files)
@@ -182,7 +182,7 @@ $(call DEPS,ifetch): $(IFETCH_DEPS)
 DISPATCH_DEPS = verilog/decoder.sv verilog/map_table.sv verilog/free_list.sv verilog/rob.sv verilog/reservation_station.sv
 $(call DEPS,dispatch): $(DISPATCH_DEPS)
 
-PIPELINE_DEPS = verilog/icache.sv verilog/ifetch.sv $(IFETCH_DEPS) verilog/dispatch.sv $(DISPATCH_DEPS) verilog/issue.sv verilog/stage_ex.sv $(STAGE_EX_DEPS) verilog/complete.sv verilog/retire.sv verilog/regfile.sv
+PIPELINE_DEPS = verilog/icache.sv verilog/ifetch_basic.sv $(IFETCH_DEPS) verilog/dispatch.sv $(DISPATCH_DEPS) verilog/issue.sv verilog/stage_ex.sv $(STAGE_EX_DEPS) verilog/complete.sv verilog/retire.sv verilog/regfile.sv
 $(call DEPS,pipeline): $(PIPELINE_DEPS)
 
 
@@ -328,7 +328,7 @@ SOURCES = verilog/pipeline.sv \
 		  verilog/dispatch.sv \
 		  verilog/free_list.sv \
 		  verilog/functional_units.sv \
-		  verilog/ifetch.sv \
+		  verilog/ifetch_basic.sv \
 		  verilog/issue.sv \
 		  verilog/map_table.sv \
 		  verilog/mem_controller.sv \
