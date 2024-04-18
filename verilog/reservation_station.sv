@@ -309,8 +309,9 @@ module reservation_station (
                 end
             end else begin 
                // ready <= 1'b0;
-                issued_packet <= INVALID_ID_IS_PACKET; // TODO this is really undefined 
-                issue_fu_index <= 0; // TODO this is really undefined
+		// if !issue_enable, the input inst is invalid, pass it to next stage
+                issued_packet <= input_packet; 
+                issue_fu_index <= 0; // can be any values
             end
 
 

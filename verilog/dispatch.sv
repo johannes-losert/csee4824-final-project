@@ -187,11 +187,9 @@ module dispatch (
         .dequeue_en(fl_dequeue_en), // If raised, will actually deuqueue from the head
         
         // outputs
-        .front_head_pr(fl_head_pr), // Always points to the next element to be dequeued, unless is_empty
         .is_empty(free_list_empty), // IF is_empty, front_head_pr is undefined (new)
 
         // debug outputs
-        .was_dequeued(fl_was_dequeued),
         .dequeue_pr(fl_dequeue_pr), // TODO combine with fl_head_pr? should always be the same
 
 
@@ -199,17 +197,9 @@ module dispatch (
         // inputs
         .enqueue_en(fl_enqueue_en), // If raised, will enqueue fl_enqueue_pr at the tail
         .enqueue_pr(fl_enqueue_pr), // PR to enqueue if fl_enqueue_en raised
-        
-        // outputs
-        .is_full(fl_is_full), // raised if free list is currently full (TODO not sure why this would happen, currently max is greater than num PRs)
 
         // debug outputs
-        .was_enqueued(fl_was_enqueued),
-
-        /* misc debug outputs */
-        .back_tail_ptr(fl_back_tail_ptr),
-        .front_head_ptr(fl_front_head_ptr),
-        .free_list(fl_free_list)
+        .was_enqueued(fl_was_enqueued)
     );
 
     //  Declare ROB
@@ -262,7 +252,7 @@ module dispatch (
 
     /* TODO figure out if we ever need to not issue */
     logic issue_enable;
-    assign issue_enable = 1;
+    assign issue_enable = decoded_packet.valid;
 
     reservation_station reservation_station_0(
         .clock(clock),
@@ -333,6 +323,7 @@ module dispatch (
     /* Mark decoded packet as valid if it is valid and we are ready to pass to RS/ROB (no stall)*/
     assign decoded_packet.valid = if_id_packet.valid & ~decoded_packet.illegal & (!stall);
 
+//wrong!!!
     /* Dequeue from free list (generating a physical dest) */
     assign fl_dequeue_en = decoded_packet.valid & decoded_packet.has_dest;
     assign decoded_packet.dest_reg.reg_num = fl_dequeue_pr; 
