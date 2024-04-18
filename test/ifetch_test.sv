@@ -1,7 +1,7 @@
 
 `include "verilog/sys_defs.svh"
 `include "test/mem.sv"
-// `include "verilog/icache.sv"
+`include "verilog/icache.sv"
 
 module testbench;
     logic clock, reset;
@@ -133,37 +133,29 @@ module testbench;
         reset = 0;
         
         
-        certain_branch_pc = 32'h0000_1111;
-        certain_branch_req = 1;
-        rob_target_pc = 32'h0000_2222;
-        rob_target_req = 1;
-        branch_pred_pc = 32'h0000_3333;
-        branch_pred_req = 1;
-
-
-
+        certain_branch_req = 0;
+        rob_target_req = 0;
+        branch_pred_req = 0;
+        
+        $display("if_packet.valid = %b", if_packet.valid);
+        $display("if_packet.PC = %h", if_packet.PC);
+        assert(if_packet.PC == 32'h0000_0000) else exit_on_error;
+        assert(if_packet.valid == 1) else exit_on_error;
+        
         @(posedge if_packet.valid)
 
         $display("if_packet.valid = %b", if_packet.valid);
         $display("if_packet.PC = %h", if_packet.PC);
-        assert(if_packet.PC == 32'h0000_1111) else exit_on_error;
+        assert(if_packet.PC == 32'h0000_0004) else exit_on_error;
         assert(if_packet.valid == 1) else exit_on_error;
-        $display("First Fetch Done!");
-
-        certain_branch_pc = 32'h0000_1221;
-
+        
         @(posedge if_packet.valid)
-        assert(if_packet.PC == 32'h0000_1221) else exit_on_error;
-        assert(if_packet.valid == 1) else exit_on_error;
-        $display("Second Fetch Done!");
 
-
-        certain_branch_req = 0; 
-        @(posedge if_packet.valid)
-        assert(if_packet.PC == 32'h0000_2222) else exit_on_error;
+        $display("if_packet.valid = %b", if_packet.valid);
+        $display("if_packet.PC = %h", if_packet.PC);
+        assert(if_packet.PC == 32'h0000_0008) else exit_on_error;
         assert(if_packet.valid == 1) else exit_on_error;
-        $display("Third Fetch Done!");
-    
+        
         $display("@@@Passed");
         $finish;
     end 
