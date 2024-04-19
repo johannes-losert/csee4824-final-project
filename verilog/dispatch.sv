@@ -164,18 +164,12 @@ module dispatch (
     // many of these signals are debug signals
    // logic free_list_empty;
 
-    logic fl_dequeue_en, fl_was_dequeued;
-    logic [`PHYS_REG_IDX_SZ:0] fl_dequeue_pr, fl_head_pr;
+    logic fl_dequeue_en;
+    logic [`PHYS_REG_IDX_SZ:0] fl_dequeue_pr;
 
     logic [`PHYS_REG_IDX_SZ:0] fl_enqueue_pr;
 
     logic fl_enqueue_en, fl_was_enqueued;
-
-    logic fl_is_full;
-
-    logic [`PHYS_REG_IDX_SZ+1:0] fl_back_tail_ptr;
-    logic [`PHYS_REG_IDX_SZ+1:0] fl_front_head_ptr;
-    logic [`PHYS_REG_IDX_SZ:0] fl_free_list[`FREE_LIST_SIZE];
 
     free_list free_list_0 (
         .clk(clock),
@@ -252,7 +246,7 @@ module dispatch (
 
     /* TODO figure out if we ever need to not issue */
     logic issue_enable;
-    assign issue_enable = decoded_packet.valid;
+    assign issue_enable = 1;
 
     reservation_station reservation_station_0(
         .clock(clock),
