@@ -18,7 +18,6 @@ module reservation_station (
     input logic issue_enable,
   //  output logic ready, Replaced with valid bit inside issued packet
     output ID_IS_PACKET issued_packet,
-    output logic [`MAX_FU_INDEX-1:0] issue_fu_index,
 
     /* Output indicating whether each type of functional unit entry is full */
     output logic alu_entries_full,
@@ -278,31 +277,29 @@ module reservation_station (
                  //   ready <= 1'b1;
                     issued_packet <= alu_entries[alu_issue_index].packet;
                     alu_entries[alu_issue_index].issued <= 1;
-                    issue_fu_index <= alu_issue_index;
+                    issued_packet.issued_fu_index <= alu_issue_index;
                 end else if (mult_issuable) begin
               //      ready <= 1'b1;
                     issued_packet <= mult_entries[mult_issue_index].packet;
                     mult_entries[mult_issue_index].issued <= 1;
-                    issue_fu_index <= mult_issue_index;
+                    issued_packet.issued_fu_index <= mult_issue_index;
                 end else if (load_issuable) begin
              //       ready <= 1'b1;
                     issued_packet <= load_entries[load_issue_index].packet;
                     load_entries[load_issue_index].issued <= 1;
-                    issue_fu_index <= load_issue_index;
+                    issued_packet.issued_fu_index <= load_issue_index;
                 end else if (store_issuable) begin
               //      ready <= 1'b1;
                     issued_packet <= store_entries[store_issue_index].packet;
                     store_entries[store_issue_index].issued <= 1;
-                    issue_fu_index <= store_issue_index;
+                    issued_packet.issued_fu_index <= store_issue_index;
                 end else if (branch_issuable) begin
                //     ready <= 1'b1;
                     issued_packet <= branch_entries[branch_issue_index].packet;
                     branch_entries[branch_issue_index].issued <= 1;
-                    issue_fu_index <= branch_issue_index;
+                    issued_packet.issued_fu_index <= branch_issue_index;
                 end else begin 
               //      ready <= 1'b0;
-                    issued_packet <= 0; // TODO this is really undefined 
-                    issue_fu_index <= 0; // TODO this is really undefined
 
                     issued_packet <= INVALID_ID_IS_PACKET;
 
@@ -311,7 +308,7 @@ module reservation_station (
                // ready <= 1'b0;
 		// if !issue_enable, the input inst is invalid, pass it to next stage
                 issued_packet <= input_packet; 
-                issue_fu_index <= 0; // can be any values
+                issued_packet.issued_fu_index <= 0; // can be any values
             end
 
 

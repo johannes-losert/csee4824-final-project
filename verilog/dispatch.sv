@@ -266,7 +266,6 @@ module dispatch (
         .issue_enable(issue_enable), // TODO figure out
        // .ready(id_packet.valid),
         .issued_packet(id_packet),
-        .issue_fu_index(issue_fu_index),
 
         // Output whether or not each type of FU is full (new)
         .alu_entries_full(alu_entries_full),
@@ -317,7 +316,7 @@ module dispatch (
     /* Mark decoded packet as valid if it is valid and we are ready to pass to RS/ROB (no stall)*/
     assign decoded_packet.valid = if_id_packet.valid & ~decoded_packet.illegal & (!stall);
 
-//wrong!!!
+
     /* Dequeue from free list (generating a physical dest) */
     assign fl_dequeue_en = decoded_packet.valid & decoded_packet.has_dest;
     assign decoded_packet.dest_reg.reg_num = fl_dequeue_pr; 

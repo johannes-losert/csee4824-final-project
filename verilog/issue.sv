@@ -47,6 +47,7 @@ module issue (
     assign is_packet.valid = id_is_reg.valid; // TODO any more calculation?
 
     assign is_packet.rob_index = id_is_reg.rob_index;
-    assign is_packet.has_dest = id_is_reg.has_dest;
+    assign is_packet.has_dest = id_is_reg.has_dest;	
+    assign is_packet.issued_fu_index = id_is_reg.issued_fu_index;
 
 endmodule
