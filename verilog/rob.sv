@@ -60,6 +60,14 @@ module reorder_buffer(
     logic [$clog2(`ROB_SZ)-1:0] next_tail;
     logic next_full;
 
+
+    function void print_reorder_buffer();
+        $display("[ROB] Current state of reorder buffer:");
+        for (int i = 0; i < `ROB_SZ; i++) begin
+            $display("[ROB] Entry %0d: inst=%h, T=%h, Told=%h", i, inst_buffer[i].inst, inst_buffer[i].T, inst_buffer[i].Told);
+        end
+    endfunction
+
     
     assign tail_h = tail + 1;
     assign arch_told = inst.r.rd;
@@ -131,6 +139,9 @@ module reorder_buffer(
     end
 
     always_ff @(posedge clock) begin
+        $display("[ROB] head index:%0d tail index:%0d", next_head, next_tail);
+        $display("[ROB] full:%0d", next_full);
+        print_reorder_buffer();
         if (reset) begin
             head <= 0;
             tail <= 0;

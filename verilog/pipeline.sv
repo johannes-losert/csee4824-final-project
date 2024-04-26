@@ -62,6 +62,23 @@ module pipeline (
     // output logic             mem_wb_valid_dbg
 );
 
+
+        // Debugging counter
+    integer debug_counter;
+
+    always_ff @(posedge clock) begin
+        $display("POSITIVE EDGE: %d ----------------------------------------------", debug_counter);
+        if (reset) begin
+            debug_counter <= 0;
+        end else begin
+            debug_counter <= debug_counter + 1;
+        end
+    end
+
+    always_ff @(negedge clock) begin
+        $display("NEGATIVE EDGE: %d ----------------------------------------------", debug_counter);
+    end
+
     //////////////////////////////////////////////////
     //                Pipeline Wires                //
     //////////////////////////////////////////////////
@@ -271,6 +288,7 @@ module pipeline (
     // TODO write if_id_enable logic 
     assign if_id_enable = 1;
     always_ff @(posedge clock) begin
+      //  $display("New cycle -----------");
         if (reset) begin // TODO make sure these are correct
             if_id_reg.inst  <= `NOP;
             if_id_reg.valid <= `FALSE;

@@ -1,6 +1,8 @@
 
 `include "verilog/sys_defs.svh"
 
+import "DPI-C" function void print_inst(int inst, int pc, int valid_inst);
+
 // TODO: maybe add enable?
 module reservation_station (
     input clock, reset, 
@@ -74,6 +76,81 @@ module reservation_station (
     logic branch_available_index_found;
     logic [$clog2(`NUM_FU_BRANCH)-1:0] branch_issue_index;
   //  logic branch_issuable;
+
+    function void printRSEntry(int i, string fu, RS_ENTRY entry);
+        $write("%0d \t|", i);
+        $write(" %s \t|", fu);
+        if (entry.busy) begin
+            $write(" yes \t|");
+        end else begin
+            $write(" no \t|");
+        end
+        print_inst(entry.packet.inst, entry.packet.PC, entry.packet.valid);
+        $write("\t|");
+        if (entry.packet.dest_reg.ready) begin
+            $write(" %d(+) \t|", entry.packet.dest_reg.reg_num);
+        end else begin
+            $write(" %d(-) \t|", 0);
+        end
+
+        if (entry.packet.src1_reg.ready) begin
+            $write(" %d(+) \t|", entry.packet.src1_reg.reg_num);
+        end else begin
+            $write(" %d(-) \t|", 0);
+        end
+
+        if (entry.packet.src2_reg.ready) begin
+            $write(" %d(+) \t|", entry.packet.src2_reg.reg_num);
+        end else begin
+            $write(" %d(-) \t|", 0);
+        end
+        $display("");
+
+    endfunction
+
+    // Function to print the current state of the ALU entries in the reservation station
+    function void printReservationStation();
+        $display("Reservation Stations:");
+        $display("Issuable? alu:%0d mult:%0d load:%0d store:%0d branch:%0d", alu_issuable, mult_issuable, load_issuable, store_issuable, branch_issuable);
+        $display("Freeing?  alu:%0d mult:%0d load:%0d store:%0d branch:%0d", free_alu, free_mult, free_load, free_store, free_branch);
+        $display("Full?     alu:%0d mult:%0d load:%0d store:%0d branch:%0d", alu_entries_full, mult_entries_full, load_entries_full, store_entries_full, branch_entries_full);
+        $write("Issuing: ");
+        print_inst(issued_packet.inst, issued_packet.PC, issued_packet.valid);
+        $display("");
+        $display("NUM \t| FU \t| BUSY \t| OP \t\t| DEST \t| SRC1 \t| SRC2");
+        for (int i = 0; i < `NUM_FU_ALU; i++) begin
+            printRSEntry(i + 1, "ALU", alu_entries[i]);
+        end
+        for (int i = 0; i < `NUM_FU_MULT; i++) begin
+            printRSEntry(i + `NUM_FU_ALU + 1, "MULT", mult_entries[i]);
+        end
+        for (int i = 0; i < `NUM_FU_LOAD; i++) begin
+            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + 1, "LOAD", load_entries[i]);
+        end
+        for (int i = 0; i < `NUM_FU_STORE; i++) begin
+            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + `NUM_FU_LOAD + 1, "STORE", store_entries[i]);
+        end
+        for (int i = 0; i < `NUM_FU_BRANCH; i++) begin
+            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + `NUM_FU_LOAD + `NUM_FU_STORE + 1, "BRNCH", branch_entries[i]);
+        end
+    endfunction
+            
+            /* $write("%0d \t|", i);
+            $write(" ALU \t|");
+            if (alu_entries[i].busy) begin
+                $write(" yes \t|");
+            end else begin
+                $write(" no \t|");
+            end
+            print_inst(alu_entries[i].packet.inst, alu_entries[i].packet.PC, alu_entries[i].packet.valid);
+            $write("\t|");
+            $write(" %d \t|", alu_entries[i].packet.dest_reg);
+            $write(" %d \t|", alu_entries[i].packet.src1_reg);
+            $write(" %d \t|", alu_entries[i].packet.src2_reg);
+            $display(""); */
+  //      end
+//    endfunction
+
 
    // combinational: calculate issuing output (searches for ready operands)
       // check all entries for first with both operands ready 
@@ -199,9 +276,14 @@ module reservation_station (
         end
     end
 
+    always_ff @(negedge clock) begin 
+        printReservationStation();
+    end
 
     always_ff @(posedge clock) begin
+       // printReservationStation();
         if (reset) begin
+             $display("[RS] resetting");
             // TODO add valid bit to entries
             // TODO reset packets themeselves
             for (int i = 0; i < `NUM_FU_ALU; i++) begin
@@ -228,6 +310,7 @@ module reservation_station (
             
             // Updating (TODO might be one cycle delay)
             if(update) begin
+                $display("[RS] updating from CDB ready_reg:%d", ready_reg);
                 for (int i = 0; i < `NUM_FU_ALU; i++) begin
                     if(alu_entries[i].packet.src1_reg == ready_reg) begin
                         alu_entries[i].packet.src1_reg.ready <= 1'b1;
@@ -274,6 +357,7 @@ module reservation_station (
             // Issuing 
             if (issue_enable) begin 
                 if (alu_issuable) begin
+                    $display("[RS] Issuing ALU packet, pc:%p", alu_entries[alu_issue_index].packet.PC);
                  //   ready <= 1'b1;
                     issued_packet <= alu_entries[alu_issue_index].packet;
                     alu_entries[alu_issue_index].issued <= 1;
@@ -300,13 +384,14 @@ module reservation_station (
                     issued_packet.issued_fu_index <= branch_issue_index;
                 end else begin 
               //      ready <= 1'b0;
-
+                 //   $display("[RS] No packet to issue");
                     issued_packet <= INVALID_ID_IS_PACKET;
 
                 end
             end else begin 
                // ready <= 1'b0;
 		// if !issue_enable, the input inst is invalid, pass it to next stage
+               // $display("[RS] Issue disabled, passing input -> issued packet, pc:%p", input_packet.PC);
                 issued_packet <= input_packet; 
                 issued_packet.issued_fu_index <= 0; // can be any values
             end
@@ -315,6 +400,7 @@ module reservation_station (
             // Freeing (TODO figure out of we can allocate and free on the same cycle)
             for(int i = 0; i < `NUM_FU_ALU; i++) begin
                 if (free_alu[i]) begin
+                    $display("[RS] Freeing ALU packet, pc:%p", alu_entries[i].packet.PC);
                     alu_entries[i].busy <= 0;
                     alu_entries[i].issued <= 1;
                 end
@@ -356,6 +442,7 @@ module reservation_station (
             if(allocate) begin 
                 if(input_packet.function_type == ALU) begin
                     if (alu_available_index_found) begin
+                        $display("[RS] Allocating new ALU packet, pc:%p", input_packet.PC);
                         alu_entries[alu_available_index].busy <= 1;
                         alu_entries[alu_available_index].packet <= input_packet;
                         alu_entries[alu_available_index].issued <= 0;

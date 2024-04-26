@@ -306,8 +306,8 @@ module dispatch (
      /* Access map table (convert arch opa/opb to physical) */
 
     // Get arch regs from decoded packet
-    assign mt_arch_reg1_idx = decoded_packet.opa_select ? decoded_packet.inst.r.rs1 : `ZERO_REG;
-    assign mt_arch_reg2_idx = decoded_packet.opb_select ? decoded_packet.inst.r.rs2 : `ZERO_REG;
+    assign mt_arch_reg1_idx = decoded_packet.opa_select ? `ZERO_REG : decoded_packet.inst.r.rs1;
+    assign mt_arch_reg2_idx = decoded_packet.opb_select ? `ZERO_REG : decoded_packet.inst.r.rs2;
 
     // Update decoded packet with physical regs from map table
     assign decoded_packet.src1_reg = mt_preg1_out;
