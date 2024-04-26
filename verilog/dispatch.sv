@@ -209,7 +209,8 @@ module dispatch (
         // Instruction input to store in ROB (if valid)
         .write(decoded_packet.valid),
         .inst(decoded_packet.inst),
-        .tag(decoded_packet.dest_reg),
+        .inst_PC(decoded_packet.PC),
+        .dest_tag(decoded_packet.dest_reg),
 
         // input from retire stage
         .move_head(retire_move_head), 

@@ -124,6 +124,8 @@ module ifetch_basic (
             if_packet <= n_if_packet;
             if (if_packet.valid) begin
                 $display("[IF] fetched valid instruction, PC %p", if_packet.PC);
+            end else begin 
+                $display("[IF] no valid instruction fetched");
             end
 
         end

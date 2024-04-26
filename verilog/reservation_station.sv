@@ -81,43 +81,63 @@ module reservation_station (
         $write("%0d \t|", i);
         $write(" %s \t|", fu);
         if (entry.busy) begin
-            $write(" yes \t|");
+            $write(" y \t|");
         end else begin
-            $write(" no \t|");
+            $write(" n \t|");
         end
+
+        if (entry.issued) begin
+            $write(" y \t|");
+        end else begin
+            $write(" n \t|");
+        end
+
         print_inst(entry.packet.inst, entry.packet.PC, entry.packet.valid);
-        $write("\t|");
-        if (entry.packet.dest_reg.ready) begin
-            $write(" %d(+) \t|", entry.packet.dest_reg.reg_num);
-        end else begin
-            $write(" %d(-) \t|", 0);
-        end
+        $write("\t| ");
 
-        if (entry.packet.src1_reg.ready) begin
-            $write(" %d(+) \t|", entry.packet.src1_reg.reg_num);
-        end else begin
-            $write(" %d(-) \t|", 0);
-        end
+        print_preg(entry.packet.dest_reg);
 
-        if (entry.packet.src2_reg.ready) begin
-            $write(" %d(+) \t|", entry.packet.src2_reg.reg_num);
-        end else begin
-            $write(" %d(-) \t|", 0);
-        end
+        $write(" \t| ");
+
+        print_preg(entry.packet.src1_reg);
+
+        $write(" \t| ");
+
+        print_preg(entry.packet.src2_reg);
+
         $display("");
+
+        // if (entry.packet.dest_reg.ready) begin
+        //     $write(" %0d(+) \t|", entry.packet.dest_reg.reg_num);
+        // end else begin
+        //     $write(" %0d(-) \t|", 0);
+        // end
+
+        // if (entry.packet.src1_reg.ready) begin
+        //     $write(" %0d(+) \t|", entry.packet.src1_reg.reg_num);
+        // end else begin
+        //     $write(" %0d(-) \t|", 0);
+        // end
+
+        // if (entry.packet.src2_reg.ready) begin
+        //     $write(" %0d(+) \t|", entry.packet.src2_reg.reg_num);
+        // end else begin
+        //     $write(" %0d(-) \t|", 0);
+        // end
+        // $display("");
 
     endfunction
 
     // Function to print the current state of the ALU entries in the reservation station
     function void printReservationStation();
-        $display("Reservation Stations:");
+        $display("RESERVATION STATIONS");
         $display("Issuable? alu:%0d mult:%0d load:%0d store:%0d branch:%0d", alu_issuable, mult_issuable, load_issuable, store_issuable, branch_issuable);
         $display("Freeing?  alu:%0d mult:%0d load:%0d store:%0d branch:%0d", free_alu, free_mult, free_load, free_store, free_branch);
         $display("Full?     alu:%0d mult:%0d load:%0d store:%0d branch:%0d", alu_entries_full, mult_entries_full, load_entries_full, store_entries_full, branch_entries_full);
         $write("Issuing: ");
         print_inst(issued_packet.inst, issued_packet.PC, issued_packet.valid);
         $display("");
-        $display("NUM \t| FU \t| BUSY \t| OP \t\t| DEST \t| SRC1 \t| SRC2");
+        $display("NUM \t| FU \t| BUSY \t ISS'D \t| OP \t\t| DEST \t| SRC1 \t| SRC2 |");
         for (int i = 0; i < `NUM_FU_ALU; i++) begin
             printRSEntry(i + 1, "ALU", alu_entries[i]);
         end
@@ -125,13 +145,13 @@ module reservation_station (
             printRSEntry(i + `NUM_FU_ALU + 1, "MULT", mult_entries[i]);
         end
         for (int i = 0; i < `NUM_FU_LOAD; i++) begin
-            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + 1, "LOAD", load_entries[i]);
+            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + 1, "LD", load_entries[i]);
         end
         for (int i = 0; i < `NUM_FU_STORE; i++) begin
-            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + `NUM_FU_LOAD + 1, "STORE", store_entries[i]);
+            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + `NUM_FU_LOAD + 1, "ST", store_entries[i]);
         end
         for (int i = 0; i < `NUM_FU_BRANCH; i++) begin
-            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + `NUM_FU_LOAD + `NUM_FU_STORE + 1, "BRNCH", branch_entries[i]);
+            printRSEntry(i + `NUM_FU_ALU + `NUM_FU_MULT + `NUM_FU_LOAD + `NUM_FU_STORE + 1, "BRN", branch_entries[i]);
         end
     endfunction
             
@@ -283,7 +303,7 @@ module reservation_station (
     always_ff @(posedge clock) begin
        // printReservationStation();
         if (reset) begin
-             $display("[RS] resetting");
+            // $display("[RS] resetting");
             // TODO add valid bit to entries
             // TODO reset packets themeselves
             for (int i = 0; i < `NUM_FU_ALU; i++) begin
@@ -310,54 +330,56 @@ module reservation_station (
             
             // Updating (TODO might be one cycle delay)
             if(update) begin
-                $display("[RS] updating from CDB ready_reg:%d", ready_reg);
+                $display("[RS] CDB update, ready_reg:%d", ready_reg.reg_num);
                 for (int i = 0; i < `NUM_FU_ALU; i++) begin
-                    if(alu_entries[i].packet.src1_reg == ready_reg) begin
+                    if(alu_entries[i].packet.src1_reg.reg_num == ready_reg.reg_num) begin
                         alu_entries[i].packet.src1_reg.ready <= 1'b1;
                     end
-                    if(alu_entries[i].packet.src2_reg == ready_reg) begin
+                    if(alu_entries[i].packet.src2_reg.reg_num == ready_reg.reg_num) begin
                         alu_entries[i].packet.src2_reg.ready <= 1'b1;
                     end
                 end
                 for (int i = 0; i < `NUM_FU_MULT; i++) begin
-                    if(mult_entries[i].packet.src1_reg == ready_reg) begin
+                    if(mult_entries[i].packet.src1_reg.reg_num == ready_reg.reg_num) begin
                         mult_entries[i].packet.src1_reg.ready <= 1'b1;
                     end
-                    if(mult_entries[i].packet.src2_reg == ready_reg) begin
+                    if(mult_entries[i].packet.src2_reg.reg_num == ready_reg.reg_num) begin
                         mult_entries[i].packet.src2_reg.ready <= 1'b1;
                     end
                 end
                 for (int i = 0; i < `NUM_FU_LOAD; i++) begin
-                    if(load_entries[i].packet.src1_reg == ready_reg) begin
+                    if(load_entries[i].packet.src1_reg.reg_num == ready_reg.reg_num) begin
                         load_entries[i].packet.src1_reg.ready <= 1'b1;
                     end
-                    if(load_entries[i].packet.src2_reg == ready_reg) begin
+                    if(load_entries[i].packet.src2_reg.reg_num == ready_reg.reg_num) begin
                         load_entries[i].packet.src2_reg.ready <= 1'b1;
                     end
                 end
                 for (int i = 0; i < `NUM_FU_STORE; i++) begin
-                    if(store_entries[i].packet.src1_reg == ready_reg) begin
+                    if(store_entries[i].packet.src1_reg.reg_num == ready_reg.reg_num) begin
                         store_entries[i].packet.src1_reg.ready <= 1'b1;
                     end
-                    if(store_entries[i].packet.src2_reg == ready_reg) begin
+                    if(store_entries[i].packet.src2_reg.reg_num == ready_reg.reg_num) begin
                         store_entries[i].packet.src2_reg.ready <= 1'b1;
                     end
                 end
                 for (int i = 0; i < `NUM_FU_BRANCH; i++) begin
-                    if(branch_entries[i].packet.src1_reg == ready_reg) begin
+                    if(branch_entries[i].packet.src1_reg.reg_num == ready_reg.reg_num) begin
                         branch_entries[i].packet.src1_reg.ready <= 1'b1;
                     end
-                    if(branch_entries[i].packet.src2_reg == ready_reg) begin
+                    if(branch_entries[i].packet.src2_reg.reg_num == ready_reg.reg_num) begin
                         branch_entries[i].packet.src2_reg.ready <= 1'b1;
                     end
                 end
-            end     
+            end else begin 
+                $display("[RS] No CDB Update");
+            end   
 
 
             // Issuing 
             if (issue_enable) begin 
                 if (alu_issuable) begin
-                    $display("[RS] Issuing ALU packet, pc:%p", alu_entries[alu_issue_index].packet.PC);
+                    $display("[RS] Issue ALU packet, pc:%p", alu_entries[alu_issue_index].packet.PC);
                  //   ready <= 1'b1;
                     issued_packet <= alu_entries[alu_issue_index].packet;
                     alu_entries[alu_issue_index].issued <= 1;
@@ -384,7 +406,7 @@ module reservation_station (
                     issued_packet.issued_fu_index <= branch_issue_index;
                 end else begin 
               //      ready <= 1'b0;
-                 //   $display("[RS] No packet to issue");
+                    $display("[RS] No packet to issue");
                     issued_packet <= INVALID_ID_IS_PACKET;
 
                 end
@@ -395,7 +417,6 @@ module reservation_station (
                 issued_packet <= input_packet; 
                 issued_packet.issued_fu_index <= 0; // can be any values
             end
-
 
             // Freeing (TODO figure out of we can allocate and free on the same cycle)
             for(int i = 0; i < `NUM_FU_ALU; i++) begin
@@ -440,54 +461,69 @@ module reservation_station (
             // Try allocation 
             // find not busy entry in the four RS_ENTRYs
             if(allocate) begin 
+                $display("[RS] Trying to allocate packet, pc:%p", input_packet.PC);
                 if(input_packet.function_type == ALU) begin
                     if (alu_available_index_found) begin
-                        $display("[RS] Allocating new ALU packet, pc:%p", input_packet.PC);
+                        $display("[RS] Found index, allocating new ALU packet, pc:%p", input_packet.PC);
                         alu_entries[alu_available_index].busy <= 1;
                         alu_entries[alu_available_index].packet <= input_packet;
                         alu_entries[alu_available_index].issued <= 0;
                         done <= 1;
                     end else begin 
+                        $display("[RS] Can't allocate ALU packet, pc:%p", input_packet.PC);
                         done <= 0;
                     end
                 end else if(input_packet.function_type == MULT) begin
                     if (mult_available_index_found) begin
+                        $display("[RS] Found index, allocating new MULT packet, pc:%p", input_packet.PC);
                         mult_entries[mult_available_index].busy <= 1;
                         mult_entries[mult_available_index].packet <= input_packet;
                         mult_entries[mult_available_index].issued <= 0;
                         done <= 1;
                     end else begin
+                        $display("[RS] Can't allocate MULT packet, pc:%p", input_packet.PC);
                         done <= 0;
                     end
                 end else if(input_packet.function_type == LOAD) begin
                     if (load_available_index_found) begin
+                        $display("[RS] Found index, allocating new LOAD packet, pc:%p", input_packet.PC);
                         load_entries[load_available_index].busy <= 1;
                         load_entries[load_available_index].packet <= input_packet;
                         load_entries[load_available_index].issued <= 0;
                         done <= 1;
                     end else begin 
+                        $display("[RS] Can't allocate LOAD packet, pc:%p", input_packet.PC);
                         done <= 0;
                     end
                 end else if(input_packet.function_type == STORE) begin
                     if (store_available_index_found) begin
+                        $display("[RS] Found index, allocating new STORE packet, pc:%p", input_packet.PC);
                         store_entries[store_available_index].busy <= 1;
                         store_entries[store_available_index].packet <= input_packet;
                         store_entries[store_available_index].issued <= 0;
                         done <= 1;
                     end else begin 
+                        $display("[RS] Can't allocate STORE packet, pc:%p", input_packet.PC);
                         done <= 0;
                     end
                 end else if(input_packet.function_type == BRANCH) begin
                     if (branch_available_index_found) begin
+                        $display("[RS] Found index, allocating new BRANCH packet, pc:%p", input_packet.PC);
                         branch_entries[branch_available_index].busy <= 1;
                         branch_entries[branch_available_index].packet <= input_packet;
                         branch_entries[branch_available_index].issued <= 0;
                         done <= 1;
                     end else begin 
+                        $display("[RS] Can't allocate BRANCH packet, pc:%p", input_packet.PC);
                         done <= 0;
                     end
+                end else begin 
+                        assert(0);
+                        done <= 0;
                 end
             end else begin 
+                $display("[RS] No allocation");
+                $display("[RS] --");
                 done <= 0;
             end
         end 

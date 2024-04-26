@@ -63,22 +63,6 @@ module pipeline (
 );
 
 
-        // Debugging counter
-    integer debug_counter;
-
-    always_ff @(posedge clock) begin
-        $display("POSITIVE EDGE: %d ----------------------------------------------", debug_counter);
-        if (reset) begin
-            debug_counter <= 0;
-        end else begin
-            debug_counter <= debug_counter + 1;
-        end
-    end
-
-    always_ff @(negedge clock) begin
-        $display("NEGATIVE EDGE: %d ----------------------------------------------", debug_counter);
-    end
-
     //////////////////////////////////////////////////
     //                Pipeline Wires                //
     //////////////////////////////////////////////////

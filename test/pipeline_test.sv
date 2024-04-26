@@ -248,6 +248,7 @@ module testbench;
     // Count the number of posedges and number of instructions completed
     // till simulation ends
     always @(posedge clock) begin
+        $display("+++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE %0d ++++++++++++++++++++++++++++++++++++++++", clock_count);
         if(reset) begin
             clock_count <= 0;
             instr_count <= 0;
@@ -259,6 +260,7 @@ module testbench;
 
 
     always @(negedge clock) begin
+        $display("-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE %0d -----------------------------------------", clock_count);
         if(reset) begin
             $display("@@\n@@  %t : System STILL at reset, can't show anything\n@@",
                      $realtime);
@@ -291,7 +293,7 @@ module testbench;
             end
 
             // deal with any halting conditions
-            if(pipeline_error_status != NO_ERROR || debug_counter > 50000000) begin
+            if(pipeline_error_status != NO_ERROR || debug_counter > 200) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");
                 show_mem_with_decimal(0,`MEM_64BIT_LINES - 1);
                 // 8Bytes per line, 16kB total

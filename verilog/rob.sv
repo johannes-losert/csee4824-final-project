@@ -6,9 +6,10 @@ module reorder_buffer(
 
     /* New instruction from fetch/dispatch */
     input INST inst,
+    input logic [`XLEN-1:0] inst_PC,
     /* Signal from free list, indicating which register is ready (PREG) */
     // TODO switch to is_empty rather than free_reg = ZERO_REG
-    input PREG tag,
+    input PREG dest_tag,
 
     /* Enable to write to ROB 
        connect to the valid signal from dispatch stage*/
@@ -62,9 +63,36 @@ module reorder_buffer(
 
 
     function void print_reorder_buffer();
-        $display("[ROB] Current state of reorder buffer:");
+        $display("REORDER BUFFER");
+        $display("head:%0d tail:%0d", head, tail);
+        $display("full? %0d", full);
+        $display("ht \t| num \t| inst \t\t| T \t| Told");
         for (int i = 0; i < `ROB_SZ; i++) begin
-            $display("[ROB] Entry %0d: inst=%h, T=%h, Told=%h", i, inst_buffer[i].inst, inst_buffer[i].T, inst_buffer[i].Told);
+            // If is the head, mark an h in the ht column 
+            // If is the tail, mark a t in the ht column
+            // If is the head and tail, mark a ht in the ht column
+            string ht = "";
+            if (i == head && i == tail)
+                $write("ht \t|");
+            else if (i == head)
+                $write("h \t|");
+            else if (i == tail)
+                $write("t \t|");
+            else
+                $write(" \t|");
+
+            // write the num i to the num column
+            $write(" %0d \t|", i);
+
+            // use the c function print_inst to print the instruction in the inst column
+            print_inst(inst_buffer[i].inst, inst_buffer[i].PC, 1);
+
+            // display t and t_old in the T and Told columns
+            $write("\t| ");
+            print_preg(inst_buffer[i].T);
+            $write(" \t| ");
+            print_preg(inst_buffer[i].Told);
+            $display("");
         end
     endfunction
 
@@ -91,12 +119,15 @@ module reorder_buffer(
         end else begin
             if (write) begin
                 inst_buffer[tail].inst = inst;
+                inst_buffer[tail].PC = inst_PC;
                 if (inst.r.rd != `ZERO_REG) begin
-                    inst_buffer[tail].T = tag; // input from Free list
+                    inst_buffer[tail].T = dest_tag; // input from Free list
                     inst_buffer[tail].Told = phys_told;
                 end else begin
-                    inst_buffer[tail].T = `ZERO_REG;
-                    inst_buffer[tail].Told = `ZERO_REG;
+                    inst_buffer[tail].T.reg_num = `ZERO_REG;
+                    inst_buffer[tail].Told.reg_num = `ZERO_REG;
+                    inst_buffer[tail].T.ready = 1;
+                    inst_buffer[tail].Told.ready = 1;
                 end
                 if (!full) begin
                     next_tail = tail + 1;
@@ -104,8 +135,10 @@ module reorder_buffer(
                     next_tail = tail;
                 end
             end else begin
-                inst_buffer[tail].T = `ZERO_REG;
-                inst_buffer[tail].Told = `ZERO_REG;
+                inst_buffer[tail].T.reg_num = `ZERO_REG;
+                inst_buffer[tail].Told.reg_num = `ZERO_REG;
+                inst_buffer[tail].T.ready = 1;
+                inst_buffer[tail].Told.ready = 1;
                 next_tail = tail;
             end
         end
@@ -139,9 +172,7 @@ module reorder_buffer(
     end
 
     always_ff @(posedge clock) begin
-        $display("[ROB] head index:%0d tail index:%0d", next_head, next_tail);
-        $display("[ROB] full:%0d", next_full);
-        print_reorder_buffer();
+       // print_reorder_buffer();
         if (reset) begin
             head <= 0;
             tail <= 0;
@@ -153,8 +184,9 @@ module reorder_buffer(
         end
     end
 
-    // always_ff @(negedge clock) begin
-    //     $display("head:%0d tail:%0d", head, tail);
-    // end
+    always_ff @(negedge clock) begin
+        print_reorder_buffer();
+        //$display("head:%0d tail:%0d", head, tail);
+    end
 
 endmodule

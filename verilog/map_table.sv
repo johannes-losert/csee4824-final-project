@@ -73,7 +73,6 @@ module map_table (
         end
     end
 
-
     // Arch map read port 
     always_comb begin 
         if (arch_map_arch_reg_idx == `ZERO_REG) begin
@@ -104,6 +103,60 @@ module map_table (
         end
     end 
 
+    function void print_mt_entry(int arch_idx, PREG entry); 
+        $write("%0d \t| ", arch_idx);
+        print_preg(entry);
+        $write(" \t|");
+        // $write(" %0d \t| %0d \t|", arch_idx, entry.reg_num);
+        // if (entry.ready) begin
+        //     $write(" Y \t|");
+        // end else begin
+        //     $write(" N \t|");
+        // end
+    endfunction
+
+    function void print_map_table();
+        $display("MAP TABLE");
+        $display("opa: req_idx=%0d, preg_num=%0d, ready=%0d", arch_reg1_idx, preg1_out.reg_num, preg1_out.ready);
+        $display("opb: req_idx=%0d, preg_num=%0d, ready=%0d", arch_reg2_idx, preg2_out.reg_num, preg2_out.ready);
+        $display("dst: req_idx=%0d, preg_num=%0d, ready=%0d", arch_dest_idx, old_dest_pr.reg_num, old_dest_pr.ready);
+        $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
+        $display(" Arch \t| Phys \t| Arch \t| Phys \t|");
+        for (int i = 0; i < (`REG_SZ/4); i++) begin
+            print_mt_entry(i, preg_entries[i]);
+            print_mt_entry(i + (`REG_SZ/4), preg_entries[i + (`REG_SZ/4)]);
+            print_mt_entry(i + (`REG_SZ/2), preg_entries[i + (`REG_SZ/2)]);
+            print_mt_entry(i + 3*(`REG_SZ/4), preg_entries[i + 3*(`REG_SZ/4)]);
+            $display("");
+        end
+    endfunction
+
+    function void print_arch_table();
+        $display("ARCH MAP");
+        $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
+        $display(" Arch \t| Phys \t| Arch \t| Phys \t|");
+        for (int i = 0; i < (`REG_SZ/4); i++) begin
+            print_mt_entry(i, retired_preg_entries[i]);
+            print_mt_entry(i + (`REG_SZ/4), retired_preg_entries[i + (`REG_SZ/4)]);
+            print_mt_entry(i + (`REG_SZ/2), retired_preg_entries[i + (`REG_SZ/2)]);
+            print_mt_entry(i + 3*(`REG_SZ/4), retired_preg_entries[i + 3*(`REG_SZ/4)]);
+            $display("");
+        end
+        // $write(" Arch \t| Phys \t| Rdy \t| Arch \t| Phys \t| Rdy \t|");
+        // $display(" Arch \t| Phys \t| Rdy \t| Arch \t| Phys \t| Rdy \t|");
+        // for (int i = 0; i < (`REG_SZ/4); i++) begin
+        //     print_mt_entry(i, preg_entries[i]);
+        //     print_mt_entry(i + (`REG_SZ/4), preg_entries[i + (`REG_SZ/4)]);
+        //     print_mt_entry(i + (`REG_SZ/2), preg_entries[i + (`REG_SZ/2)]);
+        //     print_mt_entry(i + 3*(`REG_SZ/4), preg_entries[i + 3*(`REG_SZ/4)]);
+        //     $display("");
+        // end
+    endfunction
+
+    always @(negedge clk) begin 
+        print_map_table();
+        print_arch_table();
+    end
 
     always @(posedge clk) begin
         if (reset) begin

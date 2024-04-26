@@ -344,6 +344,13 @@ typedef struct packed {
     logic ready;
 } PREG;
 
+function void print_preg(PREG preg);
+    if (preg.ready)
+        $write("%0d+", preg.reg_num);
+    else
+        $write("%0d-", preg.reg_num);
+endfunction
+
 
 /**
  * ID_IS Packet:
@@ -725,6 +732,7 @@ typedef struct packed {
 typedef struct packed {
     PREG T,Told;
     INST inst;
+    logic [`XLEN-1:0] PC;
     // logic done;
 } ROB_ENTRY;
 
