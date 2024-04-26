@@ -53,7 +53,7 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 input_file = sys.argv[1]
-chunk_length = 55
+chunk_length = 70
 
 # Call the pad_output function with the specified arguments
 pad_output(input_file, chunk_length)

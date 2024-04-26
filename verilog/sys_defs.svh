@@ -344,6 +344,8 @@ typedef struct packed {
     logic ready;
 } PREG;
 
+import "DPI-C" function void print_inst(int inst, int pc, int valid_inst);
+
 function void print_preg(PREG preg);
     if (preg.ready)
         $write("%0d+", preg.reg_num);

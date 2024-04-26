@@ -1,8 +1,6 @@
 
 `include "verilog/sys_defs.svh"
 
-import "DPI-C" function void print_inst(int inst, int pc, int valid_inst);
-
 // TODO: maybe add enable?
 module reservation_station (
     input clock, reset, 
@@ -107,25 +105,6 @@ module reservation_station (
 
         $display("");
 
-        // if (entry.packet.dest_reg.ready) begin
-        //     $write(" %0d(+) \t|", entry.packet.dest_reg.reg_num);
-        // end else begin
-        //     $write(" %0d(-) \t|", 0);
-        // end
-
-        // if (entry.packet.src1_reg.ready) begin
-        //     $write(" %0d(+) \t|", entry.packet.src1_reg.reg_num);
-        // end else begin
-        //     $write(" %0d(-) \t|", 0);
-        // end
-
-        // if (entry.packet.src2_reg.ready) begin
-        //     $write(" %0d(+) \t|", entry.packet.src2_reg.reg_num);
-        // end else begin
-        //     $write(" %0d(-) \t|", 0);
-        // end
-        // $display("");
-
     endfunction
 
     // Function to print the current state of the ALU entries in the reservation station
@@ -134,9 +113,9 @@ module reservation_station (
         $display("Issuable? alu:%0d mult:%0d load:%0d store:%0d branch:%0d", alu_issuable, mult_issuable, load_issuable, store_issuable, branch_issuable);
         $display("Freeing?  alu:%0d mult:%0d load:%0d store:%0d branch:%0d", free_alu, free_mult, free_load, free_store, free_branch);
         $display("Full?     alu:%0d mult:%0d load:%0d store:%0d branch:%0d", alu_entries_full, mult_entries_full, load_entries_full, store_entries_full, branch_entries_full);
-        $write("Issuing: ");
-        print_inst(issued_packet.inst, issued_packet.PC, issued_packet.valid);
-        $display("");
+        // $write("Issuing: ");
+        // print_inst(issued_packet.inst, issued_packet.PC, issued_packet.valid);
+        // $display("");
         $display("NUM \t| FU \t| BUSY \t ISS'D \t| OP \t\t| DEST \t| SRC1 \t| SRC2 |");
         for (int i = 0; i < `NUM_FU_ALU; i++) begin
             printRSEntry(i + 1, "ALU", alu_entries[i]);

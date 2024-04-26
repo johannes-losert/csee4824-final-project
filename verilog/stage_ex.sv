@@ -288,6 +288,9 @@ module stage_ex (
             // ex_packet.mem_size      = MEM_SIZE'(tmp_branch_packet.inst.r.funct3[1:0]);
             // ex_packet.valid         = tmp_branch_packet.valid;
             // ex_packet.rob_index     = tmp_branch_packet.rob_index;
+        end else begin 
+            ex_packet = INVALID_EX_CO_PACKET;
+
         end
     end
 
@@ -307,9 +310,12 @@ module stage_ex (
             // If any of the FUs is outputting its down signal, add it to a list that signifies that that 
             // FU is ready to move forward to the next stage (waiting_fus)
             if(alu_done) begin
+                $display("[EX] ALU done, result=%h", alu_result);
                 waiting_fus[ALU]    <= 1;
                 tmp_alu_result      <= alu_result;
-            end 
+            end else 
+                $display("[EX] ALU not done");
+
             if(mult_done) begin
                 waiting_fus[MULT]   <= 1; 
                 tmp_mult_result     <= mult_result;

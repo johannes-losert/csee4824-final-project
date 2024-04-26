@@ -43,11 +43,39 @@ module regfile (
         end else begin
             read_out_2 = registers[read_idx_2];
         end
+    end 
+
+    function void print_reg(int i);
+        $write("%0d \t| %h\t|", i, registers[i]);
+    endfunction
+    function void print_regfile();
+        $display("REGFILE");
+        $display("Read 1: idx=%0d, val=%h", read_idx_1, read_out_1);
+        $display("Read 2: idx=%0d, val=%h", read_idx_2, read_out_2);
+        $write(" Idx \t| Val \t\t| Idx \t| Val \t\t| Idx \t| Val \t\t| Idx \t| Val \t\t|");
+        $display("Idx \t| Val \t\t| Idx \t| Val \t\t| Idx \t| Val \t\t| Idx \t| Val \t\t|");
+
+        for (int i = 0; i < (`PHYS_REG_SZ/8); i++) begin
+                print_reg(i);
+                print_reg(i + (`PHYS_REG_SZ/8));
+                print_reg(i + (`PHYS_REG_SZ/4));
+                print_reg(i + 3*(`PHYS_REG_SZ/8));
+                print_reg(i + (`PHYS_REG_SZ/2));
+                print_reg(i + 5*(`PHYS_REG_SZ/8));
+                print_reg(i + 3*(`PHYS_REG_SZ/4));
+                print_reg(i + 7*(`PHYS_REG_SZ/8));
+                $display("");
+        end
+    endfunction
+
+    always_ff @(negedge clock) begin 
+        print_regfile();
     end
 
     // Write port
     always_ff @(posedge clock) begin
         if (write_en && write_idx != `ZERO_REG) begin
+            $display("[REG] writing to register %0d: %h", write_idx, write_data);
             registers[write_idx] <= write_data;
         end
     end

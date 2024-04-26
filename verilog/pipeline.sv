@@ -390,12 +390,22 @@ module pipeline (
         .is_packet(is_packet)
     );
 
+    function void print_is_ex();
+        if (is_packet.valid) begin 
+            $write("[IS] Issuing instruction: ");
+            print_inst(is_packet.inst, is_packet.PC, is_packet.valid);
+            $display(" opa: %0d, opb: %0d, dest: %0d", is_packet.opa_value, is_packet.opb_value, is_packet.dest_reg_idx);
+        end else
+            $display("[IS] No valid instruction to issue");
+    endfunction
+
     //////////////////////////////////////////////////
     //          IS EX Pipeline Register             //
     //////////////////////////////////////////////////
     // TODO figure out this logic 
     assign is_ex_enable = 1'b1; 
     always_ff @(posedge clock) begin
+        print_is_ex();
         if (reset) begin   
             is_ex_reg <= INVALID_ID_IS_PACKET;
         end else if (id_is_enable) begin
@@ -423,6 +433,15 @@ module pipeline (
         .free_branch(ex_free_branch)
     );
 
+    function void print_ex_co();
+        if (ex_packet.valid) begin 
+            $write("[EX] Executed instruction: ");
+            print_inst(ex_packet.inst, ex_packet.PC, ex_packet.valid);
+            $display(" opa: %0d, opb: %0d, dest: %0d, result=%h", ex_packet.opa_value, ex_packet.opb_value, ex_packet.dest_reg_idx, ex_packet.result);
+        end else
+            $display("[EX] No valid instruction to execute");
+    endfunction
+
     //////////////////////////////////////////////////
     //          EX CO Pipeline Register             //
     //////////////////////////////////////////////////
@@ -430,6 +449,7 @@ module pipeline (
     assign ex_co_enable = 1'b1; // always enabled
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
+        print_ex_co();
         if (reset) begin
             ex_co_reg      <= INVALID_EX_CO_PACKET;
         end else if (ex_co_enable) begin
@@ -458,6 +478,8 @@ module pipeline (
         .free_load(co_free_load),
         .free_store(co_free_store)
     );
+
+    
 
     //////////////////////////////////////////////////
     //          CO RE Pipeline Register             //
