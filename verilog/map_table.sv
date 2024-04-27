@@ -209,6 +209,10 @@ module map_table (
             // If retiring, copy preg to retired_pre
             if (retire_enable) begin
                 retired_preg_entries[retire_arch_reg] <= preg_entries[retire_arch_reg];
+                // If retiring and broadcast to CDB, update ready bit (TODO check logic)
+                if (set_ready_enable && preg_entries[retire_arch_reg].reg_num == ready_phys_idx) begin
+                    retired_preg_entries[retire_arch_reg].ready <= 1;
+                end
             end
 
             // If restoring, copy all retired_pregs back to preg
