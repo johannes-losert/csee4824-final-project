@@ -150,6 +150,10 @@ void print_inst(int inst, int pc, int valid_inst) {
         default: str = "unknown"; break;
         }
     }
+    
+    if (pc > 10000 || pc < 0) {
+        pc = -1;
+    }
 
     printf("%4d:%-8s", pc, str);
     // if (ppfile != NULL)

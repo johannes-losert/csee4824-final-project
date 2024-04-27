@@ -172,12 +172,17 @@ module reorder_buffer(
     end
 
     always_ff @(posedge clock) begin
+        if (move_head)
+            $display("[ROB] move head");
+
        // print_reorder_buffer();
         if (reset) begin
             head <= 0;
             tail <= 0;
             full <= 0;
-        end else if (write) begin
+       // end else if (write) begin
+        //TODO make sure this didn't break anything
+        end else begin
             full <= next_full;
             tail <= next_tail;
             head <= next_head;

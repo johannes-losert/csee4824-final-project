@@ -31,13 +31,17 @@ module map_table (
 
     // SET READY operation (CDB)
     input logic set_ready_enable,
-    input logic [`PHYS_REG_IDX_SZ:0] ready_phys_idx
+    input logic [`PHYS_REG_IDX_SZ:0] ready_phys_idx,
+
+    output PREG [`REG_IDX_SZ:1] preg_entries,
+    output PREG [`REG_IDX_SZ:1] retired_preg_entries,
+    output PREG temp_old_dest_pr
 );
 
-    // One PREG per arch reg, always ready
-    PREG [`REG_IDX_SZ:1] preg_entries;
-    PREG [`REG_IDX_SZ:1] retired_preg_entries;
-    PREG temp_old_dest_pr;
+    // // One PREG per arch reg, always ready
+    // PREG [`REG_IDX_SZ:1] preg_entries;
+    // PREG [`REG_IDX_SZ:1] retired_preg_entries;
+    // PREG temp_old_dest_pr;
 
     // Read port 1
     always_comb begin 
@@ -120,13 +124,20 @@ module map_table (
         $display("opa: req_idx=%0d, preg_num=%0d, ready=%0d", arch_reg1_idx, preg1_out.reg_num, preg1_out.ready);
         $display("opb: req_idx=%0d, preg_num=%0d, ready=%0d", arch_reg2_idx, preg2_out.reg_num, preg2_out.ready);
         $display("dst: req_idx=%0d, preg_num=%0d, ready=%0d", arch_dest_idx, old_dest_pr.reg_num, old_dest_pr.ready);
+        
+        $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
+        $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
         $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
         $display(" Arch \t| Phys \t| Arch \t| Phys \t|");
-        for (int i = 0; i < (`REG_SZ/4); i++) begin
+        for (int i = 0; i < (`REG_SZ/8); i++) begin
             print_mt_entry(i, preg_entries[i]);
+            print_mt_entry(i + (`REG_SZ/8), preg_entries[i + (`REG_SZ/8)]);
             print_mt_entry(i + (`REG_SZ/4), preg_entries[i + (`REG_SZ/4)]);
-            print_mt_entry(i + (`REG_SZ/2), preg_entries[i + (`REG_SZ/2)]);
-            print_mt_entry(i + 3*(`REG_SZ/4), preg_entries[i + 3*(`REG_SZ/4)]);
+            print_mt_entry(i + 3*(`REG_SZ/8), preg_entries[i + 3*(`REG_SZ/8)]);
+            print_mt_entry(i + 4*(`REG_SZ/8), preg_entries[i + 4*(`REG_SZ/8)]);
+            print_mt_entry(i + 5*(`REG_SZ/8), preg_entries[i + 5*(`REG_SZ/8)]);
+            print_mt_entry(i + 6*(`REG_SZ/8), preg_entries[i + 6*(`REG_SZ/8)]);
+            print_mt_entry(i + 7*(`REG_SZ/8), preg_entries[i + 7*(`REG_SZ/8)]);
             $display("");
         end
     endfunction
@@ -134,12 +145,18 @@ module map_table (
     function void print_arch_table();
         $display("ARCH MAP");
         $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
+        $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
+        $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
         $display(" Arch \t| Phys \t| Arch \t| Phys \t|");
-        for (int i = 0; i < (`REG_SZ/4); i++) begin
+        for (int i = 0; i < (`REG_SZ/8); i++) begin
             print_mt_entry(i, retired_preg_entries[i]);
+            print_mt_entry(i + (`REG_SZ/8), retired_preg_entries[i + (`REG_SZ/8)]);
             print_mt_entry(i + (`REG_SZ/4), retired_preg_entries[i + (`REG_SZ/4)]);
-            print_mt_entry(i + (`REG_SZ/2), retired_preg_entries[i + (`REG_SZ/2)]);
-            print_mt_entry(i + 3*(`REG_SZ/4), retired_preg_entries[i + 3*(`REG_SZ/4)]);
+            print_mt_entry(i + 3*(`REG_SZ/8), retired_preg_entries[i + 3*(`REG_SZ/8)]);
+            print_mt_entry(i + 4*(`REG_SZ/8), retired_preg_entries[i + 4*(`REG_SZ/8)]);
+            print_mt_entry(i + 5*(`REG_SZ/8), retired_preg_entries[i + 5*(`REG_SZ/8)]);
+            print_mt_entry(i + 6*(`REG_SZ/8), retired_preg_entries[i + 6*(`REG_SZ/8)]);
+            print_mt_entry(i + 7*(`REG_SZ/8), retired_preg_entries[i + 7*(`REG_SZ/8)]);
             $display("");
         end
         // $write(" Arch \t| Phys \t| Rdy \t| Arch \t| Phys \t| Rdy \t|");
@@ -181,7 +198,11 @@ module map_table (
 
             // Update from CDB
             if (set_ready_enable) begin
-                preg_entries[ready_phys_idx].ready <= 1;
+                for (int i = 0; i < `REG_SZ; i++) begin
+                    if (preg_entries[i].reg_num == ready_phys_idx) begin
+                        preg_entries[i].ready <= 1;
+                    end
+                end
             end
 
 

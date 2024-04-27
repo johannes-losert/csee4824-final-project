@@ -21,12 +21,17 @@ module retire(
     output logic [4:0]       pipeline_commit_wr_idx,
     output logic [`XLEN-1:0] pipeline_commit_wr_data,
     output logic             pipeline_commit_wr_en,
-    output logic [`XLEN-1:0] pipeline_commit_NPC
+    output logic [`XLEN-1:0] pipeline_commit_NPC,
+
+    output RETIRE_ENTRY [`ROB_SZ-1:0] retire_buffer,
+
+    output RETIRE_ENTRY incoming_entry, outgoing_entry
+
 );
 
-    RETIRE_ENTRY [`ROB_SZ-1:0] retire_buffer;
+    // RETIRE_ENTRY [`ROB_SZ-1:0] retire_buffer;
 
-    RETIRE_ENTRY incoming_entry, outgoing_entry;
+    // RETIRE_ENTRY incoming_entry, outgoing_entry;
 
     logic do_forward;
 

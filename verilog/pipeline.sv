@@ -501,6 +501,9 @@ module pipeline (
     //////////////////////////////////////////////////
     // TODO could extract this into the pipeline?
     retire retire_0 (
+        .clock(clock),
+        .reset(reset),
+   
         .co_packet(co_packet),
 
         .mem2proc_response(mem2proc_response),
@@ -518,6 +521,93 @@ module pipeline (
         .pipeline_commit_NPC(pipeline_commit_NPC)
     );
 
+    function void print_instruction_line();
+
+        print_inst(if_packet.inst, if_packet.PC, if_packet.valid);
+        $write("\t|");
+        print_inst(id_packet.inst, id_packet.PC, id_packet.valid);
+        $write("\t|");
+        print_inst(is_packet.inst, is_packet.PC, is_packet.valid);
+        $write("\t|");
+        print_inst(ex_packet.inst, ex_packet.PC, ex_packet.valid);
+        $write("\t|");
+        print_inst(co_packet.inst, co_packet.PC, co_packet.valid);
+        $display("");
+    endfunction
+
+    function void print_reg_lines();
+
+        $write("-\t\t"); // IF
+
+        $write("dst=");
+        print_preg(id_packet.dest_reg);
+        $write("\t");
+
+        $write("\tds=%0d\t", is_packet.dest_reg_idx);
+        $write("\tds=%0d\t", ex_packet.dest_reg_idx);
+        $write("\tds=%0d\t", co_packet.dest_reg_idx);
+
+        $display(""); 
+
+        $write("-\t\t");
+
+        $write("s1=");
+        print_preg(id_packet.src1_reg);
+        $write("\t");
+
+        $write("\ts1=%h", is_packet.opa_value);
+        $write("\ts1=%h", ex_packet.opa_value);
+        $write("\ts1=%h", co_packet.opa_value);
+
+        $display("");
+
+        $write("-\t\t");
+
+        $write("s2=");
+        print_preg(id_packet.src2_reg);
+        $write("\t");
+
+        $write("\ts2=%h", is_packet.opb_value);
+        $write("\ts2=%h", ex_packet.opb_value);
+        $write("\ts2=%h", co_packet.opb_value);
+        $display("");
+    endfunction
+
+    // function void print_reg_values();
+    //     $write("\t|");
+    //     // Print src1 value 
+    //     $write(" src1=%");
+    
+    //     $write("\t|");
+    //     // Print src2 value 
+    //     $write(" src2=");
+    //     print_reg_value(co_packet.src2_reg);
+    //     $write("\t|");
+    //     // Print dest value 
+    //     $write(" dest=");
+    //     print_reg_value(co_packet.dest_reg);
+    //     $write("\t|");
+    //     $display("");
+    // endfunction
+
+
+
+    // Function to print the contents of all pipeline registers
+    function void print_pipeline_registers();
+        $display("Pipeline Output Registers");
+        $display("---------------------------------------------------------------------------------------");
+        $display("IF PACKET \t| ID PACKET \t| IS PACKET \t| EX PACKET \t| CO PACKET");
+        $display("---------------------------------------------------------------------------------------");
+        
+        print_instruction_line();
+        print_reg_lines();
+
+     
+    endfunction
+
+    always_ff @(posedge clock) begin 
+        print_pipeline_registers();
+    end
 
 
 

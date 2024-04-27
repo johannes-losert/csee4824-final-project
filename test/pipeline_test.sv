@@ -293,7 +293,10 @@ module testbench;
             end
 
             // deal with any halting conditions
-            if(pipeline_error_status != NO_ERROR || debug_counter > 200) begin
+            if (pipeline_error_status == LOAD_ACCESS_FAULT && debug_counter < 200) begin 
+                $display("@@@ System got a memory error");
+
+            end else if(pipeline_error_status != NO_ERROR || debug_counter > 200) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");
                 show_mem_with_decimal(0,`MEM_64BIT_LINES - 1);
                 // 8Bytes per line, 16kB total
