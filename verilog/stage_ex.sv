@@ -28,16 +28,26 @@ module stage_ex (
     output logic [`NUM_FU_LOAD-1:0]   free_load,
     output logic [`NUM_FU_STORE-1:0]  free_store,
     output logic [`NUM_FU_BRANCH-1:0] free_branch,
+    input [`XLEN-1:0]   Dmem2proc_data,
+    input [3:0]         Dmem2proc_response,
 
     // debug outputs
     output IS_EX_PACKET tmp_alu_packet,
     output IS_EX_PACKET tmp_mult_packet,
-    output IS_EX_PACKET tmp_branch_packet
+    output IS_EX_PACKET tmp_branch_packet,
+    output IS_EX_PACKET tmp_load_packet,
+    output IS_EX_PACKET tmp_store_packet,
+    output logic [1:0]       proc2Dmem_command, // The memory command
+    output MEM_SIZE          proc2Dmem_size,    // Size of data to read or write
+    output logic [`XLEN-1:0] proc2Dmem_addr,    // Address sent to Data memory
+    output logic [`XLEN-1:0] proc2Dmem_data     // Data sent to Data memory
 );
 
     logic [`XLEN-1:0]   alu_result;
     logic [`XLEN-1:0]   mult_result;
     logic [`XLEN-1:0]   branch_result;
+    logic [`XLEN-1:0]   load_result;
+    logic [`XLEN-1:0] store_result;
     logic [`XLEN-1:0]   opa_mux_out, opb_mux_out;
     logic               take_conditional;
 
@@ -68,9 +78,13 @@ module stage_ex (
     logic alu_done; 
     logic mult_done; 
     logic branch_done;
+    logic load_done; 
+    logic store_done;
     logic [`XLEN-1:0] tmp_alu_result; 
     logic [`XLEN-1:0] tmp_mult_result;
     logic [`XLEN-1:0] tmp_branch_result;
+    logic [`XLEN-1:0] tmp_load_result;
+    logic [`XLEN-1:0] tmp_store_result;
 
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
 
@@ -140,12 +154,51 @@ module stage_ex (
         .out_packet (tmp_mult_packet)
     );
 
+    load_alu load_alu_0 (
+        .clock (clock), 
+        .reset (reset),
+        .opa (opa_mux_out),
+        .opb (opb_mux_out),
+        .in_packet (is_ex_reg),
+        .alu_func (is_ex_reg.alu_func),
+        .load_en (is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
+        .Dmem2proc_data (Dmem2proc_data),
+        .Dmem2proc_response (Dmem2proc_response),
+
+        .result (load_result),
+        .load_done (load_done),
+        .out_packet (tmp_load_packet),
+        .proc2Dmem_command (proc2Dmem_command),
+        .proc2Dmem_size (proc2Dmem_size),
+        .proc2Dmem_addr (proc2Dmem_addr),
+        .proc2Dmem_data (proc2Dmem_data)
+    );
+    
+    // Instantiate the ALU
+    store store_0 (
+        // Inputs
+        .clock      (clock),
+        .reset      (reset),
+        .opa        (opa_mux_out),
+        .opb        (opb_mux_out),
+        .func       (is_ex_reg.alu_func),
+        .store_en     (is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
+        .in_packet  (is_ex_reg),
+
+        // Output
+        .result     (store_result),
+        .store_done   (store_done),
+        .out_packet (tmp_store_packet)
+    );
+
     // Choose which FU to move to the next stage
 
     logic [5:0] waiting_fus; 
     logic alu_done_process;
     logic mult_done_process;
     logic branch_done_process;
+    logic load_done_process;
+    logic store_done_process;
     logic tmp_take_conditional;
 
     // If a FU is selected to be done with the ex stage, then set the ex_packet attributes to their
@@ -184,19 +237,6 @@ module stage_ex (
             ex_packet.has_dest = tmp_alu_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_alu_packet.issued_fu_index;
-
-            // ex_packet.NPC           = tmp_alu_packet.NPC;
-            // ex_packet.rs2_value     = tmp_alu_packet.rs2_value;
-            // ex_packet.rd_mem        = tmp_alu_packet.rd_mem;
-            // ex_packet.wr_mem        = tmp_alu_packet.wr_mem;
-            // ex_packet.dest_reg_idx  = tmp_alu_packet.dest_reg_idx;
-            // ex_packet.halt          = tmp_alu_packet.halt;
-            // ex_packet.illegal       = tmp_alu_packet.illegal;
-            // ex_packet.csr_op        = tmp_alu_packet.csr_op;
-            // ex_packet.rd_unsigned   = tmp_alu_packet.inst.r.funct3[2];
-            // ex_packet.mem_size      = MEM_SIZE'(tmp_alu_packet.inst.r.funct3[1:0]);
-            // ex_packet.valid         = tmp_alu_packet.valid;
-            // ex_packet.rob_index     = tmp_alu_packet.rob_index;
         end else if (mult_done_process) begin
             ex_packet.result        = tmp_mult_result;
             ex_packet.take_branch   = 0;
@@ -230,18 +270,6 @@ module stage_ex (
             ex_packet.has_dest = tmp_mult_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_mult_packet.issued_fu_index;
-            // ex_packet.NPC           = tmp_mult_packet.NPC;
-            // ex_packet.rs2_value     = tmp_mult_packet.rs2_value;
-            // ex_packet.rd_mem        = tmp_mult_packet.rd_mem;
-            // ex_packet.wr_mem        = tmp_mult_packet.wr_mem;
-            // ex_packet.dest_reg_idx  = tmp_mult_packet.dest_reg_idx;
-            // ex_packet.halt          = tmp_mult_packet.halt;
-            // ex_packet.illegal       = tmp_mult_packet.illegal;
-            // ex_packet.csr_op        = tmp_mult_packet.csr_op;
-            // ex_packet.rd_unsigned   = tmp_mult_packet.inst.r.funct3[2];
-            // ex_packet.mem_size      = MEM_SIZE'(tmp_mult_packet.inst.r.funct3[1:0]);
-            // ex_packet.valid         = tmp_mult_packet.valid;
-            // ex_packet.rob_index     = tmp_mult_packet.rob_index;
         end else if (branch_done_process) begin
             ex_packet.result        = tmp_branch_result;
             ex_packet.take_branch   = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
@@ -276,21 +304,74 @@ module stage_ex (
 
             ex_packet.issued_fu_index = tmp_branch_packet.issued_fu_index;
 
-            // ex_packet.NPC           = tmp_branch_packet.NPC;
-            // ex_packet.rs2_value     = tmp_branch_packet.rs2_value;
-            // ex_packet.rd_mem        = tmp_branch_packet.rd_mem;
-            // ex_packet.wr_mem        = tmp_branch_packet.wr_mem;
-            // ex_packet.dest_reg_idx  = tmp_branch_packet.dest_reg_idx;
-            // ex_packet.halt          = tmp_branch_packet.halt;
-            // ex_packet.illegal       = tmp_branch_packet.illegal;
-            // ex_packet.csr_op        = tmp_branch_packet.csr_op;
-            // ex_packet.rd_unsigned   = tmp_mult_packet.inst.r.funct3[2];
-            // ex_packet.mem_size      = MEM_SIZE'(tmp_branch_packet.inst.r.funct3[1:0]);
-            // ex_packet.valid         = tmp_branch_packet.valid;
-            // ex_packet.rob_index     = tmp_branch_packet.rob_index;
+        end else if (load_done_process) begin
+            ex_packet.result        = tmp_load_result;
+            ex_packet.take_branch   = 0;
+            
+            // Pass throughs
+            ex_packet.inst = tmp_load_packet.inst;
+            ex_packet.PC = tmp_load_packet.PC;
+            ex_packet.NPC = tmp_load_packet.NPC;
+
+            ex_packet.opa_select = tmp_load_packet.opa_select;
+            ex_packet.opb_select = tmp_load_packet.opb_select;
+
+            ex_packet.opa_value = tmp_load_packet.opa_value;
+            ex_packet.opb_value = tmp_load_packet.opb_value;
+
+            ex_packet.dest_reg_idx = tmp_load_packet.dest_reg_idx;
+
+            ex_packet.alu_func = tmp_load_packet.alu_func;
+            ex_packet.rd_mem = tmp_load_packet.rd_mem;
+            ex_packet.wr_mem = tmp_load_packet.wr_mem;
+            ex_packet.cond_branch = tmp_load_packet.cond_branch;
+            ex_packet.uncond_branch = tmp_load_packet.uncond_branch;
+            ex_packet.halt = tmp_load_packet.halt;
+            ex_packet.illegal = tmp_load_packet.illegal;
+            ex_packet.csr_op = tmp_load_packet.csr_op;
+
+            ex_packet.function_type = tmp_load_packet.function_type;
+            ex_packet.valid = tmp_load_packet.valid;
+
+            ex_packet.rob_index = tmp_load_packet.rob_index;
+            ex_packet.has_dest = tmp_load_packet.has_dest;
+
+            ex_packet.issued_fu_index = tmp_load_packet.issued_fu_index;
+        end else if (store_done_process) begin
+            ex_packet.result        = tmp_store_result;
+            ex_packet.take_branch   = 0;
+            
+            // Pass throughs
+            ex_packet.inst = tmp_store_packet.inst;
+            ex_packet.PC = tmp_store_packet.PC;
+            ex_packet.NPC = tmp_store_packet.NPC;
+
+            ex_packet.opa_select = tmp_store_packet.opa_select;
+            ex_packet.opb_select = tmp_store_packet.opb_select;
+
+            ex_packet.opa_value = tmp_store_packet.opa_value;
+            ex_packet.opb_value = tmp_store_packet.opb_value;
+
+            ex_packet.dest_reg_idx = tmp_store_packet.dest_reg_idx;
+
+            ex_packet.alu_func = tmp_store_packet.alu_func;
+            ex_packet.rd_mem = tmp_store_packet.rd_mem;
+            ex_packet.wr_mem = tmp_store_packet.wr_mem;
+            ex_packet.cond_branch = tmp_store_packet.cond_branch;
+            ex_packet.uncond_branch = tmp_store_packet.uncond_branch;
+            ex_packet.halt = tmp_store_packet.halt;
+            ex_packet.illegal = tmp_store_packet.illegal;
+            ex_packet.csr_op = tmp_store_packet.csr_op;
+
+            ex_packet.function_type = tmp_store_packet.function_type;
+            ex_packet.valid = tmp_store_packet.valid;
+
+            ex_packet.rob_index = tmp_store_packet.rob_index;
+            ex_packet.has_dest = tmp_store_packet.has_dest;
+
+            ex_packet.issued_fu_index = tmp_store_packet.issued_fu_index;
         end else begin 
             ex_packet = INVALID_EX_CO_PACKET;
-
         end
     end
 
@@ -301,9 +382,13 @@ module stage_ex (
             tmp_alu_result          <= 0;
             tmp_mult_result         <= 0;
             tmp_branch_result       <= 0;
+            tmp_load_result         <= 0;
+            tmp_store_result <= 0;
             alu_done_process        <= 0;
             mult_done_process       <= 0;
             branch_done_process     <= 0;
+            load_done_process <= 0;
+            store_done_process <= 0;
             tmp_take_conditional    <= 0;
         end
         else begin
@@ -313,8 +398,7 @@ module stage_ex (
                 $display("[EX] ALU done, result=%h", alu_result);
                 waiting_fus[ALU]    <= 1;
                 tmp_alu_result      <= alu_result;
-            end else 
-                $display("[EX] ALU not done");
+            end
 
             if(mult_done) begin
                 waiting_fus[MULT]   <= 1; 
@@ -325,14 +409,26 @@ module stage_ex (
                 tmp_branch_result   <= branch_result;
                 tmp_take_conditional<= take_conditional;
             end 
+            if (load_done) begin
+                waiting_fus[LOAD] <= 1; 
+                tmp_load_result   <= load_result;
+            end
+            if (store_done) begin
+                waiting_fus[STORE] <= 1;
+                tmp_store_result <= store_result;
+            end
 
             // Defaults
             alu_done_process        <= 0;
             mult_done_process       <= 0;
             branch_done_process     <= 0;
+            load_done_process <= 0;
+            store_done_process <= 0;
             free_alu[0]             <= 0;
             free_mult[0]            <= 0;
             free_branch[0]          <= 0;
+            free_load[0] <= 0;
+            free_store[0] <= 0;
 
             // Choose one of those FUs from waiting_fus. Set its passthroughs (in an always_comb block above), 
             // and set that free_[FU] variable to 1. Also remember to say that that FU is no longer ready to move on to the
@@ -349,6 +445,14 @@ module stage_ex (
                 waiting_fus[BRANCH] <= 0;
                 branch_done_process <= 1;
                 free_branch[0]      <= 1;
+            end else if(waiting_fus[LOAD] == 1) begin
+                waiting_fus[LOAD] <= 0;
+                load_done_process <= 1;
+                free_load[0] <= 1;
+            end else if(waiting_fus[STORE] == 1) begin
+                waiting_fus[STORE] <= 0;
+                store_done_process <= 1;
+                free_store[0] <= 1;
             end
             
         end
