@@ -249,8 +249,8 @@ module dispatch (
     assign rs_ready_reg.ready = cdb_broadcast_en; // TODO this is duplicate
 
     /* TODO figure out if we ever need to not issue */
-    logic issue_enable;
-    assign issue_enable = 1;
+    logic issue_enable, next_issue_enable;
+    //assign issue_enable = 1;
 
     reservation_station reservation_station_0(
         .clock(clock),
@@ -286,6 +286,30 @@ module dispatch (
         .free_branch(free_branch)
  
     );
+
+    // stall when issue a load or store
+    always_comb begin
+	if (issue_enable) begin
+	    if (id_packet.function_type == LOAD || id_packet.function_type == STORE) begin
+	        next_issue_enable = 0;
+	    end else begin
+	        next_issue_enable = 1;
+	    end
+	end else begin
+	    if ((free_load != 0) || (free_store != 0))
+		next_issue_enable = 1;
+	    else
+		next_issue_enable = 0;
+	end
+    end
+
+    always_ff @(posedge clock) begin
+	if (reset) begin
+	    issue_enable <= 1;
+	end else begin
+	    issue_enable <= next_issue_enable;
+	end
+    end
 
     /* Just forward some info */
     assign decoded_packet.inst = if_id_packet.inst;
