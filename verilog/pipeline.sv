@@ -416,12 +416,23 @@ module pipeline (
     //////////////////////////////////////////////////
     //          Execution Stage                     //
     //////////////////////////////////////////////////
+
+    // Outputs from MEM-Stage to memory
+    logic [`XLEN-1:0] proc2Dmem_addr;
+    logic [`XLEN-1:0] proc2Dmem_data;
+    logic [1:0]       proc2Dmem_command;
+    MEM_SIZE          proc2Dmem_size;
+
     // TODO move each FU to just be in the pipeline? probably not
     stage_ex stage_ex_0 (
         .clock(clock),
         .reset(reset),
 
         .is_ex_reg(is_ex_reg),
+
+        // Load inputs
+        .Dmem2proc_data (mem2proc_data[`XLEN-1:0]),
+        .Dmem2proc_response (mem2proc_response),
 
         // outputs
         .ex_packet(ex_packet),
@@ -430,7 +441,12 @@ module pipeline (
         .free_mult(ex_free_mult),
         .free_load(ex_free_load),
         .free_store(ex_free_store),
-        .free_branch(ex_free_branch)
+        .free_branch(ex_free_branch), 
+
+        .proc2Dmem_command (proc2Dmem_command),
+        .proc2Dmem_size (proc2Dmem_size),
+        .proc2Dmem_addr (proc2Dmem_addr),
+        .proc2Dmem_data (proc2Dmem_data)
     );
 
     function void print_ex_co();
