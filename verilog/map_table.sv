@@ -33,8 +33,8 @@ module map_table (
     input logic set_ready_enable,
     input logic [`PHYS_REG_IDX_SZ:0] ready_phys_idx,
 
-    output PREG [`REG_IDX_SZ:1] preg_entries,
-    output PREG [`REG_IDX_SZ:1] retired_preg_entries,
+    output PREG [`REG_SZ] preg_entries,
+    output PREG [`REG_SZ] retired_preg_entries,
     output PREG temp_old_dest_pr
 );
 
@@ -123,7 +123,7 @@ module map_table (
         $display("MAP TABLE");
         $display("opa: req_idx=%0d, preg_num=%0d, ready=%0d", arch_reg1_idx, preg1_out.reg_num, preg1_out.ready);
         $display("opb: req_idx=%0d, preg_num=%0d, ready=%0d", arch_reg2_idx, preg2_out.reg_num, preg2_out.ready);
-        $display("dst: req_idx=%0d, preg_num=%0d, ready=%0d", arch_dest_idx, old_dest_pr.reg_num, old_dest_pr.ready);
+        $display("dst: req_idx=%0d, old_preg_num=%0d, ready=%0d, new_preg_num", arch_dest_idx, old_dest_pr.reg_num, old_dest_pr.ready, new_dest_pr_idx);
         
         $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
         $write(" Arch \t| Phys \t| Arch \t| Phys \t|");
