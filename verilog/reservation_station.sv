@@ -268,7 +268,7 @@ module reservation_station (
         for(int i = `NUM_FU_BRANCH; i > 0; i--) begin
             if(!branch_entries[i - 1].busy) begin 
                 branch_available_index = i - 1;
-                branch_available_index = 1;
+                branch_available_index_found = 1;
             end else begin 
                 branch_available_index_found = 0;
             end

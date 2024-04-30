@@ -152,6 +152,9 @@ module pipeline (
     logic [`NUM_FU_STORE-1:0] ex_free_store;
     logic [`NUM_FU_BRANCH-1:0] ex_free_branch;
 
+    logic take_branch;
+    logic [`XLEN-1:0] branch_target;
+
 
     //////////////////////////////////////////////////
     //          Complete Signals                    //
@@ -186,8 +189,8 @@ module pipeline (
     logic if_stall, id_stall, is_stall, ex_stall, co_stall, rt_stall;
 
 
-    // TODO implement logic: if stalls if id stage can't accept a new instruction
-    assign if_valid = ~id_needs_stall; //TODO fix if valid logic
+    /* if valid unless id needs stall, or we are taking a branch */
+    assign if_valid = ~id_needs_stall | take_branch; 
 
     // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
     assign id_stall = 0;
@@ -200,11 +203,15 @@ module pipeline (
     //                Brach/Interrupt Logic         //
     //////////////////////////////////////////////////
     // TODO do this 
-    // TODO also make 'arch free list'
-    assign id_rollback = 0;
-    assign re_rollback = 0;
+    assign take_branch = ex_packet.valid & ex_packet.take_branch;
+    assign branch_target = ex_packet.result;
 
-    assign certain_branch_req = 0;
+    assign id_rollback = take_branch;
+    assign re_rollback = take_branch;
+
+    assign certain_branch_req = take_branch;
+    assign certain_branch_pc = branch_target;
+
     assign rob_target_req = 0;
     assign branch_pred_req = 0;
     
