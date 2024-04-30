@@ -90,7 +90,16 @@ module ifetch_basic (
             end else if (waiting_on_inst) begin 
                 n_PC_reg = PC_reg;
                 
-                if (Icache2proc_data_valid) begin
+                if (certain_branch_req) begin 
+                    /* If there really is a branch, discard everything else and go to certain_branch_pc */
+                    // TODO fix this for real, probably don't need waiting_on_inst
+                    n_waiting_on_inst = 1;
+                    n_if_packet.inst = `NOP;
+                    n_if_packet.PC = PC_reg;
+                    n_if_packet.NPC = certain_branch_pc;
+                    n_if_packet.valid = 0;
+                    n_PC_reg = certain_branch_pc;
+                end else if (Icache2proc_data_valid) begin
                     // pushing to the tail of inst buffer
                     n_waiting_on_inst = 0; 
                     n_if_packet.inst = PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
