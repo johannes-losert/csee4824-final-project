@@ -1,5 +1,5 @@
 module load (
-    input logic start,
+    //input logic start,
     input IS_EX_PACKET is_ex_reg,
     input [`XLEN-1:0] address,
     input [`XLEN-1:0]   Dmem2proc_data,
@@ -31,29 +31,23 @@ module load (
 
     // Read data from memory and sign extend the proper bits
     always_comb begin
-        if (Dmem2proc_response != 0 && start == 1'b1) begin
-            read_data = Dmem2proc_data;
-            if (rd_unsigned) begin
-                // unsigned: zero-extend the data
-                if (memory_size == BYTE) begin
-                    read_data[`XLEN-1:8] = 0;
-                end else if (memory_size == HALF) begin
-                    read_data[`XLEN-1:16] = 0;
-                end
-            end else begin
-                // signed: sign-extend the data
-                if (memory_size[1:0] == BYTE) begin
-                    read_data[`XLEN-1:8] = {(`XLEN-8){Dmem2proc_data[7]}};
-                end else if (memory_size == HALF) begin
-                    read_data[`XLEN-1:16] = {(`XLEN-16){Dmem2proc_data[15]}};
-                end
-            end
-            done = 1;
+        read_data = Dmem2proc_data;
+        if (rd_unsigned) begin
+	    // unsigned: zero-extend the data
+	    if (memory_size == BYTE) begin
+	        read_data[`XLEN-1:8] = 0;
+	    end else if (memory_size == HALF) begin
+	        read_data[`XLEN-1:16] = 0;
+	    end
+        end else begin
+	    // signed: sign-extend the data
+	    if (memory_size[1:0] == BYTE) begin
+	        read_data[`XLEN-1:8] = {(`XLEN-8){Dmem2proc_data[7]}};
+	    end else if (memory_size == HALF) begin
+	        read_data[`XLEN-1:16] = {(`XLEN-16){Dmem2proc_data[15]}};
+	    end
         end
-        else begin
-            done = 0;
-            read_data = 0;
-        end
+        done = 1;
     end
 
 endmodule

@@ -296,9 +296,11 @@ module dispatch (
 	        next_issue_enable = 1;
 	    end
 	end else begin
-	    if ((free_load != 0) || (free_store != 0))
+	    $display ("[RS] stops issuing, waiting for load or store to finish");
+	    if ((free_load != 0) || (free_store != 0))begin
+		$display ("load or store finished, {RS} starts to issue");
 		next_issue_enable = 1;
-	    else
+	    end else
 		next_issue_enable = 0;
 	end
     end

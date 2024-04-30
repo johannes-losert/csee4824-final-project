@@ -54,6 +54,7 @@ module complete(
 
     assign co_packet.result = ex_co_reg.result;
     assign co_packet.take_branch = ex_co_reg.take_branch;
+    assign co_packet.mem_size = ex_co_reg.mem_size;
 
     
 

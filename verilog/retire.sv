@@ -22,6 +22,10 @@ module retire(
     output logic [`XLEN-1:0] pipeline_commit_wr_data,
     output logic             pipeline_commit_wr_en,
     output logic [`XLEN-1:0] pipeline_commit_NPC,
+    output logic [1:0]       proc2Dmem_command, // The memory command
+    output MEM_SIZE          proc2Dmem_size,    // Size of data to read or write
+    output logic [`XLEN-1:0] proc2Dmem_addr,    // Address sent to Data memory
+    output logic [`XLEN-1:0] proc2Dmem_data,     // Data sent to Data memory
 
     output RETIRE_ENTRY [`ROB_SZ-1:0] retire_buffer,
 
@@ -41,6 +45,10 @@ module retire(
     // Populate incoming entry, from the pipeline
     always_comb begin 
         incoming_entry.valid = co_packet.valid;
+	incoming_entry.function_type = co_packet.function_type;
+	incoming_entry.mem_size = co_packet.mem_size;
+	incoming_entry.result = co_packet.result;
+	incoming_entry.opb_value = outgoing_entry.opb_value;
         incoming_entry.completed_insts = {3'b0, co_packet.valid};
         incoming_entry.NPC = co_packet.NPC;
         incoming_entry.error_status = co_packet.illegal ? ILLEGAL_INST :
@@ -59,10 +67,22 @@ module retire(
         end else begin 
             outgoing_entry = retire_buffer[rob_head];
         end 
-   end
+    end
 
    // Move head if outgoing entry is valid
-   assign move_head = ~reset && ~clear_retire_buffer && outgoing_entry.valid;
+    assign move_head = ~reset && ~clear_retire_buffer && outgoing_entry.valid;
+
+    assign proc2Dmem_data = outgoing_entry.opb_value;
+    assign proc2Dmem_addr = outgoing_entry.result;
+    assign proc2Dmem_size = outgoing_entry.mem_size;
+
+    always_comb begin
+	if (outgoing_entry.function_type == STORE && outgoing_entry.valid && ~reset && ~clear_retire_buffer) begin
+	    proc2Dmem_command = BUS_STORE;
+	end else begin 
+	    proc2Dmem_command = BUS_NONE;
+	end
+    end
 
     always @(posedge clock) begin
         if (reset || clear_retire_buffer) begin

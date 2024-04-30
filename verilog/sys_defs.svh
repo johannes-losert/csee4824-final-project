@@ -529,6 +529,7 @@ typedef struct packed {
     // New stuff from EX stage
     logic [`XLEN-1:0] result;
     logic take_branch;
+    MEM_SIZE          mem_size;
 } EX_CO_PACKET;
 
 
@@ -564,7 +565,8 @@ EX_CO_PACKET INVALID_EX_CO_PACKET = {
     {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
 
     {`XLEN{1'b0}}, // result
-    1'b0 // take_branch
+    1'b0, // take_branch
+    1'b0 // mem_size
 };
 
 typedef struct packed {
@@ -606,6 +608,7 @@ typedef struct packed {
     logic regfile_en;
     logic [`PHYS_REG_IDX_SZ-1:0] regfile_idx;
     logic [`XLEN-1:0] regfile_data;
+    MEM_SIZE          mem_size;
 } CO_RE_PACKET;
 
 
@@ -645,7 +648,8 @@ CO_RE_PACKET INVALID_CO_RE_PACKET = {
 
     1'b0, // regfile_en
     {`PHYS_REG_IDX_SZ{1'b0}}, // regfile_idx
-    {`XLEN{1'b0}} // regfile_data
+    {`XLEN{1'b0}}, // regfile_data
+    1'b0 // mem_size
 };
 
 // // TODO can clean this up, for now just duplicates everything
@@ -821,6 +825,10 @@ typedef struct packed {
     logic [`PHYS_REG_IDX_SZ:0]  regfile_idx;  // register write index
     logic [`XLEN-1:0] regfile_data; // register write data 
     logic             valid;
+    FUNIT 	      function_type;
+    MEM_SIZE          mem_size;
+    logic [`XLEN-1:0] opb_value;
+    logic [`XLEN-1:0] result;
 } RETIRE_ENTRY;
 
 

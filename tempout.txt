@@ -1,0 +1,3248 @@
+Info: [VCS_SAVE_RESTORE_INFO] ASLR (Address Space Layout Randomization) is detected on the machine. To enable $save functionality, ASLR will be switched off and simv re-executed.
+Please use '-no_save' simv switch to avoid re-execution or '-suppress=ASLR_DETECTED_INFO' to suppress this message.
+Chronologic VCS simulator copyright 1991-2023
+Contains Synopsys proprietary information.
+Compiler version U-2023.03-SP2-1_Full64; Runtime version U-2023.03-SP2-1_Full64;  Apr 30 02:16 2024
+Initializing memory
+BEGINNING
+Loading memory file: programs/load_testing.mem
+Using writeback output file: /dev/null
+@@
+@@
+@@                     0  Asserting System reset......
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE x -----------------------------------------
+@@
+@@                     0 : System STILL at reset, can't show anything
+@@
+REORDER BUFFER
+head:x tail:x
+full? x
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:unknown 	| x- 	| x-
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:x mult:x load:x store:x branch:x
+Freeing?  alu:x mult:x load:x store:x branch:x
+Full?     alu:x mult:x load:x store:x branch:x
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| n 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| n 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| n 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| n 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| n 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=x, val=xxxxxxxx
+Read 2: idx=x, val=xxxxxxxx
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=X, preg_num=x, ready=x
+opb: req_idx=X, preg_num=x, ready=x
+dst: req_idx=X, old_preg_num=x, ready=x, new_preg_num  x
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| x- 	|4 	| x- 	|8 	| x- 	|12 	| x- 	|16 	| x- 	|20 	| x- 	|24 	| x- 	|28 	| x- 	|
+1 	| x- 	|5 	| x- 	|9 	| x- 	|13 	| x- 	|17 	| x- 	|21 	| x- 	|25 	| x- 	|29 	| x- 	|
+2 	| x- 	|6 	| x- 	|10 	| x- 	|14 	| x- 	|18 	| x- 	|22 	| x- 	|26 	| x- 	|30 	| x- 	|
+3 	| x- 	|7 	| x- 	|11 	| x- 	|15 	| x- 	|19 	| x- 	|23 	| x- 	|27 	| x- 	|31 	| x- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| x- 	|4 	| x- 	|8 	| x- 	|12 	| x- 	|16 	| x- 	|20 	| x- 	|24 	| x- 	|28 	| x- 	|
+1 	| x- 	|5 	| x- 	|9 	| x- 	|13 	| x- 	|17 	| x- 	|21 	| x- 	|25 	| x- 	|29 	| x- 	|
+2 	| x- 	|6 	| x- 	|10 	| x- 	|14 	| x- 	|18 	| x- 	|22 	| x- 	|26 	| x- 	|30 	| x- 	|
+3 	| x- 	|7 	| x- 	|11 	| x- 	|15 	| x- 	|19 	| x- 	|23 	| x- 	|27 	| x- 	|31 	| x- 	|
+[RS] stops issuing, waiting for load or store to finish
+[RS] stops issuing, waiting for load or store to finish
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE x ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|   0:-       	|   0:-       	|  -1:-       	|   0:-       
+-		dst=x-		ds=x		ds=0		ds=x	
+-		s1=x-		s1=xxxxxxxx	s1=00000000	s1=xxxxxxxx
+-		s2=x-		s2=xxxxxxxx	s2=00000000	s2=xxxxxxxx
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 0 -----------------------------------------
+@@
+@@                   300 : System STILL at reset, can't show anything
+@@
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 0 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|   0:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=x-		ds=0		ds=0		ds=x	
+-		s1=x-		s1=00000000	s1=00000000	s1=00000000
+-		s2=x-		s2=00000000	s2=00000000	s2=00000000
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 0 -----------------------------------------
+@@
+@@                   600 : System STILL at reset, can't show anything
+@@
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 0 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|   0:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=x-		ds=0		ds=0		ds=x	
+-		s1=x-		s1=00000000	s1=00000000	s1=00000000
+-		s2=x-		s2=00000000	s2=00000000	s2=00000000
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 0 -----------------------------------------
+@@
+@@                   900 : System STILL at reset, can't show anything
+@@
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 0 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|   0:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=x-		ds=0		ds=0		ds=x	
+-		s1=x-		s1=00000000	s1=00000000	s1=00000000
+-		s2=x-		s2=00000000	s2=00000000	s2=00000000
+@@                  1060  Deasserting System reset......
+@@
+@@
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 0 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 0 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|   0:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=x-		ds=0		ds=0		ds=x	
+-		s1=x-		s1=00000000	s1=00000000	s1=00000000
+-		s2=x-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 1 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=x, val=xxxxxxxx
+Read 2: idx=x, val=xxxxxxxx
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 1 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|  -1:-       	|   0:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=x		ds=0		ds=x	
+-		s1=0-		s1=xxxxxxxx	s1=00000000	s1=00000000
+-		s2=0-		s2=xxxxxxxx	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 2 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 2 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|  -1:-       	|  -1:-       	|   0:-       	|  -1:-       
+-		dst=0-		ds=0		ds=x		ds=x	
+-		s1=0-		s1=00000000	s1=xxxxxxxx	s1=00000000
+-		s2=0-		s2=00000000	s2=xxxxxxxx	s2=00000000
+[EX] ALU done, result=facebeec
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 3 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 3 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|  -1:-       	|  -1:-       	|  -1:-       	|   0:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=xxxxxxxx
+-		s2=0-		s2=00000000	s2=00000000	s2=xxxxxxxx
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 4 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 4 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 5 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 5 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 6 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 6 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 7 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:unknown 	| 0+ 	| 0+
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 7 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:lw      	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC          0
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 8 -----------------------------------------
+REORDER BUFFER
+head:0 tail:0
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ht 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   0:unknown 	| x- 	| x-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=1, old_preg_num=0, ready=0, new_preg_num 39
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 8 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   0:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] Trying to allocate packet, pc:         0
+[RS] Found index, allocating new LOAD packet, pc:         0
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 9 -----------------------------------------
+REORDER BUFFER
+head:0 tail:1
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+h 	| 0 	|   0:lw      	| 39- 	| 0-
+t 	| 1 	|   0:lw      	| 0+ 	| 0+
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:1 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:1 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| y 	| n 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 38
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 9 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   4:addi    	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC          4
+[RS] No CDB Update
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 10 -----------------------------------------
+REORDER BUFFER
+head:0 tail:1
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+h 	| 0 	|   0:lw      	| 39- 	| 0-
+t 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   0:unknown 	| x- 	| x-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:1 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| y 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=3, old_preg_num=0, ready=0, new_preg_num 38
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 10 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   4:-       	|   0:lw      	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=39-		ds=0		ds=0		ds=x	
+-		s1=0+		s1=00000000	s1=00000000	s1=00000000
+-		s2=0+		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] Trying to allocate packet, pc:         4
+[RS] Found index, allocating new ALU packet, pc:         4
+[RS] stops issuing, waiting for load or store to finish
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 11 -----------------------------------------
+REORDER BUFFER
+head:0 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+h 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+t 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:1 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:1 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| n 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| y 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 11 ++++++++++++++++++++++++++++++++++++++++
+[IS] Issuing instruction:    0:lw       opa: 0, opb: 0, dest: 39
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|   0:lw      	|  -1:-       	|  -1:-       
+-		dst=0-		ds=39		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 12 -----------------------------------------
+REORDER BUFFER
+head:0 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+h 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+t 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:1 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:1 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| n 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| y 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 12 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] Executed instruction:    0:lw       opa: 0, opb: 0, dest: 39, result=00000000
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|  -1:-       	|   0:lw      	|  -1:-       
+-		dst=0-		ds=0		ds=39		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000100
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No allocation
+[RS] --
+[RS] stops issuing, waiting for load or store to finish
+load or store finished, {RS} starts to issue
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 13 -----------------------------------------
+REORDER BUFFER
+head:0 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+h 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+t 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:1 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:1 store:0 branch:0
+Full?     alu:1 mult:0 load:1 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| n 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| y 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| xxxxxxxx	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 0- 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 13 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|  -1:-       	|  -1:-       	|   0:lw      
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[ROB] move head
+[RS] CDB update, ready_reg: 39
+[RS] No allocation
+[RS] --
+[REG] writing to register 39: 00000000
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 14 -----------------------------------------
+REORDER BUFFER
+head:1 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+h 	| 1 	|   4:addi    	| 38- 	| 0-
+t 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:1 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| n 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 14 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] Issue ALU packet, pc:         4
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 15 -----------------------------------------
+REORDER BUFFER
+head:1 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+h 	| 1 	|   4:addi    	| 38- 	| 0-
+t 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 15 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|   4:addi    	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=38-		ds=0		ds=0		ds=x	
+-		s1=0+		s1=00000000	s1=00000000	s1=00000000
+-		s2=0+		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 16 -----------------------------------------
+REORDER BUFFER
+head:1 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+h 	| 1 	|   4:addi    	| 38- 	| 0-
+t 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 16 ++++++++++++++++++++++++++++++++++++++++
+[IS] Issuing instruction:    4:addi     opa: 0, opb: 0, dest: 38
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|   4:addi    	|  -1:-       	|  -1:-       
+-		dst=0-		ds=38		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 17 -----------------------------------------
+REORDER BUFFER
+head:1 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+h 	| 1 	|   4:addi    	| 38- 	| 0-
+t 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 17 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] Executed instruction:    4:addi     opa: 0, opb: 0, dest: 38, result=00000000
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|  -1:-       	|   4:addi    	|  -1:-       
+-		dst=0-		ds=0		ds=38		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000003
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 18 -----------------------------------------
+REORDER BUFFER
+head:1 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+h 	| 1 	|   4:addi    	| 38- 	| 0-
+t 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:1 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| xxxxxxxx	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 0- 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 18 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|  -1:-       	|  -1:-       	|   4:addi    
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[ROB] move head
+[RS] CDB update, ready_reg: 38
+[RS] No packet to issue
+[RS] Freeing ALU packet, pc:         4
+[RS] No allocation
+[RS] --
+[REG] writing to register 38: 00000000
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 19 -----------------------------------------
+REORDER BUFFER
+head:2 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ht 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 19 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 20 -----------------------------------------
+REORDER BUFFER
+head:2 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ht 	| 2 	|   0:unknown 	| 0+ 	| 0+
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 20 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:addi    	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC          8
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 21 -----------------------------------------
+REORDER BUFFER
+head:2 tail:2
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ht 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|   0:unknown 	| x- 	| x-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   4:addi    	| 38- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=4, old_preg_num=0, ready=0, new_preg_num 37
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 21 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+   8:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] Trying to allocate packet, pc:         8
+[RS] Found index, allocating new ALU packet, pc:         8
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 22 -----------------------------------------
+REORDER BUFFER
+head:2 tail:3
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+h 	| 2 	|   8:addi    	| 37- 	| 0-
+t 	| 3 	|   8:addi    	| 0+ 	| 0+
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:1 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| n 	|   8:addi    	| 37- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 36
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 22 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:add     	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         12
+[RS] No CDB Update
+[RS] Issue ALU packet, pc:         8
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 23 -----------------------------------------
+REORDER BUFFER
+head:2 tail:3
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+h 	| 2 	|   8:addi    	| 37- 	| 0-
+t 	| 3 	|   8:addi    	| 0+ 	| 0+
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|   8:addi    	| 37- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=1, preg_num=39, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=5, old_preg_num=0, ready=0, new_preg_num 36
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 23 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:add     	|   8:addi    	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=37-		ds=0		ds=0		ds=x	
+-		s1=0+		s1=00000000	s1=00000000	s1=00000000
+-		s2=0+		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         12
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 24 -----------------------------------------
+REORDER BUFFER
+head:2 tail:3
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+h 	| 2 	|   8:addi    	| 37- 	| 0-
+t 	| 3 	|   8:addi    	| 0+ 	| 0+
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|   8:addi    	| 37- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=1, preg_num=39, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=5, old_preg_num=0, ready=0, new_preg_num 36
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 24 ++++++++++++++++++++++++++++++++++++++++
+[IS] Issuing instruction:    8:addi     opa: 0, opb: 0, dest: 37
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:add     	|  -1:-       	|   8:addi    	|  -1:-       	|  -1:-       
+-		dst=0-		ds=37		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         12
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 25 -----------------------------------------
+REORDER BUFFER
+head:2 tail:3
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+h 	| 2 	|   8:addi    	| 37- 	| 0-
+t 	| 3 	|   8:addi    	| 0+ 	| 0+
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|   8:addi    	| 37- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=1, preg_num=39, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=5, old_preg_num=0, ready=0, new_preg_num 36
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 25 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] Executed instruction:    8:addi     opa: 0, opb: 0, dest: 37, result=00000000
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:add     	|  -1:-       	|  -1:-       	|   8:addi    	|  -1:-       
+-		dst=0-		ds=0		ds=37		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000004
+[IF] fetched valid instruction, PC         12
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 26 -----------------------------------------
+REORDER BUFFER
+head:2 tail:3
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+h 	| 2 	|   8:addi    	| 37- 	| 0-
+t 	| 3 	|   8:addi    	| 0+ 	| 0+
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:1 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|   8:addi    	| 37- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| xxxxxxxx	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=1, preg_num=39, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=5, old_preg_num=0, ready=0, new_preg_num 36
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 0- 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 26 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:add     	|  -1:-       	|  -1:-       	|  -1:-       	|   8:addi    
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         12
+[ROB] move head
+[RS] CDB update, ready_reg: 37
+[RS] No packet to issue
+[RS] Freeing ALU packet, pc:         8
+[RS] No allocation
+[RS] --
+[REG] writing to register 37: 00000000
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 27 -----------------------------------------
+REORDER BUFFER
+head:3 tail:3
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ht 	| 3 	|  12:add     	| 36- 	| 0-
+ 	| 4 	|   0:unknown 	| x- 	| x-
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|   8:addi    	| 37- 	| 0+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=1, preg_num=39, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=5, old_preg_num=0, ready=0, new_preg_num 36
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 27 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:add     	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         12
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] Trying to allocate packet, pc:        12
+[RS] Found index, allocating new ALU packet, pc:        12
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 28 -----------------------------------------
+REORDER BUFFER
+head:3 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+h 	| 3 	|  12:add     	| 36- 	| 0-
+t 	| 4 	|  12:add     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:1 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| n 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=1, preg_num=39, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=5, old_preg_num=0, ready=0, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 28 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] Issue ALU packet, pc:        12
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 29 -----------------------------------------
+REORDER BUFFER
+head:3 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+h 	| 3 	|  12:add     	| 36- 	| 0-
+t 	| 4 	|  12:add     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 29 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:-       	|  12:add     	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=36-		ds=0		ds=0		ds=x	
+-		s1=39+		s1=00000000	s1=00000000	s1=00000000
+-		s2=0+		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 30 -----------------------------------------
+REORDER BUFFER
+head:3 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+h 	| 3 	|  12:add     	| 36- 	| 0-
+t 	| 4 	|  12:add     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=39, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 30 ++++++++++++++++++++++++++++++++++++++++
+[IS] Issuing instruction:   12:add      opa: 0, opb: 0, dest: 36
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:-       	|  -1:-       	|  12:add     	|  -1:-       	|  -1:-       
+-		dst=0-		ds=36		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 31 -----------------------------------------
+REORDER BUFFER
+head:3 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+h 	| 3 	|  12:add     	| 36- 	| 0-
+t 	| 4 	|  12:add     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 31 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] Executed instruction:   12:add      opa: 0, opb: 0, dest: 36, result=00000000
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:-       	|  -1:-       	|  -1:-       	|  12:add     	|  -1:-       
+-		dst=0-		ds=0		ds=36		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 32 -----------------------------------------
+REORDER BUFFER
+head:3 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+h 	| 3 	|  12:add     	| 36- 	| 0-
+t 	| 4 	|  12:add     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:1 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| xxxxxxxx	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 0- 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 32 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  12:add     
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[ROB] move head
+[RS] CDB update, ready_reg: 36
+[RS] No packet to issue
+[RS] Freeing ALU packet, pc:        12
+[RS] No allocation
+[RS] --
+[REG] writing to register 36: 00000000
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 33 -----------------------------------------
+REORDER BUFFER
+head:4 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+ht 	| 4 	|  12:add     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 33 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  12:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 34 -----------------------------------------
+REORDER BUFFER
+head:4 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+ht 	| 4 	|  12:add     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 34 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  16:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 35 -----------------------------------------
+REORDER BUFFER
+head:4 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+ht 	| 4 	|  12:add     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 35 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  16:wfi     	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         16
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 36 -----------------------------------------
+REORDER BUFFER
+head:4 tail:4
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+ht 	| 4 	|  16:wfi     	| 0+ 	| 0+
+ 	| 5 	|   0:unknown 	| x- 	| x-
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:0 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| n 	| y 	|  12:add     	| 36- 	| 39+ 	| 0+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=5, preg_num=36, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 36 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  16:-       	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] no valid instruction fetched
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] Trying to allocate packet, pc:        16
+[RS] Found index, allocating new ALU packet, pc:        16
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 37 -----------------------------------------
+REORDER BUFFER
+head:4 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+h 	| 4 	|  16:wfi     	| 0+ 	| 0+
+t 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:1 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| n 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 37 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  20:unknown 	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         20
+[RS] No CDB Update
+[RS] Issue ALU packet, pc:        16
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 38 -----------------------------------------
+REORDER BUFFER
+head:4 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+h 	| 4 	|  16:wfi     	| 0+ 	| 0+
+t 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 38 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  20:unknown 	|  16:wfi     	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=35+		ds=0		ds=0		ds=x	
+-		s1=0+		s1=00000000	s1=00000000	s1=00000000
+-		s2=36+		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         20
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 39 -----------------------------------------
+REORDER BUFFER
+head:4 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+h 	| 4 	|  16:wfi     	| 0+ 	| 0+
+t 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=36, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 39 ++++++++++++++++++++++++++++++++++++++++
+[IS] Issuing instruction:   16:wfi      opa: 0, opb: 0, dest: 35
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  20:unknown 	|  -1:-       	|  16:wfi     	|  -1:-       	|  -1:-       
+-		dst=0-		ds=35		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         20
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 40 -----------------------------------------
+REORDER BUFFER
+head:4 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+h 	| 4 	|  16:wfi     	| 0+ 	| 0+
+t 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 40 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] Executed instruction:   16:wfi      opa: 0, opb: 0, dest: 35, result=00000000
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  20:unknown 	|  -1:-       	|  -1:-       	|  16:wfi     	|  -1:-       
+-		dst=0-		ds=0		ds=35		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         20
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 41 -----------------------------------------
+REORDER BUFFER
+head:4 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+h 	| 4 	|  16:wfi     	| 0+ 	| 0+
+t 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| xxxxxxxx	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ System got a memory error
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 41 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  20:unknown 	|  -1:-       	|  -1:-       	|  -1:-       	|  16:wfi     
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         20
+[ROB] move head
+[RS] CDB update, ready_reg: 35
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+[REG] writing to register 35: 00000000
+-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE 42 -----------------------------------------
+REORDER BUFFER
+head:5 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+ 	| 4 	|  16:wfi     	| 0+ 	| 0+
+ht 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| 00000000	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+@@@ Unified Memory contents hex on left, decimal on right: 
+@@@
+@@@ mem[    0] = 0030019310002083 : 13512530022375555
+@@@ mem[    8] = 000082b300400213 : 143705314951699
+@@@ mem[   16] = 0000000010500073 : 273678451
+@@@
+@@@
+@@                 13820 : System halted
+@@
+@@@ System halted on WFI instruction
+@@@
+@@
+@@  43 cycles / x instrs = inf CPI
+@@
+@@  1260.00 ns total time to execute
+@@
+
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 42 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  20:unknown 	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         20
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+REORDER BUFFER
+head:5 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+ 	| 4 	|  16:wfi     	| 0+ 	| 0+
+ht 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| 00000000	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 43 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  20:unknown 	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         20
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+REORDER BUFFER
+head:5 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+ 	| 4 	|  16:wfi     	| 0+ 	| 0+
+ht 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| 00000000	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
++++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE 44 ++++++++++++++++++++++++++++++++++++++++
+[IS] No valid instruction to issue
+[EX] No valid instruction to execute
+Pipeline Output Registers
+---------------------------------------------------------------------------------------
+IF PACKET 	| ID PACKET 	| IS PACKET 	| EX PACKET 	| CO PACKET
+---------------------------------------------------------------------------------------
+  20:unknown 	|  -1:-       	|  -1:-       	|  -1:-       	|  -1:-       
+-		dst=0-		ds=0		ds=0		ds=x	
+-		s1=0-		s1=00000000	s1=00000000	s1=00000000
+-		s2=0-		s2=00000000	s2=00000000	s2=00000000
+[EX] ALU done, result=00000000
+[IF] fetched valid instruction, PC         20
+[RS] No CDB Update
+[RS] No packet to issue
+[RS] No allocation
+[RS] --
+REORDER BUFFER
+head:5 tail:5
+full? 0
+ht 	| num 	| inst 		| T 	| Told
+ 	| 0 	|   0:lw      	| 39- 	| 0-
+ 	| 1 	|   4:addi    	| 38- 	| 0-
+ 	| 2 	|   8:addi    	| 37- 	| 0-
+ 	| 3 	|  12:add     	| 36- 	| 0-
+ 	| 4 	|  16:wfi     	| 0+ 	| 0+
+ht 	| 5 	|  16:wfi     	| 0+ 	| 0+
+ 	| 6 	|   0:unknown 	| x- 	| x-
+ 	| 7 	|   0:unknown 	| x- 	| x-
+RESERVATION STATIONS
+Issuable? alu:0 mult:0 load:0 store:0 branch:0
+Freeing?  alu:0 mult:0 load:0 store:0 branch:0
+Full?     alu:1 mult:0 load:0 store:0 branch:0
+NUM 	| FU 	| BUSY 	 ISS'D 	| OP 		| DEST 	| SRC1 	| SRC2 |
+1 	| ALU 	| y 	| y 	|  16:wfi     	| 35+ 	| 0+ 	| 36+
+2 	| MULT 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+3 	| LD 	| n 	| y 	|   0:lw      	| 39- 	| 0+ 	| 0+
+4 	| ST 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+5 	| BRN 	| n 	| y 	|   0:-       	| x- 	| x- 	| x-
+REGFILE
+Read 1: idx=0, val=00000000
+Read 2: idx=0, val=00000000
+ Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		| Idx 	| Val 		|
+0 	| xxxxxxxx	|5 	| xxxxxxxx	|10 	| xxxxxxxx	|15 	| xxxxxxxx	|20 	| xxxxxxxx	|25 	| xxxxxxxx	|30 	| xxxxxxxx	|35 	| 00000000	|
+1 	| xxxxxxxx	|6 	| xxxxxxxx	|11 	| xxxxxxxx	|16 	| xxxxxxxx	|21 	| xxxxxxxx	|26 	| xxxxxxxx	|31 	| xxxxxxxx	|36 	| 00000000	|
+2 	| xxxxxxxx	|7 	| xxxxxxxx	|12 	| xxxxxxxx	|17 	| xxxxxxxx	|22 	| xxxxxxxx	|27 	| xxxxxxxx	|32 	| xxxxxxxx	|37 	| 00000000	|
+3 	| xxxxxxxx	|8 	| xxxxxxxx	|13 	| xxxxxxxx	|18 	| xxxxxxxx	|23 	| xxxxxxxx	|28 	| xxxxxxxx	|33 	| xxxxxxxx	|38 	| 00000000	|
+4 	| xxxxxxxx	|9 	| xxxxxxxx	|14 	| xxxxxxxx	|19 	| xxxxxxxx	|24 	| xxxxxxxx	|29 	| xxxxxxxx	|34 	| xxxxxxxx	|39 	| 00000000	|
+MAP TABLE
+opa: req_idx=0, preg_num=0, ready=1
+opb: req_idx=0, preg_num=0, ready=1
+dst: req_idx=0, old_preg_num=0, ready=1, new_preg_num 35
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+ARCH MAP
+ Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	| Arch 	| Phys 	|
+0 	| 0- 	|4 	| 37+ 	|8 	| 0- 	|12 	| 0- 	|16 	| 0- 	|20 	| 0- 	|24 	| 0- 	|28 	| 0- 	|
+1 	| 39+ 	|5 	| 36+ 	|9 	| 0- 	|13 	| 0- 	|17 	| 0- 	|21 	| 0- 	|25 	| 0- 	|29 	| 0- 	|
+2 	| 0- 	|6 	| 0- 	|10 	| 0- 	|14 	| 0- 	|18 	| 0- 	|22 	| 0- 	|26 	| 0- 	|30 	| 0- 	|
+3 	| 38+ 	|7 	| 0- 	|11 	| 0- 	|15 	| 0- 	|19 	| 0- 	|23 	| 0- 	|27 	| 0- 	|31 	| 0- 	|
+$finish called from file "test/pipeline_test.sv", line 321.
+$finish at simulation time                14820
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 1482000 ps
+CPU Time:      0.150 seconds;       Data structure size:   0.2Mb
+Tue Apr 30 02:16:53 2024

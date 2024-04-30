@@ -534,7 +534,13 @@ module pipeline (
         .pipeline_commit_wr_idx(pipeline_commit_wr_idx),
         .pipeline_commit_wr_data(pipeline_commit_wr_data),
         .pipeline_commit_wr_en(pipeline_commit_wr_en),
-        .pipeline_commit_NPC(pipeline_commit_NPC)
+        .pipeline_commit_NPC(pipeline_commit_NPC),
+
+	// pipeline to memory
+	.proc2Dmem_command (proc2Dmem_command),
+        .proc2Dmem_size (proc2Dmem_size),
+        .proc2Dmem_addr (proc2Dmem_addr),
+        .proc2Dmem_data (proc2Dmem_data)
     );
 
     function void print_instruction_line();
