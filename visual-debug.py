@@ -4,6 +4,13 @@ import readline
 import tty
 import termios
 
+
+NEGEDGE_LINE_ST = "-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE"
+POSEDGE_LINE_ST = "+++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE"
+
+NEGEDGE_ST_IDX = 20
+
+
 def pad_output(input_file, chunk_length):
     # Open the input file in read mode
     with open(input_file, 'r') as file:
@@ -70,7 +77,7 @@ def interactive_session(input_file):
     chunks = []  # List to store chunks of lines
     chunk = []  # List to store lines in a chunk
     for line in lines:
-        if line.startswith('++++'):
+        if line.startswith(POSEDGE_LINE_ST):
             # If a line starts with '++++', it indicates the start of a new chunk
             if chunk:
                 # If there is a non-empty chunk, append it to the list of chunks
@@ -86,7 +93,15 @@ def interactive_session(input_file):
     while True:
         # Print the current chunk
         os.system('clear')
-        print("".join(chunks[current_chunk_index]))
+        line_no = 0
+        for line in chunks[current_chunk_index]:
+            if (line.startswith(NEGEDGE_LINE_ST)):
+                if (NEGEDGE_ST_IDX - line_no) > 0:
+                    print("\n" * (NEGEDGE_ST_IDX- line_no))
+
+            print(line, end='')
+            line_no += 1
+
         # Prompt the user for input
        # user_input = input("Press 'n' for next chunk, 'b' for previous chunk, or 'q' to quit: ")
         user_input = getch()
