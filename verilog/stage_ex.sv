@@ -405,6 +405,13 @@ module stage_ex (
                 tmp_mult_result     <= mult_result;
             end
             if(branch_done) begin
+                $write("[EX] BRANCH done,");
+                if (take_conditional) begin
+                    $write(" take branch=true");
+                end else begin 
+                    $write(" take branch=false");
+                end
+                $display(" branch_result=%h", branch_result);
                 waiting_fus[BRANCH] <= 1; 
                 tmp_branch_result   <= branch_result;
                 tmp_take_conditional<= take_conditional;
