@@ -115,7 +115,7 @@ module reorder_buffer(
     always_comb begin
         //update ROB & map table
         if (undo) begin
-            next_tail = undo_index + 1;
+            next_tail = undo_index; //+ 1;
         end else begin
             if (write) begin
                 inst_buffer[tail].inst = inst;
@@ -174,6 +174,8 @@ module reorder_buffer(
     always_ff @(posedge clock) begin
         if (move_head)
             $display("[ROB] move head");
+        if (undo)
+            $display("[ROB] undo, rollback to %0d", undo_index);
 
        // print_reorder_buffer();
         if (reset) begin
