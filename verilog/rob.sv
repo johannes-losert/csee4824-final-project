@@ -45,6 +45,9 @@ module reorder_buffer(
     // Index of currently written instruction 
     output logic [$clog2(`ROB_SZ)-1:0] inst_index,
 
+    /* Signal to free list on rollback, indicating which registers are now free */
+     output logic [`PHYS_REG_SZ-1:0] rollback_mask,
+
 
     /* Signal to indicate the ROB is full */
     // TODO pass this to instruction fetch stall
@@ -109,13 +112,36 @@ module reorder_buffer(
         end
     end
 
+    /* calculate rollback mask */
+    always_comb begin
+        rollback_mask = 0;
+        if (undo) begin 
+            /* For each instruction between head and tai; (including tail, not including head), add T to rollback mask */
+            for (int i = 0; i < `ROB_SZ; i++) begin
+                /* If tail >= head, then 'active' entries are those s.t. head < i <= tail */
+                if (tail >= head) begin 
+                if (i > head && i <= tail) begin
+                        rollback_mask[inst_buffer[i].T.reg_num] = 1;
+                    end 
+                end 
+                /* If tail < head, then 'active' entries are those s.t. i > head || i <= tail */
+                else begin 
+                    assert(tail != head);
+                    if (i > head || i <= tail) begin
+                        rollback_mask[inst_buffer[i].T.reg_num] = 1;
+                    end
+                end 
+            end
+        end
+    end 
+
     
     assign inst_index = tail;
 
     always_comb begin
         //update ROB & map table
         if (undo) begin
-            next_tail = undo_index + 1;
+            next_tail = undo_index; //+ 1;
         end else begin
             if (write) begin
                 inst_buffer[tail].inst = inst;
@@ -174,6 +200,8 @@ module reorder_buffer(
     always_ff @(posedge clock) begin
         if (move_head)
             $display("[ROB] move head");
+        if (undo)
+            $display("[ROB] undo, rollback to %0d", undo_index);
 
        // print_reorder_buffer();
         if (reset) begin

@@ -11,50 +11,83 @@ module free_list (
     // WRITE to tail operation
     input logic enqueue_en,
     input logic [`PHYS_REG_IDX_SZ:0] enqueue_pr,
-    output logic was_enqueued
+
+    // Rollback mask includes things from ROB to free (TODO could pack this to be more efficient if actually synthesizing)
+    input logic rollback,
+    input logic [`PHYS_REG_SZ-1:0] rollback_mask
+
 );
 
-    logic [`PHYS_REG_SZ-1:0]  	 	free_list_bitmap;
-    logic [`PHYS_REG_IDX_SZ:0] 		free_reg_num;
-    logic 				need_reset;
-    logic [`PHYS_REG_IDX_SZ:0]		next_enqueue_pr;
-    logic [`PHYS_REG_IDX_SZ:0]		next_dequeue_pr;
-    assign is_empty = (dequeue_pr == 1);
+    logic [`PHYS_REG_SZ-1:0] free_list_bitmap;
 
-    //enqueue & dequeue
-    assign free_list_bitmap[0] = 1; // this is the zero reg (map table is empty)
+    /* True if current dequeue_pr comes via enqueue_pr, not the bitmap */
+    logic passthrough;
+
+    assign passthrough = is_empty && enqueue_en;
+
+    /* Find the first free PR, assign as dequeue_pr */
     always_comb begin
-        for (int i = 1; i < `PHYS_REG_SZ; i++) begin
-	    if (need_reset | (i == next_enqueue_pr))
-	    	free_list_bitmap[i] <= 1;
-	    else if (i == next_dequeue_pr)
-		free_list_bitmap[i] <= 0;    
-	end
+        /* if empty, but about to enqueue something, just pass through to dequeue_pr */ 
+        if (passthrough)
+            dequeue_pr = enqueue_pr;
+        else begin 
+            for (int i = `PHYS_REG_SZ-1; i > 0; i--) begin
+                if (free_list_bitmap[i]) begin
+                    dequeue_pr = i;
+                end
+            end
+        end 
     end
 
-    always_comb begin
-	for (int i = 0; i < `PHYS_REG_SZ; i++) begin
-	    if (free_list_bitmap[i])
-		dequeue_pr = i;
-	end
-    end
+
+    /* Calculating is_empty, this feels inefficient, but probably gets compiled/synthesized to efficient bit operation */
+    always_comb begin 
+        is_empty = 1;
+        for (int i = 0; i < `PHYS_REG_SZ; i++) begin
+            if (free_list_bitmap[i]) begin
+                is_empty = 0;
+            end
+        end
+    end 
+
 
     always_ff @(posedge clk) begin
-	if (reset) begin
-	    next_enqueue_pr <= 0;
-	    next_dequeue_pr <= 0;
-	    need_reset      <= 1;
-	end else begin
-	    need_reset	    <= 0;
-	    if (enqueue_en)
-		next_enqueue_pr <= enqueue_pr;
-	    else
-		next_enqueue_pr <= 0;
-	    if (dequeue_en)
-		next_dequeue_pr <= dequeue_pr;
-	    else
-		next_dequeue_pr <= 0;
-	end
+        if (reset) begin
+            /* Everything starts free */
+            for (int i = 0; i < `PHYS_REG_SZ; i++) begin
+                free_list_bitmap[i] <= 1;
+            end
+        end else begin
+            /* If rolling back, mark all bits in rollback_mask as free */
+            if (rollback) begin
+                // TODO could do this much cleaner if this was actually a bitmap (but it probably compiles/synthesizes to something not too bad)
+                $display("[FL] Rolling back, mask: %b", rollback_mask);
+                for (int i = 0; i < `PHYS_REG_SZ; i++) begin
+                    if (rollback_mask[i])
+                        free_list_bitmap[i] <= 1;
+                end
+
+                // TODO is there ever a case where we rollback AND dequeue/enqueue?
+
+            end else begin 
+                    /* If dequeue_en, then mark dequeued pr as not free (on pass-through, this may already be 0) */
+                if (dequeue_en) begin
+                    free_list_bitmap[dequeue_pr] <= 0; 
+                end 
+
+                /* If enqueue_en and not pass-through, then mark enqueued pr as free */
+                if (enqueue_en && !passthrough) begin
+                    free_list_bitmap[enqueue_pr] <= 1;
+                end            
+            end
+        end
     end
+
+    always_ff @(negedge clk) begin
+        $display("FREE LIST:");
+        $display("Bitmap: %b, rollback: %b, rollback mask: %b", free_list_bitmap, rollback, rollback_mask);
+        //$dipslay("is_empty: %b");
+    end 
+
 
 endmodule

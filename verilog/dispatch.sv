@@ -171,6 +171,8 @@ module dispatch (
 
     logic fl_enqueue_en, fl_was_enqueued;
 
+    logic [`PHYS_REG_SZ-1:0] fl_rollback_mask;
+
     free_list free_list_0 (
         .clk(clock),
         .reset(reset),
@@ -192,8 +194,12 @@ module dispatch (
         .enqueue_en(fl_enqueue_en), // If raised, will enqueue fl_enqueue_pr at the tail
         .enqueue_pr(fl_enqueue_pr), // PR to enqueue if fl_enqueue_en raised
 
-        // debug outputs
-        .was_enqueued(fl_was_enqueued)
+        /* ROLLBACK operation */
+        // input 
+        .rollback(rollback), // If raised, will clear all bits in rollback_mask
+        .rollback_mask(fl_rollback_mask) // TODO implement this
+
+        
     );
 
     //  Declare ROB
@@ -221,6 +227,8 @@ module dispatch (
         // Undo stuff TODO figure this out
         .undo(rollback), // If signal raised, will move next tail back to undo_index+1
         .undo_index(head), // always roll back all the way to head
+
+        .rollback_mask(fl_rollback_mask),
 
         //TODO: need to connect the actual interconnects
 
