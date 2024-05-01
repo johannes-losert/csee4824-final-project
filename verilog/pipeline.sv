@@ -30,9 +30,9 @@ module pipeline (
     output logic [1:0]       proc2mem_command, // Command sent to memory
     output logic [`XLEN-1:0] proc2mem_addr,    // Address sent to memory
     output logic [63:0]      proc2mem_data,    // Data sent to memory
-`ifndef CACHE_MODE // no longer sending size to memory
+//`ifndef CACHE_MODE // no longer sending size to memory
     output MEM_SIZE          proc2mem_size,    // Data size sent to memory
-`endif
+//`endif
 
     // Note: these are assigned at the very bottom of the module
     output logic [3:0]       pipeline_completed_insts,
@@ -85,6 +85,36 @@ module pipeline (
 
     // Outputs from CO stage and input to RT stage
     CO_RE_PACKET co_packet, co_re_reg;
+
+    //////////////////////////////////////////////////////
+    //  communication signal between processor and mem  //
+    //////////////////////////////////////////////////////
+
+
+    logic [1:0]       ex_proc2mem_command, re_proc2mem_command, ic_proc2mem_command; 
+    logic [`XLEN-1:0] ex_proc2mem_addr, re_proc2mem_addr, ic_proc2mem_addr;    
+    logic [31:0]      ex_proc2mem_data, re_proc2mem_data;    
+    MEM_SIZE          ex_proc2mem_size, re_proc2mem_size, ic_proc2mem_size;    
+
+    always_comb begin
+	if (ex_proc2mem_command == BUS_LOAD) begin
+	    proc2mem_command = ex_proc2mem_command;
+	    proc2mem_addr = ex_proc2mem_addr;
+	    proc2mem_data = {32'b0, ex_proc2mem_data};
+	    proc2mem_size = ex_proc2mem_size;
+	end else if (re_proc2mem_command == BUS_STORE) begin 
+	    proc2mem_command = re_proc2mem_command;
+	    proc2mem_addr = re_proc2mem_addr;
+	    proc2mem_data = {32'b0, re_proc2mem_data};
+	    proc2mem_size = re_proc2mem_size;
+	end else begin
+	    proc2mem_command = ic_proc2mem_command;
+	    proc2mem_addr = ic_proc2mem_addr;
+	    proc2mem_data = 64'b0;
+	    proc2mem_size = ic_proc2mem_size;
+	end
+    end	
+
 
     //////////////////////////////////////////////////
     //          Instruction Fetch Signals           //
@@ -172,6 +202,7 @@ module pipeline (
     //////////////////////////////////////////////////
 
     logic re_rollback;
+    logic re_free_store;
 
     //////////////////////////////////////////////////
     //          Common Data Bus Signals             //
@@ -233,8 +264,8 @@ module pipeline (
         .proc2Icache_addr(icache_input_addr),
 
         // To memory
-        .proc2Imem_command(proc2mem_command),
-        .proc2Imem_addr(proc2mem_addr),
+        .proc2Imem_command(ic_proc2mem_command),
+        .proc2Imem_addr(ic_proc2mem_addr),
 
         // To fetch stage
         .Icache_data_out(icache_data_out),
@@ -305,7 +336,7 @@ module pipeline (
     assign rs_free_alu = co_free_alu;
     assign rs_free_mult = co_free_mult;
     assign rs_free_load = co_free_load;
-    assign rs_free_store = co_free_store;
+    assign rs_free_store = re_free_store;
     assign rs_free_branch = co_free_branch;
 
     dispatch dispatch_0 (
@@ -425,10 +456,10 @@ module pipeline (
     //////////////////////////////////////////////////
 
     // Outputs from MEM-Stage to memory
-    logic [`XLEN-1:0] proc2Dmem_addr;
-    logic [`XLEN-1:0] proc2Dmem_data;
-    logic [1:0]       proc2Dmem_command;
-    MEM_SIZE          proc2Dmem_size;
+    // logic [`XLEN-1:0] proc2Dmem_addr;
+    // logic [`XLEN-1:0] proc2Dmem_data;
+    // logic [1:0]       proc2Dmem_command;
+    // MEM_SIZE          proc2Dmem_size;
 
     // TODO move each FU to just be in the pipeline? probably not
     stage_ex stage_ex_0 (
@@ -439,7 +470,7 @@ module pipeline (
 
         // Load inputs
         .Dmem2proc_data (mem2proc_data[`XLEN-1:0]),
-        .Dmem2proc_response (mem2proc_response),
+        .Dmem2proc_response (mem2proc_tag),
 
         // outputs
         .ex_packet(ex_packet),
@@ -450,10 +481,10 @@ module pipeline (
         .free_store(ex_free_store),
         .free_branch(ex_free_branch), 
 
-        .proc2Dmem_command (proc2Dmem_command),
-        .proc2Dmem_size (proc2Dmem_size),
-        .proc2Dmem_addr (proc2Dmem_addr),
-        .proc2Dmem_data (proc2Dmem_data)
+        .proc2Dmem_command (ex_proc2mem_command),
+        .proc2Dmem_size (ex_proc2mem_size),
+        .proc2Dmem_addr (ex_proc2mem_addr),
+        .proc2Dmem_data (ex_proc2mem_data)
     );
 
     function void print_ex_co();
@@ -519,6 +550,8 @@ module pipeline (
         end
     end
 
+
+
     //////////////////////////////////////////////////
     //          Retire Stage                        //
     //////////////////////////////////////////////////
@@ -527,13 +560,14 @@ module pipeline (
         .clock(clock),
         .reset(reset),
    
-        .co_packet(co_packet),
+        .co_packet(co_re_reg),
 
         .mem2proc_response(mem2proc_response),
         .rob_head(rob_head_idx),
         .clear_retire_buffer(re_rollback),
 
         .move_head(retire_move_head),
+	.free_store(re_free_store),
 
         // pipeline output
         .pipeline_completed_insts(pipeline_completed_insts),
@@ -544,10 +578,10 @@ module pipeline (
         .pipeline_commit_NPC(pipeline_commit_NPC),
 
 	// pipeline to memory
-	.proc2Dmem_command (proc2Dmem_command),
-        .proc2Dmem_size (proc2Dmem_size),
-        .proc2Dmem_addr (proc2Dmem_addr),
-        .proc2Dmem_data (proc2Dmem_data)
+	.proc2Dmem_command (re_proc2mem_command),
+        .proc2Dmem_size (re_proc2mem_size),
+        .proc2Dmem_addr (re_proc2mem_addr),
+        .proc2Dmem_data (re_proc2mem_data)
     );
 
     function void print_instruction_line();

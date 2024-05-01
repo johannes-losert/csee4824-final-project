@@ -289,30 +289,30 @@ module dispatch (
 
     // stall when issue a load or store
     always_comb begin
-        if (issue_enable) begin
-            if (id_packet.function_type == LOAD || id_packet.function_type == STORE) begin
-                $display ("[RS] stops issuing, waiting for load or store to finish");
-                next_issue_enable = 0;
-            end else begin
-                next_issue_enable = 1;
-            end
-        end else begin
-            if ((free_load != 0) || (free_store != 0))begin
-                $display ("load or store finished, {RS} starts to issue");
-                next_issue_enable = 1;
-            end else begin
-                $display ("[RS] stops issuing, waiting for load or store to finish");
-                next_issue_enable = 0;
+	if (issue_enable) begin
+	    if (id_packet.function_type == LOAD || id_packet.function_type == STORE) begin
+		$display ("[RS] stops issuing, waiting for load or store to finish");
+	        next_issue_enable = 0;
+	    end else begin
+	        next_issue_enable = 1;
 	    end
-        end
+	end else begin
+	    if ((free_load != 0) || (free_store != 0))begin
+		$display ("load or store finished, {RS} starts to issue");
+		next_issue_enable = 1;
+	    end else begin
+		$display ("[RS] stops issuing, waiting for load or store to finish");
+		next_issue_enable = 0;
+	    end
+	end
     end
 
     always_ff @(posedge clock) begin
-        if (reset) begin
-            issue_enable <= 1;
-        end else begin
-            issue_enable <= next_issue_enable;
-        end
+	if (reset) begin
+	    issue_enable <= 1;
+	end else begin
+	    issue_enable <= next_issue_enable;
+	end
     end
 
     /* Just forward some info */

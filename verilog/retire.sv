@@ -14,6 +14,7 @@ module retire(
 
     //signals to tell rob to move head
     output logic move_head,
+    output logic free_store,
 
     //output of the processor
     output logic [3:0]       pipeline_completed_insts,
@@ -48,7 +49,7 @@ module retire(
 	incoming_entry.function_type = co_packet.function_type;
 	incoming_entry.mem_size = co_packet.mem_size;
 	incoming_entry.result = co_packet.result;
-	incoming_entry.opb_value = outgoing_entry.opb_value;
+	incoming_entry.opb_value = co_packet.opb_value;
         incoming_entry.completed_insts = {3'b0, co_packet.valid};
         incoming_entry.NPC = co_packet.NPC;
         incoming_entry.error_status = co_packet.illegal ? ILLEGAL_INST :
@@ -79,8 +80,10 @@ module retire(
     always_comb begin
 	if (outgoing_entry.function_type == STORE && outgoing_entry.valid && ~reset && ~clear_retire_buffer) begin
 	    proc2Dmem_command = BUS_STORE;
+	    free_store = 1;
 	end else begin 
 	    proc2Dmem_command = BUS_NONE;
+	    free_store = 0;
 	end
     end
 

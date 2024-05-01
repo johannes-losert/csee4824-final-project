@@ -156,8 +156,8 @@ module stage_ex (
     );
 
     load_alu load_alu_0 (
-        //.clock (clock), 
-        //.reset (reset),
+        .clock (clock), 
+        .reset (reset),
         .opa (opa_mux_out),
         .opb (opb_mux_out),
         .in_packet (is_ex_reg),
@@ -207,8 +207,8 @@ module stage_ex (
     // If a FU is selected to be done with the ex stage, then set the ex_packet attributes to their
     // corresponding values
     always_comb begin
-        if(alu_done_process) begin
-            ex_packet.result        = tmp_alu_result;
+        if(alu_done) begin
+            ex_packet.result        = alu_result;
             ex_packet.take_branch   = 0;
 	    ex_packet.mem_size = 0;
 
@@ -277,8 +277,8 @@ module stage_ex (
             ex_packet.has_dest = tmp_mult_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_mult_packet.issued_fu_index;
-        end else if (branch_done_process) begin
-            ex_packet.result        = tmp_branch_result;
+        end else if (branch_done) begin
+            ex_packet.result        = branch_result;
             ex_packet.take_branch   = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
 	    ex_packet.mem_size = 0;
 
@@ -313,8 +313,8 @@ module stage_ex (
 
             ex_packet.issued_fu_index = tmp_branch_packet.issued_fu_index;
 
-        end else if (load_done_process) begin
-            ex_packet.result        = tmp_load_result;
+        end else if (load_done) begin
+            ex_packet.result        = load_result;
             ex_packet.take_branch   = 0;
 	    ex_packet.mem_size = 0;
 
@@ -348,8 +348,8 @@ module stage_ex (
             ex_packet.has_dest = tmp_load_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_load_packet.issued_fu_index;
-        end else if (store_done_process) begin
-            ex_packet.result        = tmp_store_result;
+        end else if (store_done) begin
+            ex_packet.result        = store_result;
             ex_packet.take_branch   = 0;
             
             // Pass throughs
