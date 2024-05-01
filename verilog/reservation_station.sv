@@ -390,11 +390,7 @@ module reservation_station (
 
                 end
             end else begin 
-               // ready <= 1'b0;
-		// if !issue_enable, the input inst is invalid, pass it to next stage
-               // $display("[RS] Issue disabled, passing input -> issued packet, pc:%p", input_packet.PC);
-                issued_packet <= input_packet; 
-                issued_packet.issued_fu_index <= 0; // can be any values
+               issued_packet <= INVALID_ID_IS_PACKET;
             end
 
             // Freeing (TODO figure out of we can allocate and free on the same cycle)

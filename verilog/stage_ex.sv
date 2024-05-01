@@ -85,6 +85,7 @@ module stage_ex (
     logic [`XLEN-1:0] tmp_branch_result;
     logic [`XLEN-1:0] tmp_load_result;
     logic [`XLEN-1:0] tmp_store_result;
+    MEM_SIZE mem_size;
 
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
 
@@ -93,8 +94,8 @@ module stage_ex (
     // Instantiate the ALU
     alu alu_0 (
         // Inputs
-        .clock      (clock),
-        .reset      (reset),
+        //.clock      (clock),
+        //.reset      (reset),
         .opa        (opa_mux_out),
         .opb        (opb_mux_out),
         .func       (is_ex_reg.alu_func),
@@ -109,8 +110,8 @@ module stage_ex (
 
     branch_calculation branch_0 (
         // Inputs
-        .clock      (clock),
-        .reset      (reset),
+        //.clock      (clock),
+        //.reset      (reset),
         .opa        (opa_mux_out),
         .opb        (opb_mux_out),
         .alu_func   (is_ex_reg.alu_func),
@@ -126,8 +127,8 @@ module stage_ex (
     // Instantiate the conditional branch module
     conditional_branch conditional_branch_0 (
         // Inputs
-        .clock      (clock),
-        .reset      (reset),
+        //.clock      (clock),
+        //.reset      (reset),
         .func       (is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
         .rs1        (is_ex_reg.opa_value),
         .rs2        (is_ex_reg.opb_value),
@@ -155,8 +156,8 @@ module stage_ex (
     );
 
     load_alu load_alu_0 (
-        .clock (clock), 
-        .reset (reset),
+        //.clock (clock), 
+        //.reset (reset),
         .opa (opa_mux_out),
         .opb (opb_mux_out),
         .in_packet (is_ex_reg),
@@ -177,10 +178,11 @@ module stage_ex (
     // Instantiate the ALU
     store store_0 (
         // Inputs
-        .clock      (clock),
-        .reset      (reset),
+        //.clock      (clock),
+        //.reset      (reset),
         .opa        (opa_mux_out),
         .opb        (opb_mux_out),
+	.inst       (is_ex_reg.inst),
         .func       (is_ex_reg.alu_func),
         .store_en     (is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
         .in_packet  (is_ex_reg),
@@ -188,6 +190,7 @@ module stage_ex (
         // Output
         .result     (store_result),
         .store_done   (store_done),
+	.mem_size	(mem_size),
         .out_packet (tmp_store_packet)
     );
 
@@ -207,6 +210,8 @@ module stage_ex (
         if(alu_done_process) begin
             ex_packet.result        = tmp_alu_result;
             ex_packet.take_branch   = 0;
+	    ex_packet.mem_size = 0;
+
 
             // Pass throughs 
             ex_packet.inst = tmp_alu_packet.inst;
@@ -240,6 +245,8 @@ module stage_ex (
         end else if (mult_done_process) begin
             ex_packet.result        = tmp_mult_result;
             ex_packet.take_branch   = 0;
+	    ex_packet.mem_size = 0;
+
             
             // Pass throughs
             ex_packet.inst = tmp_mult_packet.inst;
@@ -273,6 +280,8 @@ module stage_ex (
         end else if (branch_done_process) begin
             ex_packet.result        = tmp_branch_result;
             ex_packet.take_branch   = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
+	    ex_packet.mem_size = 0;
+
             // Pass throughs
 
             ex_packet.inst = tmp_branch_packet.inst;
@@ -307,6 +316,8 @@ module stage_ex (
         end else if (load_done_process) begin
             ex_packet.result        = tmp_load_result;
             ex_packet.take_branch   = 0;
+	    ex_packet.mem_size = 0;
+
             
             // Pass throughs
             ex_packet.inst = tmp_load_packet.inst;
@@ -368,6 +379,8 @@ module stage_ex (
 
             ex_packet.rob_index = tmp_store_packet.rob_index;
             ex_packet.has_dest = tmp_store_packet.has_dest;
+	    ex_packet.mem_size = mem_size;
+
 
             ex_packet.issued_fu_index = tmp_store_packet.issued_fu_index;
         end else begin 

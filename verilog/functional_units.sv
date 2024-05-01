@@ -5,8 +5,8 @@
 
 // ALU: computes the result of FUNC applied with operands A and B
 module alu (
-    input                           clock, 
-    input                           reset,
+    //input                           clock, 
+    //input                           reset,
     input [`XLEN-1:0]               opa,
     input [`XLEN-1:0]               opb,
     input ALU_FUNC                  func,
@@ -40,7 +40,11 @@ module alu (
             default:    result = `XLEN'hfacebeec;  // here to prevent latches
         endcase
     end
-
+    assign out_packet = in_packet;
+    assign alu_done[0] = 1;
+    assign alu_opa = opa;
+    assign alu_opb = opb;
+/*
     always_ff @(posedge clock) begin
         if(reset) begin
             alu_done[0]     <= 1'b0;
@@ -59,13 +63,13 @@ module alu (
             out_packet      <= out_packet;
         end
     end
-
+*/
 endmodule // alu
 
 // For calculating branch addresses 
 module branch_calculation (
-    input               clock, 
-    input               reset,
+    //input               clock, 
+    //input               reset,
     input [`XLEN-1:0]   opa,
     input [`XLEN-1:0]   opb,
     input ALU_FUNC      alu_func,
@@ -99,6 +103,12 @@ module branch_calculation (
         endcase
     end
 
+    assign out_packet = in_packet;
+    assign branch_done[0] = 1;
+    assign branch_opa = opa;
+    assign branch_opb = opb;
+
+/*
     always_ff @(posedge clock) begin
         if(reset) begin
             branch_done[0]  <= 1'b0;
@@ -117,13 +127,13 @@ module branch_calculation (
             out_packet      <= out_packet;
         end
     end
-
+*/
 endmodule
 
 // Conditional branch module: compute whether to take conditional branches
 module conditional_branch (
-    input               clock,
-    input               reset,
+    //input               clock,
+    //input               reset,
     input [2:0]         func, // Specifies which condition to check
     input [`XLEN-1:0]   rs1,  // Value to check against condition
     input [`XLEN-1:0]   rs2,
@@ -150,6 +160,10 @@ module conditional_branch (
         endcase
     end
 
+    assign cond_rs1 = cond_rs1;
+    assign cond_rs2 = cond_rs2;
+
+/*
     always_ff @(posedge clock) begin
         if (reset) begin
             cond_rs1 <= 0;
@@ -162,7 +176,7 @@ module conditional_branch (
             cond_rs2 <= cond_rs2;
         end
     end
-
+*/
 endmodule // conditional_branch
 
 
@@ -249,8 +263,8 @@ module multiply (
 endmodule
 
 module load_alu (
-    input clock,
-    input reset, 
+    //input clock,
+    //input reset, 
     input [`XLEN-1:0] opa, 
     input [`XLEN-1:0] opb,
     input IS_EX_PACKET in_packet,
@@ -271,8 +285,8 @@ module load_alu (
 ); 
 
     logic [`XLEN-1:0] load_opa, load_opb, address;
-    logic start;
-
+    //logic start;
+    //assign start = load_en;
     assign signed_opa   = load_opa;
     assign signed_opb   = load_opb;
 
@@ -294,7 +308,7 @@ module load_alu (
     end
 
     load load_0 (
-        .start (start),
+        //.start (start),
         .is_ex_reg (out_packet), 
         .address (address),
         .Dmem2proc_data (Dmem2proc_data),
@@ -307,40 +321,42 @@ module load_alu (
         .result(result),
         .done(load_done)
     );
-
+/*
     always_ff @(posedge clock) begin
         if(reset) begin
             out_packet      <= 0;
             load_opa      <= 0;
             load_opb      <= 0;
-            start <= 0;
+            //start <= 0;
         end else if (load_en) begin
             out_packet      <= in_packet;
             load_opa      <= opa;
             load_opb      <= opb;
-            start <= 1;
+            //start <= 1;
         end else begin
             load_opa      <= load_opa;
             load_opb      <= load_opb;
             out_packet    <= out_packet;
-            start <= start; 
+            //start <= start; 
         end
     end
-
+*/
 endmodule
 
 // ALU: computes the result of FUNC applied with operands A and B
 module store (
-    input                           clock, 
-    input                           reset,
+    //input                           clock, 
+    //input                           reset,
     input [`XLEN-1:0]               opa,
     input [`XLEN-1:0]               opb,
+    input INST			    inst,
     input ALU_FUNC                  func,
     input logic                     store_en,
     input IS_EX_PACKET              in_packet,
 
     output logic [`XLEN-1:0]        result,
     output logic [`NUM_FU_ALU-1:0]  store_done,
+    output MEM_SIZE		    mem_size,
     output IS_EX_PACKET             out_packet
 );
 
@@ -367,6 +383,13 @@ module store (
         endcase
     end
 
+    assign store_done[0] = 1'b0;
+    assign out_packet = in_packet;
+    assign store_opa = opa;
+    assign store_opb = opb;
+    assign mem_size  = MEM_SIZE'(inst.r.funct3[1:0]);
+
+/*
     always_ff @(posedge clock) begin
         if(reset) begin
             store_done[0]     <= 1'b0;
@@ -385,5 +408,5 @@ module store (
             out_packet      <= out_packet;
         end
     end
-
+*/
 endmodule // alu
