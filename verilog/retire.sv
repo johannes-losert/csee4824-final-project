@@ -45,14 +45,16 @@ module retire(
 
     // Populate incoming entry, from the pipeline
     always_comb begin 
-        incoming_entry.valid = co_packet.valid;
+    incoming_entry.valid = co_packet.valid;
+    incoming_entry.inst = co_packet.inst;
 	incoming_entry.function_type = co_packet.function_type;
 	incoming_entry.mem_size = co_packet.mem_size;
 	incoming_entry.result = co_packet.result;
 	incoming_entry.opb_value = co_packet.opb_value;
-        incoming_entry.completed_insts = {3'b0, co_packet.valid};
-        incoming_entry.NPC = co_packet.NPC;
-        incoming_entry.error_status = co_packet.illegal ? ILLEGAL_INST :
+    incoming_entry.completed_insts = {3'b0, co_packet.valid};
+    incoming_entry.PC = co_packet.PC;
+    incoming_entry.NPC = co_packet.NPC;
+    incoming_entry.error_status = co_packet.illegal ? ILLEGAL_INST :
                                       co_packet.halt    ? HALTED_ON_WFI :
                                       (mem2proc_response==4'h0) ? LOAD_ACCESS_FAULT :
                                       NO_ERROR;
@@ -87,6 +89,61 @@ module retire(
 	end
     end
 
+typedef struct packed {
+    INST              inst;
+    logic [3:0]       completed_insts;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC;
+    EXCEPTION_CODE    error_status;
+    logic             regfile_en;   // register write enable
+    logic [`PHYS_REG_IDX_SZ:0]  regfile_idx;  // register write index
+    logic [`XLEN-1:0] regfile_data; // register write data 
+    logic             valid;
+    FUNIT 	      function_type;
+    MEM_SIZE          mem_size;
+    logic [`XLEN-1:0] opb_value;
+    logic [`XLEN-1:0] result;
+} RETIRE_ENTRY;
+
+
+    function void print_retire_entry(int i, RETIRE_ENTRY ret_entry);
+        $write(" %0d \t|", i);
+        print_inst(ret_entry.inst , ret_entry.PC, ret_entry.valid);
+        $write("\t| ");
+        // Result value
+        $write(" %0h \t|", ret_entry.result);
+        // error status 
+        $write(" %0h \t\t|", ret_entry.error_status);
+    endfunction
+
+
+    function void print_retire_buffer();
+            $display("RETIRE BUFFER");
+            $write("num \t| inst \t\t| result \t| error status\t|");
+            $write("num \t| inst \t\t| result \t| error status\t|");
+            $write("num \t| inst \t\t| result \t| error status\t|");
+            $display("num \t| inst \t\t| result \t| error status\t|");
+            for (int i = 0; i < `ROB_SZ/4; i++) begin
+                print_retire_entry(i, retire_buffer[i]);
+                print_retire_entry(i+`ROB_SZ/4, retire_buffer[i+`ROB_SZ/4]);
+                print_retire_entry(i+`ROB_SZ/2, retire_buffer[i+`ROB_SZ/2]);
+                print_retire_entry(i+3*`ROB_SZ/4, retire_buffer[i+3*`ROB_SZ/4]);
+                $display("");
+            end
+        endfunction
+
+    always @(negedge clock) begin 
+        print_retire_buffer();
+        $write("Incoming Entry: ");
+        print_retire_entry(-1, incoming_entry);
+        $display("");
+        $write("Outgoing Entry: ");
+        print_retire_entry(-1, outgoing_entry);
+        $display("");
+
+    end 
+
+
     always @(posedge clock) begin
         if (reset || clear_retire_buffer) begin
             for (int i=0; i < `ROB_SZ; i++) begin
@@ -96,6 +153,7 @@ module retire(
             // Adding to retire buffer
             if (do_forward) begin 
                 // If forwarding, we do not add to buffer 
+                $display("[RT] forwarding packet, not added to buffer");
                 assert(retire_buffer[rob_head].valid == 1'b0); // Make sure we are not overwriting? Maybe is OK            
             end else if (incoming_entry.valid) begin 
                 // Add completed packet to retire buffer
@@ -120,6 +178,8 @@ module retire(
             end 
         end  
     end
+
+
 
     // old
 

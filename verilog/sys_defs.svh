@@ -818,7 +818,9 @@ typedef union packed {
 } MEM_RETURN;
 
 typedef struct packed {
+    INST              inst;
     logic [3:0]       completed_insts;
+    logic [`XLEN-1:0] PC;
     logic [`XLEN-1:0] NPC;
     EXCEPTION_CODE    error_status;
     logic             regfile_en;   // register write enable

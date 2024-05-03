@@ -8,7 +8,7 @@ import termios
 NEGEDGE_LINE_ST = "-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE"
 POSEDGE_LINE_ST = "+++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE"
 
-NEGEDGE_ST_IDX = 20
+NEGEDGE_ST_IDX = 17
 
 
 def pad_output(input_file, chunk_length):
