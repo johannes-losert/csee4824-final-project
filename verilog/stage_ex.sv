@@ -32,11 +32,11 @@ module stage_ex (
     input [3:0]         Dmem2proc_response,
 
     // debug outputs
-    output IS_EX_PACKET tmp_alu_packet,
-    output IS_EX_PACKET tmp_mult_packet,
-    output IS_EX_PACKET tmp_branch_packet,
-    output IS_EX_PACKET tmp_load_packet,
-    output IS_EX_PACKET tmp_store_packet,
+    output IS_EX_PACKET alu_packet,
+    output IS_EX_PACKET mult_packet,
+    output IS_EX_PACKET branch_packet,
+    output IS_EX_PACKET load_packet,
+    output IS_EX_PACKET store_packet,
     output logic [1:0]       proc2Dmem_command, // The memory command
     output MEM_SIZE          proc2Dmem_size,    // Size of data to read or write
     output logic [`XLEN-1:0] proc2Dmem_addr,    // Address sent to Data memory
@@ -85,6 +85,11 @@ module stage_ex (
     logic [`XLEN-1:0] tmp_branch_result;
     logic [`XLEN-1:0] tmp_load_result;
     logic [`XLEN-1:0] tmp_store_result;
+    IS_EX_PACKET tmp_alu_packet;
+    IS_EX_PACKET tmp_mult_packet;
+    IS_EX_PACKET tmp_branch_packet;
+    IS_EX_PACKET tmp_load_packet;
+    IS_EX_PACKET tmp_store_packet;
     MEM_SIZE mem_size;
 
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
@@ -105,7 +110,7 @@ module stage_ex (
         // Output
         .result     (alu_result),
         .alu_done   (alu_done),
-        .out_packet (tmp_alu_packet)
+        .out_packet (alu_packet)
     );
 
     branch_calculation branch_0 (
@@ -121,7 +126,7 @@ module stage_ex (
         // Output
         .result         (branch_result),
         .branch_done    (branch_done),
-        .out_packet     (tmp_branch_packet)
+        .out_packet     (branch_packet)
     );
 
     // Instantiate the conditional branch module
@@ -152,7 +157,7 @@ module stage_ex (
         // Output
         .product    (mult_result),
         .mult_done  (mult_done),
-        .out_packet (tmp_mult_packet)
+        .out_packet (mult_packet)
     );
 
     load_alu load_alu_0 (
@@ -168,7 +173,7 @@ module stage_ex (
 
         .result (load_result),
         .load_done (load_done),
-        .out_packet (tmp_load_packet),
+        .out_packet (load_packet),
         .proc2Dmem_command (proc2Dmem_command),
         .proc2Dmem_size (proc2Dmem_size),
         .proc2Dmem_addr (proc2Dmem_addr),
@@ -191,7 +196,7 @@ module stage_ex (
         .result     (store_result),
         .store_done   (store_done),
 	.mem_size	(mem_size),
-        .out_packet (tmp_store_packet)
+        .out_packet (store_packet)
     );
 
     // Choose which FU to move to the next stage
@@ -207,10 +212,10 @@ module stage_ex (
     // If a FU is selected to be done with the ex stage, then set the ex_packet attributes to their
     // corresponding values
     always_comb begin
-        if(alu_done) begin
-            ex_packet.result        = alu_result;
+        if(alu_done_process) begin
+            ex_packet.result        = tmp_alu_result;
             ex_packet.take_branch   = 0;
-	    ex_packet.mem_size = 0;
+	        ex_packet.mem_size = 0;
 
 
             // Pass throughs 
@@ -277,10 +282,10 @@ module stage_ex (
             ex_packet.has_dest = tmp_mult_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_mult_packet.issued_fu_index;
-        end else if (branch_done) begin
-            ex_packet.result        = branch_result;
+        end else if (branch_done_process) begin
+            ex_packet.result        = tmp_branch_result;
             ex_packet.take_branch   = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
-	    ex_packet.mem_size = 0;
+	        ex_packet.mem_size = 0;
 
             // Pass throughs
 
@@ -313,8 +318,8 @@ module stage_ex (
 
             ex_packet.issued_fu_index = tmp_branch_packet.issued_fu_index;
 
-        end else if (load_done) begin
-            ex_packet.result        = load_result;
+        end else if (load_done_process) begin
+            ex_packet.result        = tmp_load_result;
             ex_packet.take_branch   = 0;
 	    ex_packet.mem_size = 0;
 
@@ -348,8 +353,8 @@ module stage_ex (
             ex_packet.has_dest = tmp_load_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_load_packet.issued_fu_index;
-        end else if (store_done) begin
-            ex_packet.result        = store_result;
+        end else if (store_done_process) begin
+            ex_packet.result        = tmp_store_result;
             ex_packet.take_branch   = 0;
             
             // Pass throughs
@@ -397,6 +402,11 @@ module stage_ex (
             tmp_branch_result       <= 0;
             tmp_load_result         <= 0;
             tmp_store_result <= 0;
+            tmp_alu_packet <= 0;
+            tmp_mult_packet <= 0;
+            tmp_branch_packet <= 0;
+            tmp_load_packet <= 0;
+            tmp_store_packet <= 0;
             alu_done_process        <= 0;
             mult_done_process       <= 0;
             branch_done_process     <= 0;
@@ -411,11 +421,13 @@ module stage_ex (
                 $display("[EX] ALU done, result=%h", alu_result);
                 waiting_fus[ALU]    <= 1;
                 tmp_alu_result      <= alu_result;
+                tmp_alu_packet <= alu_packet;
             end
 
             if(mult_done) begin
                 waiting_fus[MULT]   <= 1; 
                 tmp_mult_result     <= mult_result;
+                tmp_mult_packet <= mult_packet;
             end
             if(branch_done) begin
                 $write("[EX] BRANCH done,");
@@ -427,15 +439,18 @@ module stage_ex (
                 $display(" branch_result=%h", branch_result);
                 waiting_fus[BRANCH] <= 1; 
                 tmp_branch_result   <= branch_result;
+                tmp_branch_packet <= branch_packet;
                 tmp_take_conditional<= take_conditional;
             end 
             if (load_done) begin
                 waiting_fus[LOAD] <= 1; 
                 tmp_load_result   <= load_result;
+                tmp_load_packet <= load_packet;
             end
             if (store_done) begin
                 waiting_fus[STORE] <= 1;
                 tmp_store_result <= store_result;
+                tmp_store_packet <= store_packet;
             end
 
             // Defaults

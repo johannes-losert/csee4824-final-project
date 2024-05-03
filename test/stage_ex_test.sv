@@ -12,7 +12,7 @@ module testbench;
     logic [`NUM_FU_STORE-1:0] free_store;
     logic [`NUM_FU_BRANCH-1:0] free_branch;
     integer i;
-    IS_EX_PACKET is_ex_reg, alu_packet, mult_packet, branch_packet;
+    IS_EX_PACKET is_ex_reg, alu_packet, mult_packet, branch_packet, load_packet, store_packet;
     EX_CO_PACKET ex_packet;
     logic [3:0] Dmem2proc_response;
     logic [1:0] proc2Dmem_command;
@@ -30,9 +30,11 @@ module testbench;
         .free_load(free_load), 
         .free_store(free_store),
         .free_branch(free_branch),
-        .tmp_alu_packet(alu_packet),
-        .tmp_mult_packet(mult_packet),
-        .tmp_branch_packet(branch_packet),
+        .alu_packet(alu_packet),
+        .mult_packet(mult_packet),
+        .branch_packet(branch_packet),
+        .load_packet(load_packet),
+        .store_packet(store_packet),
         .proc2Dmem_command (proc2Dmem_command),
         .proc2Dmem_size (proc2Dmem_size),
         .proc2Dmem_addr (proc2Dmem_addr),
@@ -108,8 +110,8 @@ module testbench;
 
     initial begin
         // NOTE: monitor starts using 5-digit decimal values for printing
-        $monitor("Time:%4.0f opa:%d opb:%d alu_func:%d func:%b result:%d funit:%2h free_alu:%b free_mult:%b free_branch:%b take_branch:%b",
-                 $time, $signed(is_ex_reg.opa_value), $signed(is_ex_reg.opb_value), is_ex_reg.alu_func, is_ex_reg.inst.b.funct3, $signed(ex_packet.result), is_ex_reg.function_type, free_alu, free_mult, free_branch, ex_packet.take_branch);
+        $monitor("Time:%4.0f opa:%d opb:%d alu_func:%d func:%b result:%d funit:%2h free_alu:%b free_mult:%b free_branch:%b take_branch:%b free_load:%b",
+                 $time, $signed(is_ex_reg.opa_value), $signed(is_ex_reg.opb_value), is_ex_reg.alu_func, is_ex_reg.inst.b.funct3, $signed(ex_packet.result), is_ex_reg.function_type, free_alu, free_mult, free_branch, ex_packet.take_branch, free_load);
         $display("\nBeginning edge-case testing:");
 
         is_ex_reg <= '{
