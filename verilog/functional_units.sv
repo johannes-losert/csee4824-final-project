@@ -1,6 +1,5 @@
 `include "verilog/sys_defs.svh"
 `include "verilog/ISA.svh"
-`include "verilog/load.sv"
 // `include "verilog/mult.sv"
 
 // ALU: computes the result of FUNC applied with operands A and B
@@ -261,95 +260,265 @@ module multiply (
 
 endmodule
 
-module load_alu (
-    input clock,
-    input reset, 
-    input [`XLEN-1:0] opa, 
-    input [`XLEN-1:0] opb,
-    input IS_EX_PACKET in_packet,
+
+/* Combinationally do ALU aritmetic */
+module arithmetic (
+    input [`XLEN-1:0] arith_opa,
+    input [`XLEN-1:0] arith_opb,
     input ALU_FUNC alu_func,
-    input load_en,
-    // the BUS_LOAD response will magically be present in the *same* cycle it's requested (0ns latency)
-    // this will not be true in project 4 (100ns latency)
-    input [`XLEN-1:0]   Dmem2proc_data,
-    input [3:0]         Dmem2proc_response,
 
-    output logic [`XLEN-1:0]  result,
-    output IS_EX_PACKET out_packet,
-    output logic [`NUM_FU_LOAD] load_done,
-    output logic [1:0]       proc2Dmem_command, // The memory command
-    output MEM_SIZE          proc2Dmem_size,    // Size of data to read or write
-    output logic [`XLEN-1:0] proc2Dmem_addr,    // Address sent to Data memory
-    output logic [`XLEN-1:0] proc2Dmem_data     // Data sent to Data memory
-); 
+    output logic [`XLEN-1:0] result
+);
 
-    logic [`XLEN-1:0] load_opa, load_opb, address;
-    logic start;
-    assign signed_opa   = load_opa;
-    assign signed_opb   = load_opb;
+    logic signed [`XLEN-1:0] signed_opa, signed_opb;
+
+    assign signed_opa = arith_opa;
+    assign signed_opb = arith_opb;
 
     always_comb begin
         case (alu_func)
-            ALU_ADD:    address = load_opa + load_opb;
-            ALU_SUB:    address = load_opa - load_opb;
-            ALU_AND:    address = load_opa & load_opb;
-            ALU_SLT:    address = signed_opa < signed_opb;
-            ALU_SLTU:   address = load_opa < load_opb;
-            ALU_OR:     address = load_opa | load_opb;
-            ALU_XOR:    address = load_opa ^ load_opb;
-            ALU_SRL:    address = load_opa >> load_opb[4:0];
-            ALU_SLL:    address = load_opa << load_opb[4:0];
-            ALU_SRA:    address = signed_opa >>> load_opb[4:0]; // arithmetic from logical shift
+            ALU_ADD:    result = arith_opa + arith_opb;
+            ALU_SUB:    result = arith_opa - arith_opb;
+            ALU_AND:    result = arith_opa & arith_opb;
+            ALU_SLT:    result = signed_opa < signed_opb;
+            ALU_SLTU:   result = arith_opa < arith_opb;
+            ALU_OR:     result = arith_opa | arith_opb;
+            ALU_XOR:    result = arith_opa ^ arith_opb;
+            ALU_SRL:    result = arith_opa >> arith_opb[4:0];
+            ALU_SLL:    result = arith_opa << arith_opb[4:0];
+            ALU_SRA:    result = signed_opa >>> arith_opb[4:0]; // arithmetic from logical shift
 
-            default:    address = `XLEN'hfacebeec;  // here to prevent latches
+            default:    result = `XLEN'hfacebeec;  // here to prevent latches
         endcase
     end
 
-    load load_0 (
-        .start (start),
-        .is_ex_reg (out_packet), 
-        .address (address),
-        .Dmem2proc_data (Dmem2proc_data),
-        .Dmem2proc_response (Dmem2proc_response),
+endmodule 
 
-        .proc2Dmem_command (proc2Dmem_command),
-        .proc2Dmem_size (proc2Dmem_size),
-        .proc2Dmem_addr (proc2Dmem_addr),
-        .proc2Dmem_data (proc2Dmem_data),
-        .result(result),
-        .done(load_done)
+
+/* Takes in load instruction, calculates address, sends request to dcache, waits for response */
+module load ( 
+    input clock, 
+    input reset, 
+
+    input start_load, /* Stays high until load finishes */
+
+    /* Instruction information */
+    input [`XLEN-1:0] in_opa,
+    input [`XLEN-1:0] in_opb,
+    input IS_EX_PACKET in_packet,
+    input ALU_FUNC alu_func,
+
+    /* Input from dcache */
+    input [63:0] Dcache_data_out, // Data is mem[proc2Dcache_addr]
+    input Dcache_valid_out, // When valid is high
+
+    /* Output to dcache */
+    output logic load_en,
+    output [`XLEN-1:0] load2Dcache_addr,
+
+    /* Output for pipeline */
+    output logic [`XLEN-1:0] result,
+    output IS_EX_PACKET out_packet,
+    output logic [`NUM_FU_LOAD] load_done
+
+);
+    /* Must keep a copy of all the state we need, since inputs may change */
+    logic started;
+    IS_EX_PACKET curr_packet;
+    ALU_FUNC curr_alu_func; 
+    logic [`XLEN-1:0] curr_opa, curr_opb;
+
+    /* Just forward the current packet to output packet */
+    assign out_packet = curr_packet;
+
+    /* Check if we should issue load request to dcache */
+    assign load_en = (started && curr_packet.valid && curr_packet.rd_mem);
+
+    /* Calculate address to load from */
+    arithmetic arith_0 (
+        .arith_opa (curr_opa),
+        .arith_opb (curr_opb),
+        .alu_func (curr_alu_func),
+        .result (load2Dcache_addr)
     );
-/*
-    assign out_packet = in_packet;
-    assign load_opa = opa;
-    assign load_opb = opb;
-    assign start = load_en;
-*/
+
+    /* Extract data word from double word returned by dcache:
+        - if address[2] is 1, word is bits 63-32
+        - else, word is bits 31-0
+       Compute extension bytes based on instruction:
+        - if unsigned, zero-extend
+        - if signed, sign-extend
+       Mask with extend bytes based on size:
+        - if byte, mask all but last 8 bits
+    */ 
+    
+    MEM_SIZE memory_size;
+    logic rd_unsigned;
+    logic [`XLEN-1:0] data_word;
+
+    assign memory_size = MEM_SIZE'(curr_packet.inst.r.funct3[1:0]);
+    assign rd_unsigned = curr_packet.inst.r.funct3[2];
+    assign data_word = load2Dcache_addr[2] ? Dcache_data_out[63:`XLEN] : Dcache_data_out[`XLEN-1:0];
+
+    always_comb begin 
+        /* If dcache has finished with our request */
+        if (started && Dcache_valid_out) begin
+            result = data_word;
+            if(rd_unsigned) begin 
+                // unsigned: zero-extend the data
+                if(memory_size == BYTE) begin
+                    result[`XLEN-1:8] = 0;
+                end else if(memory_size == HALF) begin
+                    result[`XLEN-1:16] = 0;
+                end
+            end else begin
+                if(memory_size == BYTE) begin
+                    result[`XLEN-1:8] = {(`XLEN-8){data_word[7]}};
+                end else if(memory_size == HALF) begin
+                    result[`XLEN-1:16] = {(`XLEN-16){data_word[15]}};
+                end
+            end
+            load_done = 1; 
+        end else begin
+            result = 0;
+            load_done = 0;
+        end
+    end 
+
     always_ff @(posedge clock) begin
         if(reset) begin
-            out_packet      <= 0;
-            load_opa      <= 0;
-            load_opb      <= 0;
-            start <= 0;
-        end else if (load_en) begin
-            out_packet      <= in_packet;
-            load_opa      <= opa;
-            load_opb      <= opb;
-            start <= 1;
-        end else if(!load_done) begin
-            load_opa      <= load_opa;
-            load_opb      <= load_opb;
-            out_packet    <= out_packet;
-            start <= start; 
-        end else begin
-	    load_opa      <= load_opa;
-            load_opb      <= load_opb;
-            out_packet    <= out_packet;
-            start <= 0; 
-	end
+            curr_packet    <= 0;
+            curr_opa      <= 0;
+            curr_opb      <= 0;
+            curr_alu_func <= 0;
+            started <= 0;
+        end else if (start_load) begin
+            curr_packet    <= in_packet;
+            curr_opa      <= in_opa;
+            curr_opb      <= in_opb;
+            curr_alu_func <= alu_func;
+            started <= 1;
+        end else if (load_done) begin 
+	        curr_packet   <= 0;
+            curr_opa      <= 0;
+            curr_opb      <= 0;
+            curr_alu_func <= 0;
+            started <= 0; 
+        end
     end
+endmodule 
 
-endmodule
+
+
+// module load_alu (
+//     input clock,
+//     input reset, 
+
+//     input start_load,
+
+//     /* Instruction information */
+//     input [`XLEN-1:0] opa, 
+//     input [`XLEN-1:0] opb,
+//     input IS_EX_PACKET in_packet,
+//     input ALU_FUNC alu_func,
+
+//     /* Input from dcache */
+//     input [63:0] Dcache_data_out, // Data is mem[proc2Dcache_addr]
+//     input Dcache_valid_out // When valid is high
+
+//     /* Output to dcache */
+//     output logic load_en,
+//     output [`XLEN-1:0] load2Dcache_addr,
+
+//     // the BUS_LOAD response will magically be present in the *same* cycle it's requested (0ns latency)
+//     // this will not be true in project 4 (100ns latency)
+//     input [`XLEN-1:0]   Dmem2proc_data,
+//     input [3:0]         Dmem2proc_response,
+
+//     output logic [`XLEN-1:0]  result,
+//     output IS_EX_PACKET out_packet,
+//     output logic [`NUM_FU_LOAD] load_done,
+//     output logic [1:0]       proc2Dmem_command, // The memory command
+//     output MEM_SIZE          proc2Dmem_size,    // Size of data to read or write
+//     output logic [`XLEN-1:0] proc2Dmem_addr,    // Address sent to Data memory
+//     output logic [`XLEN-1:0] proc2Dmem_data     // Data sent to Data memory
+// ); 
+
+//     logic [`XLEN-1:0] load_opa, load_opb, address;
+//     logic start;
+//     assign signed_opa   = load_opa;
+//     assign signed_opb   = load_opb;
+
+
+//     /* Calculate address to load from */
+//     always_comb begin
+//         case (alu_func)
+//             ALU_ADD:    address = load_opa + load_opb;
+//             ALU_SUB:    address = load_opa - load_opb;
+//             ALU_AND:    address = load_opa & load_opb;
+//             ALU_SLT:    address = signed_opa < signed_opb;
+//             ALU_SLTU:   address = load_opa < load_opb;
+//             ALU_OR:     address = load_opa | load_opb;
+//             ALU_XOR:    address = load_opa ^ load_opb;
+//             ALU_SRL:    address = load_opa >> load_opb[4:0];
+//             ALU_SLL:    address = load_opa << load_opb[4:0];
+//             ALU_SRA:    address = signed_opa >>> load_opb[4:0]; // arithmetic from logical shift
+
+//             default:    address = `XLEN'hfacebeec;  // here to prevent latches
+//         endcase
+//     end
+
+
+    
+
+//     /* Calculate signals to send to dcache */
+//     assign proc2Dmem_command = (is_ex_reg.valid && is_ex_reg.rd_mem) ? BUS_LOAD : BUS_NONE;
+
+//     load load_0 (
+//         .start (start),
+//         .is_ex_reg (out_packet), 
+//         .address (address),
+//         .Dmem2proc_data (Dmem2proc_data),
+//         .Dmem2proc_response (Dmem2proc_response),
+
+//         .proc2Dmem_command (proc2Dmem_command),
+//         .proc2Dmem_size (proc2Dmem_size),
+//         .proc2Dmem_addr (proc2Dmem_addr),
+//         .proc2Dmem_data (proc2Dmem_data),
+//         .result(result),
+//         .done(load_done)
+//     );
+// /*
+//     assign out_packet = in_packet;
+//     assign load_opa = opa;
+//     assign load_opb = opb;
+//     assign start = load_en;
+// */
+//     always_ff @(posedge clock) begin
+//         if(reset) begin
+//             out_packet      <= 0;
+//             load_opa      <= 0;
+//             load_opb      <= 0;
+//             start <= 0;
+//         end else if (load_alu_en) begin
+//             out_packet      <= in_packet;
+//             load_opa      <= opa;
+//             load_opb      <= opb;
+//             start <= 1;
+//         end else if(!load_done) begin
+//             load_opa      <= load_opa;
+//             load_opb      <= load_opb;
+//             out_packet    <= out_packet;
+//             start <= start; 
+//         end else begin
+// 	    load_opa      <= load_opa;
+//             load_opb      <= load_opb;
+//             out_packet    <= out_packet;
+//             start <= 0; 
+// 	end
+//     end
+
+// endmodule
 
 // ALU: computes the result of FUNC applied with operands A and B
 module store (
