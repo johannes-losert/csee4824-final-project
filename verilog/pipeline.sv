@@ -91,30 +91,72 @@ module pipeline (
     //////////////////////////////////////////////////////
 
 
-    logic [1:0]       ex_proc2mem_command, re_proc2mem_command, ic_proc2mem_command; 
-    logic [`XLEN-1:0] ex_proc2mem_addr, re_proc2mem_addr, ic_proc2mem_addr;    
-    logic [31:0]      ex_proc2mem_data, re_proc2mem_data;    
-    MEM_SIZE          ex_proc2mem_size, re_proc2mem_size, ic_proc2mem_size;    
+    /* Signals from dcache to memory, carrying load, store, or none */
+    BUS_COMMAND proc2Dmem_command;
+    logic [`XLEN-1:0] proc2Dmem_addr;
+    logic [`XLEN-1:0] proc2Dmem_data;
 
-    always_comb begin
-	if (ex_proc2mem_command == BUS_LOAD) begin
-	    proc2mem_command = ex_proc2mem_command;
-	    proc2mem_addr = ex_proc2mem_addr;
-	    proc2mem_data = {32'b0, ex_proc2mem_data};
-	    proc2mem_size = ex_proc2mem_size;
-	end else if (re_proc2mem_command == BUS_STORE) begin 
-	    proc2mem_command = re_proc2mem_command;
-	    proc2mem_addr = re_proc2mem_addr;
-	    proc2mem_data = {32'b0, re_proc2mem_data};
-	    proc2mem_size = re_proc2mem_size;
-	end else begin
-	    proc2mem_command = ic_proc2mem_command;
-	    proc2mem_addr = ic_proc2mem_addr;
-	    proc2mem_data = 64'b0;
-	    proc2mem_size = ic_proc2mem_size;
-	end
-    end	
+    /* Signals from icache to memory carrying load or none */
+    BUS_COMMAND proc2Imem_command;
+    logic [`XLEN-1:0] proc2Imem_addr;
 
+    /* Signals from store (in retire stage) to dcache */
+    logic store_en;
+    logic [`XLEN-1:0] store2Dcache_addr;
+    logic [`XLEN-1:0] store2Dcache_data;
+
+    /* Signals from load (in execute stage) to dcache */
+    logic load_en;
+    logic [`XLEN-1:0] load2Dcache_addr;
+
+    /* Signals from dcache to load (in execute stage), with data */
+    logic [63:0] Dcache_data_out;
+    logic Dcache_valid_out;
+
+    /* Assign either dmem or imem (dmem has priority) to actual memory inputs */
+    always_comb begin 
+        if (proc2Dmem_command == BUS_LOAD || proc2Dmem_command == BUS_STORE) begin 
+            proc2mem_command = proc2Dmem_command;
+            proc2mem_addr = proc2Dmem_addr;
+            proc2mem_data = {32'b0, proc2Dmem_data};
+        end else begin
+            proc2mem_command = proc2Imem_command;
+            proc2mem_addr = proc2Imem_addr;
+            proc2mem_data = 64'b0;
+        end
+    end
+
+    //////////////////////////////////////////////////
+    //          Data Cache                          //
+    ////////////////////////////////////////////////// 
+    dcache dcache_0 (
+        .clock(clock),
+        .reset(reset),
+
+        // input from data memory 
+        .Dmem2proc_response(mem2proc_response), 
+        .Dmem2proc_data(mem2proc_data),
+        .Dmem2proc_tag(mem2proc_tag),
+
+        // Input from store command (retire stage)
+        .store_en(store_en),
+        .store2Dcache_addr(store2Dcache_addr),
+        .store2Dcache_data(store2Dcache_data),
+
+        // Input from load command (execute stage)
+        .load_en(load_en),
+        .load2Dcache_addr(load2Dcache_addr),
+        
+        // Output to selector (then memory)
+        .proc2Dmem_command(proc2Dmem_command),
+        .proc2Dmem_addr(proc2Dmem_addr),
+        .proc2Dmem_data(proc2Dmem_data),
+
+        // Output to load (stage ex)
+        .Dcache_data_out(Dcache_data_out),
+        .Dcache_valid_out(Dcache_valid_out)        
+    );
+    
 
     //////////////////////////////////////////////////
     //          Instruction Fetch Signals           //
@@ -264,8 +306,8 @@ module pipeline (
         .proc2Icache_addr(icache_input_addr),
 
         // To memory
-        .proc2Imem_command(ic_proc2mem_command),
-        .proc2Imem_addr(ic_proc2mem_addr),
+        .proc2Imem_command(proc2Imem_command),
+        .proc2Imem_addr(proc2Imem_addr),
 
         // To fetch stage
         .Icache_data_out(icache_data_out),
@@ -468,9 +510,14 @@ module pipeline (
 
         .is_ex_reg(is_ex_reg),
 
-        // Load inputs
-        .Dmem2proc_data (mem2proc_data[`XLEN-1:0]),
-        .Dmem2proc_response (mem2proc_tag),
+
+        /* Input from dcache */
+        .Dcache_data_out(Dcache_data_out),
+        .Dcache_valid_out(Dcache_valid_out),
+
+        /* output to dcache*/
+        .load_en(load_en),
+        .load2Dcache_addr(load2Dcache_addr),    // Address sent to Data memory
 
         // outputs
         .ex_packet(ex_packet),
@@ -479,12 +526,13 @@ module pipeline (
         .free_mult(ex_free_mult),
         .free_load(ex_free_load),
         .free_store(ex_free_store),
-        .free_branch(ex_free_branch), 
+        .free_branch(ex_free_branch)
+        
 
-        .proc2Dmem_command (ex_proc2mem_command),
-        .proc2Dmem_size (ex_proc2mem_size),
-        .proc2Dmem_addr (ex_proc2mem_addr),
-        .proc2Dmem_data (ex_proc2mem_data)
+        // .proc2Dmem_command (ex_proc2mem_command),
+        // .proc2Dmem_size (ex_proc2mem_size),
+        // .proc2Dmem_addr (ex_proc2mem_addr),
+        // .proc2Dmem_data (ex_proc2mem_data)
     );
 
     function void print_ex_co();
@@ -562,12 +610,12 @@ module pipeline (
    
         .co_packet(co_re_reg),
 
-        .mem2proc_response(mem2proc_response),
+        //.mem2proc_response(mem2proc_response),
         .rob_head(rob_head_idx),
         .clear_retire_buffer(re_rollback),
 
         .move_head(retire_move_head),
-	.free_store(re_free_store),
+	    .free_store(re_free_store),
 
         // pipeline output
         .pipeline_completed_insts(pipeline_completed_insts),
@@ -577,12 +625,20 @@ module pipeline (
         .pipeline_commit_wr_en(pipeline_commit_wr_en),
         .pipeline_commit_NPC(pipeline_commit_NPC),
 
-	// pipeline to memory
-	.proc2Dmem_command (re_proc2mem_command),
-        .proc2Dmem_size (re_proc2mem_size),
-        .proc2Dmem_addr (re_proc2mem_addr),
-        .proc2Dmem_data (re_proc2mem_data)
+	    // output to data cache
+        .store_en(store_en),
+        .store2Dcache_addr(store2Dcache_addr),
+        .store2Dcache_data(store2Dcache_data)
+
+	// .proc2Dmem_command (re_proc2mem_command),
+    //     .proc2Dmem_size (re_proc2mem_size),
+    //     .proc2Dmem_addr (re_proc2mem_addr),
+    //     .proc2Dmem_data (re_proc2mem_data)
     );
+
+
+
+
 
     function void print_instruction_line();
 
