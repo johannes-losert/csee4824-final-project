@@ -54,10 +54,13 @@ module reorder_buffer(
     output logic full,
 
     /* passing the head's index to the retire stage */
-    output logic [$clog2(`ROB_SZ)-1:0] head
+    output logic [$clog2(`ROB_SZ)-1:0] head,
+
+
+    output ROB_ENTRY [`ROB_SZ-1:0] inst_buffer
 );
 
-    ROB_ENTRY [`ROB_SZ-1:0] inst_buffer;
+    // ROB_ENTRY [`ROB_SZ-1:0] inst_buffer;
     logic [$clog2(`ROB_SZ)-1:0] tail;
     logic [$clog2(`ROB_SZ)-1:0] tail_h;
     logic [$clog2(`ROB_SZ)-1:0] next_head;
@@ -148,7 +151,7 @@ module reorder_buffer(
                 inst_buffer[tail].PC = inst_PC;
                 if (inst.r.rd != `ZERO_REG) begin
                     inst_buffer[tail].T = dest_tag; // input from Free list
-                    inst_buffer[tail].Told = phys_told;
+                    inst_buffer[tail].Told.reg_num = phys_told;
                 end else begin
                     inst_buffer[tail].T.reg_num = `ZERO_REG;
                     inst_buffer[tail].Told.reg_num = `ZERO_REG;
