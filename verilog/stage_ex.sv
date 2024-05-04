@@ -448,18 +448,24 @@ module stage_ex (
             // If any of the FUs is outputting its down signal, add it to a list that signifies that that 
             // FU is ready to move forward to the next stage (waiting_fus)
             if(alu_done) begin
+                `ifdef DEBUG_PRINT
                 $display("[EX] ALU done, result=%h", alu_result);
+                `endif
                 waiting_fus[ALU]    <= 1;
                 tmp_alu_result      <= alu_result;
                 tmp_alu_packet <= alu_packet;
             end
 
             if(mult_done) begin
+                `ifdef DEBUG_PRINT
+                $display("[EX] MULT done, result=%h", mult_result);
+                `endif
                 waiting_fus[MULT]   <= 1; 
                 tmp_mult_result     <= mult_result;
                 tmp_mult_packet <= mult_packet;
             end
             if(branch_done) begin
+                `ifdef DEBUG_PRINT
                 $write("[EX] BRANCH done,");
                 if (take_conditional) begin
                     $write(" take branch=true");
@@ -467,12 +473,16 @@ module stage_ex (
                     $write(" take branch=false");
                 end
                 $display(" branch_result=%h", branch_result);
+                `endif
                 waiting_fus[BRANCH] <= 1; 
                 tmp_branch_result   <= branch_result;
                 tmp_branch_packet <= branch_packet;
                 tmp_take_conditional<= take_conditional;
             end 
             if (load_done) begin
+                `ifdef DEBUG_PRINT
+                $display("[EX] LOAD done, result=%h", load_result);
+                `endif
                 waiting_fus[LOAD] <= 1; 
                 tmp_load_result   <= load_result;
                 tmp_load_packet <= load_packet;
