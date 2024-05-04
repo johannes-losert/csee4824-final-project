@@ -26,7 +26,8 @@ for source_file in programs/*.s programs/*.c; do
 
     make $program.out >> debug.log 2>&1 
 
-    # Copy the generated file to our output directory
+    # Copy the generated files to our output directory
     cp output/$program.out "$NEW_IMP_PATH/$REF_OUT/$program.out"
+    cp output/$program.wb "$NEW_IMP_PATH/$REF_OUT/$program.wb"
 
 done
