@@ -37,6 +37,9 @@ module stage_ex (
     output logic         load_en,
     output logic [`XLEN-1:0] load2Dcache_addr,    // Address sent to Data memory
 
+    /* Input to roll back */
+    input logic rollback,
+
     // debug outputs
     output IS_EX_PACKET alu_packet,
     output IS_EX_PACKET mult_packet,
@@ -438,7 +441,7 @@ module stage_ex (
 
     // Chooses which FU to move forward to the next stage
     always_ff @(posedge clock) begin
-        if(reset) begin
+        if(reset || rollback) begin
             waiting_fus             <= 0;
             tmp_alu_result          <= 0;
             tmp_mult_result         <= 0;
