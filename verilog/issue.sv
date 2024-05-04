@@ -50,4 +50,6 @@ module issue (
     assign is_packet.has_dest = id_is_reg.has_dest;	
     assign is_packet.issued_fu_index = id_is_reg.issued_fu_index;
 
+    assign is_packet.arch_dest_reg_num = id_is_reg.arch_dest_reg_num;
+
 endmodule

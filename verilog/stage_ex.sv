@@ -277,6 +277,8 @@ module stage_ex (
             ex_packet.has_dest = tmp_alu_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_alu_packet.issued_fu_index;
+            ex_packet.arch_dest_reg_num = tmp_alu_packet.arch_dest_reg_num;
+
         end else if (mult_done_process) begin
             ex_packet.result        = tmp_mult_result;
             ex_packet.take_branch   = 0;
@@ -312,6 +314,9 @@ module stage_ex (
             ex_packet.has_dest = tmp_mult_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_mult_packet.issued_fu_index;
+
+            ex_packet.arch_dest_reg_num = tmp_mult_packet.arch_dest_reg_num;
+
         end else if (branch_done_process) begin
             ex_packet.result        = tmp_branch_result;
             ex_packet.take_branch   = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
@@ -348,6 +353,8 @@ module stage_ex (
 
             ex_packet.issued_fu_index = tmp_branch_packet.issued_fu_index;
 
+            ex_packet.arch_dest_reg_num = tmp_branch_packet.arch_dest_reg_num;
+
         end else if (load_done_process) begin
             ex_packet.result        = tmp_load_result;
             ex_packet.take_branch   = 0;
@@ -383,6 +390,9 @@ module stage_ex (
             ex_packet.has_dest = tmp_load_packet.has_dest;
 
             ex_packet.issued_fu_index = tmp_load_packet.issued_fu_index;
+
+            ex_packet.arch_dest_reg_num = tmp_load_packet.arch_dest_reg_num;
+
         end else if (store_done_process) begin
             ex_packet.result        = tmp_store_result;
             ex_packet.take_branch   = 0;
@@ -414,10 +424,13 @@ module stage_ex (
 
             ex_packet.rob_index = tmp_store_packet.rob_index;
             ex_packet.has_dest = tmp_store_packet.has_dest;
-	    ex_packet.mem_size = mem_size;
+	         ex_packet.mem_size = mem_size;
 
 
             ex_packet.issued_fu_index = tmp_store_packet.issued_fu_index;
+
+            ex_packet.arch_dest_reg_num = tmp_store_packet.arch_dest_reg_num;
+
         end else begin 
             ex_packet = INVALID_EX_CO_PACKET;
         end
