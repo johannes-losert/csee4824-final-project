@@ -19,6 +19,9 @@ module reservation_station (
   //  output logic ready, Replaced with valid bit inside issued packet
     output ID_IS_PACKET issued_packet,
 
+    /* From ROB, so branch knows if it is head */
+    input logic [$clog2(`ROB_SZ)-1:0] rob_head_index,
+
     /* Output indicating whether each type of functional unit entry is full */
     output logic alu_entries_full,
     output logic mult_entries_full,
@@ -221,8 +224,11 @@ module reservation_station (
                 branch_entries_full = 1'b0;
             end
             if (~branch_entries[i].issued && branch_entries[i].packet.src1_reg.ready && branch_entries[i].packet.src2_reg.ready) begin
-                branch_issuable = 1'b1;
-                branch_issue_index = i;
+                /* Branches should wait for everything in front of them to commit before issuing */
+                if (branch_entries[i].packet.rob_index == rob_head_index) begin
+                    branch_issuable = 1'b1;
+                    branch_issue_index = i;
+                end
             end
         end   
     end  

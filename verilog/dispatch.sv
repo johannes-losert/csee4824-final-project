@@ -282,6 +282,9 @@ module dispatch (
        // .ready(id_packet.valid),
         .issued_packet(id_packet),
 
+        /* Head of ROB, so branch knows if it can issue */
+        .rob_head_index(head),
+
         // Output whether or not each type of FU is full (new)
         .alu_entries_full(alu_entries_full),
         .mult_entries_full(mult_entries_full),
@@ -301,18 +304,18 @@ module dispatch (
     // stall when issue a load or store
     always_comb begin
         if (issue_enable) begin
-            if (id_packet.function_type == LOAD || id_packet.function_type == STORE) begin
+            if (id_packet.function_type == LOAD || id_packet.function_type == STORE || id_packet.function_type == BRANCH) begin
                 `ifdef DEBUG_PRINT
-                $display ("[RS] stops issuing, waiting for load or store to finish");
+                $display ("[RS] stops issuing, waiting for load,store, or branch to finish");
                 `endif
                 next_issue_enable = 0;
             end else begin
                 next_issue_enable = 1;
             end
         end else begin
-            if ((free_load != 0) || (free_store != 0))begin
+            if ((free_load != 0) || (free_store != 0) || (free_branch != 0))begin
                 `ifdef DEBUG_PRINT
-                $display ("load or store finished, {RS} starts to issue");
+                $display ("load, store, or branch finished, {RS} starts to issue");
                 `endif
                 next_issue_enable = 1;
             end else begin
