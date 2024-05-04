@@ -171,8 +171,10 @@ module map_table (
     endfunction
 
     always @(negedge clk) begin 
+        `ifdef DEBUG_PRINT
         print_map_table();
         print_arch_table();
+        `endif
     end
 
     always @(posedge clk) begin
