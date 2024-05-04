@@ -13,6 +13,8 @@
 // all files should `include "sys_defs.svh" to at least define the timescale
 `timescale 1ns/100ps
 
+`define DEBUG_PRINT
+
 ///////////////////////////////////
 // ---- Starting Parameters ---- //
 ///////////////////////////////////
@@ -345,6 +347,8 @@ typedef struct packed {
 } PREG;
 
 import "DPI-C" function void print_inst(int inst, int pc, int valid_inst);
+import "DPI-C" function void debug_print(string str);
+import "DPI-C" function void debug_prinln(string str);
 
 function void print_preg(PREG preg);
     if (preg.ready)
