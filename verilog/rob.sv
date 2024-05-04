@@ -198,10 +198,12 @@ module reorder_buffer(
     end
 
     always_ff @(posedge clock) begin
+        `ifdef DEBUG_PRINT
         if (move_head)
             $display("[ROB] move head");
         if (undo)
             $display("[ROB] undo, rollback to %0d", undo_index);
+        `endif
 
        // print_reorder_buffer();
         if (reset) begin
@@ -218,8 +220,10 @@ module reorder_buffer(
     end
 
     always_ff @(negedge clock) begin
+        `ifdef DEBUG_PRINT
         print_reorder_buffer();
         //$display("head:%0d tail:%0d", head, tail);
+        `endif
     end
 
 endmodule
