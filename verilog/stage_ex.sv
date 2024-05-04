@@ -28,19 +28,21 @@ module stage_ex (
     output logic [`NUM_FU_LOAD-1:0]   free_load,
     output logic [`NUM_FU_STORE-1:0]  free_store,
     output logic [`NUM_FU_BRANCH-1:0] free_branch,
-    input [`XLEN-1:0]   Dmem2proc_data,
-    input [3:0]         Dmem2proc_response,
+    
+    /* Input from dcache */
+    input [63:0]   Dcache_data_out,
+    input logic         Dcache_valid_out,
+
+    /* output to dcache*/
+    output logic         load_en,
+    output logic [`XLEN-1:0] load2Dcache_addr,    // Address sent to Data memory
 
     // debug outputs
     output IS_EX_PACKET alu_packet,
     output IS_EX_PACKET mult_packet,
     output IS_EX_PACKET branch_packet,
     output IS_EX_PACKET load_packet,
-    output IS_EX_PACKET store_packet,
-    output logic [1:0]       proc2Dmem_command, // The memory command
-    output MEM_SIZE          proc2Dmem_size,    // Size of data to read or write
-    output logic [`XLEN-1:0] proc2Dmem_addr,    // Address sent to Data memory
-    output logic [`XLEN-1:0] proc2Dmem_data     // Data sent to Data memory
+    output IS_EX_PACKET store_packet
 );
 
     logic [`XLEN-1:0]   alu_result;
@@ -160,25 +162,53 @@ module stage_ex (
         .out_packet (mult_packet)
     );
 
-    load_alu load_alu_0 (
-        .clock (clock), 
-        .reset (reset),
-        .opa (opa_mux_out),
-        .opb (opb_mux_out),
-        .in_packet (is_ex_reg),
-        .alu_func (is_ex_reg.alu_func),
-        .load_en (is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
-        .Dmem2proc_data (Dmem2proc_data),
-        .Dmem2proc_response (Dmem2proc_response),
+    load load_0 (
+        .clock(clock),
+        .reset(reset),
 
-        .result (load_result),
-        .load_done (load_done),
-        .out_packet (load_packet),
-        .proc2Dmem_command (proc2Dmem_command),
-        .proc2Dmem_size (proc2Dmem_size),
-        .proc2Dmem_addr (proc2Dmem_addr),
-        .proc2Dmem_data (proc2Dmem_data)
+        .start_load(is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
+        
+        /* Instruction info */
+        .in_opa(opa_mux_out),
+        .in_opb(opb_mux_out),
+        .in_packet(is_ex_reg),
+        .alu_func(is_ex_reg.alu_func),
+
+        /* Input from dcache */
+        .Dcache_data_out(Dcache_data_out),
+        .Dcache_valid_out(Dcache_valid_out),
+
+        /* Output to dcache */
+        .load_en(load_en),
+        .load2Dcache_addr(load2Dcache_addr),
+
+        /* Output for pipeline */
+        .result(load_result),
+        .out_packet(load_packet),
+        .load_done(load_done)
     );
+
+
+    // load load (
+    //     .clock (clock), 
+    //     .reset (reset),
+    //     .opa (opa_mux_out),
+    //     .opb (opb_mux_out),
+    //     .in_packet (is_ex_reg),
+    //     .alu_func (is_ex_reg.alu_func),
+
+    //     .start_load (is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
+    //     .Dmem2proc_data (Dmem2proc_data),
+    //     .Dmem2proc_response (Dmem2proc_response),
+
+    //     .result (load_result),
+    //     .load_done (load_done),
+    //     .out_packet (load_packet),
+    //     .proc2Dmem_command (proc2Dmem_command),
+    //     .proc2Dmem_size (proc2Dmem_size),
+    //     .proc2Dmem_addr (proc2Dmem_addr),
+    //     .proc2Dmem_data (proc2Dmem_data)
+    // );
     
     // Instantiate the ALU
     store store_0 (
@@ -321,7 +351,7 @@ module stage_ex (
         end else if (load_done_process) begin
             ex_packet.result        = tmp_load_result;
             ex_packet.take_branch   = 0;
-	    ex_packet.mem_size = 0;
+	        ex_packet.mem_size = 0;
 
             
             // Pass throughs
