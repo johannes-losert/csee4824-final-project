@@ -60,7 +60,7 @@ module icache (
     output [1:0]       proc2Imem_command,
     output [`XLEN-1:0] proc2Imem_addr,
 
-    // To fetch stage
+    // To fetch stageproc2Icache_addr
     output [63:0] Icache_data_out, // Data is mem[proc2Icache_addr]
     output Icache_valid_out // When valid is high
 );
