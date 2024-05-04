@@ -63,9 +63,9 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
     input [`XLEN-1:0] load2Dcache_addr,
 
     // To memory
-    output [1:0]       proc2Dmem_command,
-    output [`XLEN-1:0] proc2Dmem_addr,
-    output [`XLEN-1:0] proc2Dmem_data,
+    output logic [1:0]       proc2Dmem_command,
+    output logic [`XLEN-1:0] proc2Dmem_addr,
+    output logic [63:0] proc2Dmem_data,
 
     // To load (stage ex)
     output [63:0] Dcache_data_out, // Data is mem[proc2Dcache_addr]
@@ -133,7 +133,16 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
                              : (store_en) ? BUS_STORE
                              : BUS_NONE;
 
-    assign proc2Dmem_data = (store_en) ? proc2Dcache_data : 32'hdeadbeef;
+    /* Calculate 64-bit data to send to memory */
+    always_comb begin 
+        if (store_en) begin 
+            if (proc2Dcache_addr[2])
+                proc2Dmem_data = {proc2Dcache_data, 32'b0};
+            else
+                proc2Dmem_data = {32'b0, proc2Dcache_data};
+        end else
+            proc2Dmem_data = 64'hdeadbeef;
+    end
 
 
     // ---- Main cache logic ---- //
