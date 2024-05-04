@@ -17,6 +17,7 @@ bt1:
     addi x2, x0, 6
     addi x3, x0, 7
     addi x4, x0, 8
+    wfi
 
 end:
     mul x7,	x2,	x1 #

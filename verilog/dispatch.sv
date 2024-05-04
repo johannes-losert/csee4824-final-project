@@ -30,7 +30,7 @@ module dispatch (
     output ID_IS_PACKET id_packet,      // outputs (new) 
     // if rob or RS is not abvailable, stall will be high, keep all inputs same as pervious cycle.
     output logic stall,          // (new) stall signal to ifetch stage 
-
+    output logic branch_decoded,    // (new) stall signal to ifetch stage for branch
 
     // Output to retire stage
     output logic [$clog2(`ROB_SZ)-1:0] rob_head_idx,
@@ -352,11 +352,13 @@ module dispatch (
                    | (load_entries_full & (decoded_packet.function_type == LOAD)) 
                    | (store_entries_full & (decoded_packet.function_type == STORE)) 
                    | (branch_entries_full & (decoded_packet.function_type == BRANCH));
+
+    assign is_branch = decoded_packet.function_type == BRANCH;
                    
     // rstall if ROB full or RS full or free list empty
     assign stall = (rob_full | rs_full | free_list_empty);
 
-   
+    assign branch_decoded = is_branch;
 
      /* Access map table (convert arch rs1/rs2 to physical) */
 

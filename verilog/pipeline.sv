@@ -17,7 +17,7 @@
 // `include "verilog/complete.sv"
 // `include "verilog/retire.sv"
 // `include "verilog/regfile.sv"
-//`include "verilog/ifetch_basic.sv"
+// `include "verilog/ifetch_basic.sv"
 
 
 module pipeline (
@@ -172,10 +172,14 @@ module pipeline (
 
     // Ifetch input signals
     logic if_valid;
-    logic [`XLEN-1:0] certain_branch_pc, rob_target_pc, branch_pred_pc;
-    logic certain_branch_req, rob_target_req, branch_pred_req;
+    logic [`XLEN-1:0] certain_branch_pc, branch_pred_pc;
+    logic certain_branch_req, branch_pred_req;
 
-    // TODO debug signals?
+    //////////////////////////////////////////////////
+    //          Branch Predictor Signals            //
+    //////////////////////////////////////////////////
+    logic branch_predictor_hit; 
+    logic predict_branch_taken;
 
     //////////////////////////////////////////////////
     //          Instruction Dispatch Signals        //
@@ -198,6 +202,11 @@ module pipeline (
     // Stall output signal
     // TODO branch addresses?
     logic id_needs_stall;
+
+    logic branch_decoded;
+    logic branch_resolved;
+    logic branch_lock;
+    logic n_branch_lock;
 
     // output to retire stage
     logic [$clog2(`ROB_SZ)-1:0] rob_head_idx;
@@ -264,7 +273,8 @@ module pipeline (
 
 
     /* if valid unless id needs stall, or we are taking a branch */
-    assign if_valid = ~id_needs_stall | take_branch; 
+    assign if_valid = ~id_needs_stall && ~branch_lock && ~branch_decoded || branch_resolved; 
+    assign branch_resolved = ex_packet.cond_branch || ex_packet.uncond_branch;
 
     // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
     assign id_stall = 0;
@@ -277,7 +287,7 @@ module pipeline (
     //                Brach/Interrupt Logic         //
     //////////////////////////////////////////////////
     // TODO do this 
-    assign take_branch = ex_packet.valid & ex_packet.take_branch;
+    assign take_branch = ex_packet.valid & (ex_packet.take_branch) ;
     assign branch_target = ex_packet.result;
 
     assign id_rollback = take_branch;
@@ -285,12 +295,25 @@ module pipeline (
     assign ex_rollback = take_branch;
 
     assign certain_branch_req = take_branch;
-    assign certain_branch_pc = branch_target;
+    assign certain_branch_pc = branch_target; 
 
-    assign rob_target_req = 0;
-    assign branch_pred_req = 0;
+    always_comb begin 
+        if (branch_lock) begin
+            if (branch_resolved) begin 
+                n_branch_lock = 0;
+            end else begin 
+                n_branch_lock = 1;
+            end
+        end else begin 
+            if (branch_decoded) begin 
+                n_branch_lock = 1;
+            end else begin 
+                n_branch_lock = 0;
+            end
+        end
+    end
+    assign branch_pred_req = 0; // commented out for branch prediction 
     
-
     //////////////////////////////////////////////////
     //          Instruction Fetch Modules           //
     //////////////////////////////////////////////////
@@ -325,9 +348,6 @@ module pipeline (
         .certain_branch_pc(certain_branch_pc),
         .certain_branch_req(certain_branch_req),
 
-        .rob_target_pc(rob_target_pc),
-        .rob_target_req(rob_target_req),
-
         .branch_pred_pc(branch_pred_pc),
         .branch_pred_req(branch_pred_req),
 
@@ -341,11 +361,9 @@ module pipeline (
         // output packet
         .if_packet(if_packet)       
     );
-    
     //////////////////////////////////////////////////
     //              Branch Modules                  //
-    //////////////////////////////////////////////////
-
+    //////////////////////////////////////////////////    
 
     //////////////////////////////////////////////////
     //          IF ID Pipeline Register             //
@@ -409,6 +427,7 @@ module pipeline (
 
         // Outputs
         .stall(id_needs_stall),
+        .branch_decoded(branch_decoded),
 
         .rob_head_idx(rob_head_idx),
 
@@ -425,8 +444,10 @@ module pipeline (
     always_ff @(posedge clock) begin
         if (reset) begin   
             id_is_reg <= INVALID_ID_IS_PACKET;
+            branch_lock <= 0;
         end else if (id_is_enable) begin
             id_is_reg <= id_packet;
+            branch_lock = n_branch_lock;
         end
     end
 

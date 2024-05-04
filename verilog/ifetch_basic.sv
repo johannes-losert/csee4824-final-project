@@ -19,9 +19,6 @@ module ifetch_basic (
     input [`XLEN-1:0] certain_branch_pc, 
     input certain_branch_req,
 
-    input [`XLEN-1:0] rob_target_pc,
-    input rob_target_req,
-
     input [`XLEN-1:0] branch_pred_pc,
     input branch_pred_req,
 
@@ -37,8 +34,8 @@ module ifetch_basic (
     output IF_ID_PACKET if_packet,
     
     //          *** DEBUG ***
-    output [3:0] req_debug,
-    output [3:0] gnt_debug,
+    output [1:0] req_debug,
+    output [1:0] gnt_debug,
     output [`XLEN-1:0] PC_reg_debug,
     output waiting_on_inst_debug,
     output [`INST_INDEX_SIZE-1:0] inst_buffer_tail_debug
@@ -51,9 +48,9 @@ module ifetch_basic (
     logic n_waiting_on_inst;  
     assign waiting_on_inst_debug = waiting_on_inst;
     
-    logic [3:0] req;
-    assign req = {certain_branch_req, rob_target_req, branch_pred_req, 1'b1};
-    logic [3:0] gnt; 
+    logic [1:0] req;
+    assign req = {branch_pred_req, 1'b1};
+    logic [1:0] gnt; 
 
     IF_ID_PACKET n_if_packet;
 
@@ -62,7 +59,7 @@ module ifetch_basic (
     assign gnt_debug = gnt;
     assign PC_reg_debug = PC_reg;
     
-    psel_gen #(.WIDTH(4), .REQS(1)) 
+    psel_gen #(.WIDTH(2), .REQS(1)) 
     if_psel (
         .req(req),       
         .gnt(gnt),       
@@ -72,13 +69,21 @@ module ifetch_basic (
 
     always_comb begin
 
-        if (if_valid) begin         
-            if (!waiting_on_inst) begin 
+
+        if (if_valid) begin   
+            if (certain_branch_req) begin 
+                /* If there really is a branch, discard everything else and go to certain_branch_pc */
+                n_waiting_on_inst = 1;
+                n_PC_reg = certain_branch_pc;
+
+                n_if_packet.inst = `NOP;
+                n_if_packet.PC = PC_reg;
+                n_if_packet.NPC = certain_branch_pc;
+                n_if_packet.valid = 0;
+            end else if (!waiting_on_inst) begin 
                 unique case (gnt)
-                    4'b1000 : n_PC_reg = certain_branch_pc;
-                    4'b0100 : n_PC_reg = rob_target_pc;
-                    4'b0010 : n_PC_reg = branch_pred_pc;
-                    4'b0001 : n_PC_reg = PC_reg + 4;
+                    2'b10 : n_PC_reg = branch_pred_pc;
+                    2'b01 : n_PC_reg = PC_reg + 4;
                     default : n_PC_reg = 32'hdeadbeef;
                 endcase
                 n_waiting_on_inst = 1;
@@ -89,17 +94,7 @@ module ifetch_basic (
                 n_if_packet.valid = 0;
             end else if (waiting_on_inst) begin 
                 n_PC_reg = PC_reg;
-                
-                if (certain_branch_req) begin 
-                    /* If there really is a branch, discard everything else and go to certain_branch_pc */
-                    // TODO fix this for real, probably don't need waiting_on_inst
-                    n_waiting_on_inst = 1;
-                    n_if_packet.inst = `NOP;
-                    n_if_packet.PC = PC_reg;
-                    n_if_packet.NPC = certain_branch_pc;
-                    n_if_packet.valid = 0;
-                    n_PC_reg = certain_branch_pc;
-                end else if (Icache2proc_data_valid) begin
+                if (Icache2proc_data_valid) begin
                     // pushing to the tail of inst buffer
                     n_waiting_on_inst = 0; 
                     n_if_packet.inst = PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
@@ -115,9 +110,17 @@ module ifetch_basic (
                 end
             end
         end else begin
-            n_PC_reg = PC_reg;
-            n_waiting_on_inst = waiting_on_inst;
-            n_if_packet = if_packet;
+            n_waiting_on_inst = 1;
+            if (certain_branch_req) begin 
+                n_PC_reg = certain_branch_pc;
+            end else begin 
+                n_PC_reg = PC_reg;
+            end
+
+            n_if_packet.inst = `NOP;
+            n_if_packet.PC = PC_reg;
+            n_if_packet.NPC = PC_reg+4;
+            n_if_packet.valid = 0;
         end
     end
 
