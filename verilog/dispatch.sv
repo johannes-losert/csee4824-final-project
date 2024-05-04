@@ -297,7 +297,10 @@ module dispatch (
         .free_mult(free_mult),
         .free_load(free_load),
         .free_store(free_store),
-        .free_branch(free_branch)
+        .free_branch(free_branch),
+
+        /* Rollback */
+        .rollback(rollback)
  
     );
 
