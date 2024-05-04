@@ -276,7 +276,9 @@ module reservation_station (
     end
 
     always_ff @(negedge clock) begin 
+        `ifdef DEBUG_PRINT
         printReservationStation();
+        `endif
     end
 
     always_ff @(posedge clock) begin
@@ -309,7 +311,9 @@ module reservation_station (
             
             // Updating (TODO might be one cycle delay)
             if(update) begin
+                `ifdef DEBUG_PRINT
                 $display("[RS] CDB update, ready_reg:%d", ready_reg.reg_num);
+                `endif
                 for (int i = 0; i < `NUM_FU_ALU; i++) begin
                     if(alu_entries[i].packet.src1_reg.reg_num == ready_reg.reg_num) begin
                         alu_entries[i].packet.src1_reg.ready <= 1'b1;
@@ -351,14 +355,18 @@ module reservation_station (
                     end
                 end
             end else begin 
+                `ifdef DEBUG_PRINT
                 $display("[RS] No CDB Update");
+                `endif
             end   
 
 
             // Issuing 
             if (issue_enable) begin 
                 if (alu_issuable) begin
+                    `ifdef DEBUG_PRINT
                     $display("[RS] Issue ALU packet, pc:%p", alu_entries[alu_issue_index].packet.PC);
+                    `endif
                  //   ready <= 1'b1;
                     issued_packet <= alu_entries[alu_issue_index].packet;
                     alu_entries[alu_issue_index].issued <= 1;
@@ -385,7 +393,9 @@ module reservation_station (
                     issued_packet.issued_fu_index <= branch_issue_index;
                 end else begin 
               //      ready <= 1'b0;
+                    `ifdef DEBUG_PRINT
                     $display("[RS] No packet to issue");
+                    `endif
                     issued_packet <= INVALID_ID_IS_PACKET;
 
                 end
@@ -396,7 +406,9 @@ module reservation_station (
             // Freeing (TODO figure out of we can allocate and free on the same cycle)
             for(int i = 0; i < `NUM_FU_ALU; i++) begin
                 if (free_alu[i]) begin
+                    `ifdef DEBUG_PRINT
                     $display("[RS] Freeing ALU packet, pc:%p", alu_entries[i].packet.PC);
+                    `endif
                     alu_entries[i].busy <= 0;
                     alu_entries[i].issued <= 1;
                 end
@@ -436,60 +448,82 @@ module reservation_station (
             // Try allocation 
             // find not busy entry in the four RS_ENTRYs
             if(allocate) begin 
+                `ifdef DEBUG_PRINT
                 $display("[RS] Trying to allocate packet, pc:%p", input_packet.PC);
+                `endif
                 if(input_packet.function_type == ALU) begin
                     if (alu_available_index_found) begin
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Found index, allocating new ALU packet, pc:%p", input_packet.PC);
+                        `endif
                         alu_entries[alu_available_index].busy <= 1;
                         alu_entries[alu_available_index].packet <= input_packet;
                         alu_entries[alu_available_index].issued <= 0;
                         done <= 1;
                     end else begin 
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Can't allocate ALU packet, pc:%p", input_packet.PC);
+                        `endif
                         done <= 0;
                     end
                 end else if(input_packet.function_type == MULT) begin
                     if (mult_available_index_found) begin
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Found index, allocating new MULT packet, pc:%p", input_packet.PC);
+                        `endif
                         mult_entries[mult_available_index].busy <= 1;
                         mult_entries[mult_available_index].packet <= input_packet;
                         mult_entries[mult_available_index].issued <= 0;
                         done <= 1;
                     end else begin
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Can't allocate MULT packet, pc:%p", input_packet.PC);
+                        `endif
                         done <= 0;
                     end
                 end else if(input_packet.function_type == LOAD) begin
                     if (load_available_index_found) begin
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Found index, allocating new LOAD packet, pc:%p", input_packet.PC);
+                        `endif
                         load_entries[load_available_index].busy <= 1;
                         load_entries[load_available_index].packet <= input_packet;
                         load_entries[load_available_index].issued <= 0;
                         done <= 1;
                     end else begin 
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Can't allocate LOAD packet, pc:%p", input_packet.PC);
+                        `endif
                         done <= 0;
                     end
                 end else if(input_packet.function_type == STORE) begin
                     if (store_available_index_found) begin
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Found index, allocating new STORE packet, pc:%p", input_packet.PC);
+                        `endif
                         store_entries[store_available_index].busy <= 1;
                         store_entries[store_available_index].packet <= input_packet;
                         store_entries[store_available_index].issued <= 0;
                         done <= 1;
                     end else begin 
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Can't allocate STORE packet, pc:%p", input_packet.PC);
+                        `endif
                         done <= 0;
                     end
                 end else if(input_packet.function_type == BRANCH) begin
                     if (branch_available_index_found) begin
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Found index, allocating new BRANCH packet, pc:%p", input_packet.PC);
+                        `endif
                         branch_entries[branch_available_index].busy <= 1;
                         branch_entries[branch_available_index].packet <= input_packet;
                         branch_entries[branch_available_index].issued <= 0;
                         done <= 1;
                     end else begin 
+                        `ifdef DEBUG_PRINT
                         $display("[RS] Can't allocate BRANCH packet, pc:%p", input_packet.PC);
+                        `endif
                         done <= 0;
                     end
                 end else begin 
@@ -497,8 +531,10 @@ module reservation_station (
                         done <= 0;
                 end
             end else begin 
+                `ifdef DEBUG_PRINT
                 $display("[RS] No allocation");
                 $display("[RS] --");
+                `endif
                 done <= 0;
             end
         end 
