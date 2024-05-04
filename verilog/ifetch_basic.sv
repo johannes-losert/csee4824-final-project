@@ -131,11 +131,13 @@ module ifetch_basic (
             PC_reg <= n_PC_reg;
             waiting_on_inst <= n_waiting_on_inst;
             if_packet <= n_if_packet;
+            `ifdef DEBUG_PRINT
             if (if_packet.valid) begin
                 $display("[IF] fetched valid instruction, PC %p", if_packet.PC);
             end else begin 
                 $display("[IF] no valid instruction fetched");
             end
+            `endif
 
         end
     end
