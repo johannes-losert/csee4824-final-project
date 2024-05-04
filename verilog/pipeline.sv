@@ -485,7 +485,9 @@ module pipeline (
     // TODO figure out this logic 
     assign is_ex_enable = 1'b1; 
     always_ff @(posedge clock) begin
+        `ifdef DEBUG_PRINT
         print_is_ex();
+        `endif
         if (reset) begin   
             is_ex_reg <= INVALID_ID_IS_PACKET;
         end else if (id_is_enable) begin
@@ -551,7 +553,9 @@ module pipeline (
     assign ex_co_enable = 1'b1; // always enabled
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
+        `ifdef DEBUG_PRINT
         print_ex_co();
+        `endif
         if (reset) begin
             ex_co_reg      <= INVALID_EX_CO_PACKET;
         end else if (ex_co_enable) begin
@@ -725,7 +729,9 @@ module pipeline (
     endfunction
 
     always_ff @(posedge clock) begin 
+        `ifdef DEBUG_PRINT
         print_pipeline_registers();
+        `endif
     end
 
 
