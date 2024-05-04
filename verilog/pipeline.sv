@@ -461,11 +461,11 @@ module pipeline (
     issue issue_0 ( 
         .id_is_reg(id_is_reg),
 
-        .opa_preg_data(rf_read_data1),
-        .opb_preg_data(rf_read_data2),
+        .rs1_preg_data(rf_read_data1),
+        .rs2_preg_data(rf_read_data2),
 
-        .opa_preg_idx(rf_read_idx1),
-        .opb_preg_idx(rf_read_idx2),
+        .rs1_preg_idx(rf_read_idx1),
+        .rs2_preg_idx(rf_read_idx2),
 
         .is_packet(is_packet)
     );
@@ -474,7 +474,7 @@ module pipeline (
         if (is_packet.valid) begin 
             $write("[IS] Issuing instruction: ");
             print_inst(is_packet.inst, is_packet.PC, is_packet.valid);
-            $display(" opa: %0d, opb: %0d, dest: %0d", is_packet.opa_value, is_packet.opb_value, is_packet.dest_reg_idx);
+            $display(" rs1: %0d, rs2: %0d, dest: %0d", is_packet.rs1_value, is_packet.rs2_value, is_packet.dest_reg_idx);
         end else
             $display("[IS] No valid instruction to issue");
     endfunction
@@ -541,7 +541,7 @@ module pipeline (
         if (ex_packet.valid) begin 
             $write("[EX] Executed instruction: ");
             print_inst(ex_packet.inst, ex_packet.PC, ex_packet.valid);
-            $display(" opa: %0d, opb: %0d, dest: %0d, result=%h", ex_packet.opa_value, ex_packet.opb_value, ex_packet.dest_reg_idx, ex_packet.result);
+            $display(" rs1: %0d, rs2: %0d, dest: %0d, result=%h", ex_packet.rs1_value, ex_packet.rs2_value, ex_packet.dest_reg_idx, ex_packet.result);
         end else
             $display("[EX] No valid instruction to execute");
     endfunction
@@ -678,9 +678,9 @@ module pipeline (
         print_preg(id_packet.src1_reg);
         $write("\t");
 
-        $write("\ts1=%h", is_packet.opa_value);
-        $write("\ts1=%h", ex_packet.opa_value);
-        $write("\ts1=%h", co_packet.opa_value);
+        $write("\tv1=%h", is_packet.rs1_value);
+        $write("\tv1=%h", ex_packet.rs1_value);
+        $write("\tv1=%h", co_packet.rs1_value);
 
         $display("");
 
@@ -690,9 +690,9 @@ module pipeline (
         print_preg(id_packet.src2_reg);
         $write("\t");
 
-        $write("\ts2=%h", is_packet.opb_value);
-        $write("\ts2=%h", ex_packet.opb_value);
-        $write("\ts2=%h", co_packet.opb_value);
+        $write("\tv2=%h", is_packet.rs2_value);
+        $write("\tv2=%h", ex_packet.rs2_value);
+        $write("\tv2=%h", co_packet.rs2_value);
         $display("");
     endfunction
 

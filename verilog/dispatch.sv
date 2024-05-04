@@ -70,6 +70,7 @@ module dispatch (
     // Declare Decoder
     
     ID_IS_PACKET decoded_packet;
+    logic has_rs1, has_rs2; /* Don't get passed along, only needed to decide whether to mark in RS */
 
     decoder decoder1 (
         // inputs
@@ -79,6 +80,8 @@ module dispatch (
         .opa_select(decoded_packet.opa_select),
         .opb_select(decoded_packet.opb_select),
         .has_dest(decoded_packet.has_dest),
+        .has_rs1(has_rs1),
+        .has_rs2(has_rs2),
         .alu_func(decoded_packet.alu_func),
         .rd_mem(decoded_packet.rd_mem),
         .wr_mem(decoded_packet.wr_mem),
@@ -349,12 +352,11 @@ module dispatch (
 
    
 
-     /* Access map table (convert arch opa/opb to physical) */
+     /* Access map table (convert arch rs1/rs2 to physical) */
 
     // Get arch regs from decoded packet
-    assign mt_arch_reg1_idx = decoded_packet.opa_select == OPA_IS_RS1 ? decoded_packet.inst.r.rs1 : `ZERO_REG;
-        
-    assign mt_arch_reg2_idx = decoded_packet.opb_select == OPB_IS_RS2 ? decoded_packet.inst.r.rs2 : `ZERO_REG;
+    assign mt_arch_reg1_idx = has_rs1 ? decoded_packet.inst.r.rs1 :  `ZERO_REG;
+    assign mt_arch_reg2_idx = has_rs2 ? decoded_packet.inst.r.rs2 : `ZERO_REG;
 
     // Update decoded packet with physical regs from map table
     assign decoded_packet.src1_reg = mt_preg1_out;
