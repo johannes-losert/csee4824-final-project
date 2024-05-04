@@ -69,13 +69,17 @@ module regfile (
     endfunction
 
     always_ff @(negedge clock) begin 
+        `ifdef DEBUG_PRINT
         print_regfile();
+        `endif
     end
 
     // Write port
     always_ff @(posedge clock) begin
         if (write_en && write_idx != `ZERO_REG) begin
+            `ifdef DEBUG_PRINT
             $display("[REG] writing to register %0d: %h", write_idx, write_data);
+            `endif
             registers[write_idx] <= write_data;
         end
     end
