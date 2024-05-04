@@ -67,7 +67,7 @@ module retire(
                                       /*(Dcache2store_response==4'h0) ? LOAD_ACCESS_FAULT : */
                                       NO_ERROR;
         incoming_entry.regfile_en = co_packet.regfile_en;
-        incoming_entry.regfile_idx = co_packet.regfile_idx;
+        incoming_entry.regfile_idx = co_packet.arch_dest_reg_num; // Switch from phys to arch compared to actual
         incoming_entry.regfile_data = co_packet.regfile_data;
     end 
 
