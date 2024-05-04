@@ -61,7 +61,9 @@ module free_list (
             /* If rolling back, mark all bits in rollback_mask as free */
             if (rollback) begin
                 // TODO could do this much cleaner if this was actually a bitmap (but it probably compiles/synthesizes to something not too bad)
+                `ifdef DEBUG_PRINT
                 $display("[FL] Rolling back, mask: %b", rollback_mask);
+                `endif
                 for (int i = 0; i < `PHYS_REG_SZ; i++) begin
                     if (rollback_mask[i])
                         free_list_bitmap[i] <= 1;
@@ -84,9 +86,11 @@ module free_list (
     end
 
     always_ff @(negedge clk) begin
+        `ifdef DEBUG_PRINT
         $display("FREE LIST:");
         $display("Bitmap: %b, rollback: %b, rollback mask: %b", free_list_bitmap, rollback, rollback_mask);
         //$dipslay("is_empty: %b");
+        `endif
     end 
 
 
