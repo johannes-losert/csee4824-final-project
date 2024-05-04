@@ -19,11 +19,7 @@ module complete(
     output logic [`NUM_FU_LOAD-1:0] free_load,
     output logic [`NUM_FU_STORE-1:0] free_store
 );
-    
-    assign co_packet.regfile_en = co_output_en;
-    assign co_packet.regfile_idx = co_output_idx;
-    assign co_packet.regfile_data = co_output_data;
-    
+       
     // Passthrough
     assign co_packet.inst = ex_co_reg.inst;
     assign co_packet.PC = ex_co_reg.PC;
@@ -100,6 +96,10 @@ module complete(
     assign co_output_en = ex_co_reg.valid && (ex_co_reg.dest_reg_idx != `ZERO_REG);
 
     assign co_output_idx = ex_co_reg.dest_reg_idx; // PHYSICAL register index 
+
+    assign co_packet.regfile_en = co_output_en;
+    assign co_packet.regfile_idx = co_output_idx;
+    assign co_packet.regfile_data = co_output_data;
 
     // Select register writeback data:
     // ALU/MEM result, unless taken branch, in which case we write
