@@ -176,8 +176,8 @@ $(call DEPS,mult): $(MULT_DEPS)
 STAGE_EX_DEPS = verilog/functional_units.sv verilog/mult.sv $(MULT_DEPS)
 $(call DEPS,stage_ex): $(STAGE_EX_DEPS)
 
-IFETCH_DEPS = verilog/psel_gen.sv
-$(call DEPS,ifetch): $(IFETCH_DEPS)
+# IFETCH_DEPS = verilog/psel_gen.sv
+# $(call DEPS,ifetch): $(IFETCH_DEPS)
 
 DISPATCH_DEPS = verilog/decoder.sv verilog/map_table.sv verilog/free_list.sv verilog/rob.sv verilog/reservation_station.sv
 $(call DEPS,dispatch): $(DISPATCH_DEPS)
@@ -321,6 +321,7 @@ TESTBENCH = test/pipeline_test.sv \
 SOURCES = verilog/pipeline.sv \
           verilog/regfile.sv \
           verilog/icache.sv \
+		  verilog/dcache.sv \
           verilog/mult.sv \
           verilog/mult_stage.sv \
 		  verilog/complete.sv \
