@@ -162,6 +162,26 @@ typedef struct packed {
     end 
 
 
+    /* Calculate pipeline output */
+    always_comb begin
+        if (outgoing_entry.valid) begin 
+            pipeline_completed_insts = outgoing_entry.completed_insts;
+            pipeline_error_status    = outgoing_entry.error_status;
+            pipeline_commit_wr_idx   = outgoing_entry.regfile_idx;
+            pipeline_commit_wr_data  = outgoing_entry.regfile_data;
+            pipeline_commit_wr_en    = outgoing_entry.regfile_en;
+            pipeline_commit_NPC      = outgoing_entry.NPC;
+        end else begin 
+            pipeline_completed_insts = 4'b0;
+            pipeline_error_status    = NO_ERROR;
+            pipeline_commit_wr_idx   = 5'b0;
+            pipeline_commit_wr_data  = `XLEN'b0;
+            pipeline_commit_wr_en    = 1'b0;
+            pipeline_commit_NPC      = `XLEN'b0;
+        end
+    end
+
+
     always @(posedge clock) begin
         if (reset || clear_retire_buffer) begin
             for (int i=0; i < `ROB_SZ; i++) begin
@@ -187,14 +207,6 @@ typedef struct packed {
                     // If we are forwarding, do not remove head from buffer? TODO this is weird b/c move head will still be raised
                     retire_buffer[rob_head].valid <= 0;
                 end
-
-                // Update pipeline outputs with outgoing entry
-                pipeline_completed_insts <= outgoing_entry.completed_insts;
-                pipeline_error_status    <= outgoing_entry.error_status;
-                pipeline_commit_wr_idx   <= outgoing_entry.regfile_idx;
-                pipeline_commit_wr_data  <= outgoing_entry.regfile_data;
-                pipeline_commit_wr_en    <= outgoing_entry.regfile_en;
-                pipeline_commit_NPC      <= outgoing_entry.NPC;
             end 
         end  
     end
