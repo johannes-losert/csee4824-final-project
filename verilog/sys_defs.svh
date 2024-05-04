@@ -444,8 +444,8 @@ typedef struct packed {
     ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
     ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
 
-    logic [`XLEN-1:0] opa_value; // reg A value
-    logic [`XLEN-1:0] opb_value; // reg B value
+    logic [`XLEN-1:0] rs1_value; // reg A value
+    logic [`XLEN-1:0] rs2_value; // reg B value
 
     logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
     
@@ -476,8 +476,8 @@ IS_EX_PACKET INVALID_IS_EX_PACKET = {
     OPA_IS_RS1, // opa_select
     OPB_IS_RS2, // opb_select
     
-    {`XLEN{1'b0}}, // opa_value
-    {`XLEN{1'b0}}, // opb_value
+    {`XLEN{1'b0}}, // rs1_value
+    {`XLEN{1'b0}}, // rs2_value
 
     {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
 
@@ -508,8 +508,8 @@ typedef struct packed {
     ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
     ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
 
-    logic [`XLEN-1:0] opa_value; // reg A value
-    logic [`XLEN-1:0] opb_value; // reg B value
+    logic [`XLEN-1:0] rs1_value; // reg A value
+    logic [`XLEN-1:0] rs2_value; // reg B value
 
     logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
     
@@ -546,8 +546,8 @@ EX_CO_PACKET INVALID_EX_CO_PACKET = {
     OPA_IS_RS1, // opa_select
     OPB_IS_RS2, // opb_select
     
-    {`XLEN{1'b0}}, // opa_value
-    {`XLEN{1'b0}}, // opb_value
+    {`XLEN{1'b0}}, // rs1_value
+    {`XLEN{1'b0}}, // rs2_value
 
     {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
 
@@ -582,8 +582,8 @@ typedef struct packed {
     ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
     ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
 
-    logic [`XLEN-1:0] opa_value; // reg A value
-    logic [`XLEN-1:0] opb_value; // reg B value
+    logic [`XLEN-1:0] rs1_value; // reg A value
+    logic [`XLEN-1:0] rs2_value; // reg B value
 
     logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
     
@@ -625,8 +625,8 @@ CO_RE_PACKET INVALID_CO_RE_PACKET = {
     OPA_IS_RS1, // opa_select
     OPB_IS_RS2, // opb_select
     
-    {`XLEN{1'b0}}, // opa_value
-    {`XLEN{1'b0}}, // opb_value
+    {`XLEN{1'b0}}, // rs1_value
+    {`XLEN{1'b0}}, // rs2_value
 
     {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
 
@@ -833,7 +833,7 @@ typedef struct packed {
     logic             valid;
     FUNIT 	      function_type;
     MEM_SIZE          mem_size;
-    logic [`XLEN-1:0] opb_value;
+    logic [`XLEN-1:0] rs2_value;
     logic [`XLEN-1:0] result;
 } RETIRE_ENTRY;
 
