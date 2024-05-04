@@ -367,13 +367,14 @@ module dispatch (
 
 
     /* Dequeue from free list (generating a physical dest) */
-    assign fl_dequeue_en = decoded_packet.valid & decoded_packet.has_dest;
+
+    assign fl_dequeue_en = decoded_packet.valid & decoded_packet.has_dest & (decoded_packet.inst.r.rd != `ZERO_REG);
     assign decoded_packet.dest_reg.reg_num = fl_dequeue_en ? fl_dequeue_pr : `ZERO_REG; 
     // If a packet doesn't have destination, it must be ready
     assign decoded_packet.dest_reg.ready = ~decoded_packet.has_dest;
 
     /* Update Map Table with newly dequeued pr dest if it should exist */
-    assign mt_set_dest_enable = decoded_packet.valid & decoded_packet.has_dest;
+    assign mt_set_dest_enable = fl_dequeue_en;
     assign mt_arch_dest_idx = mt_set_dest_enable ? decoded_packet.inst.r.rd : `ZERO_REG;
     assign mt_new_dest_pr_idx = decoded_packet.dest_reg.reg_num; // TODO should this be PREG?
 
