@@ -94,7 +94,7 @@ module pipeline (
     /* Signals from dcache to memory, carrying load, store, or none */
     BUS_COMMAND proc2Dmem_command;
     logic [`XLEN-1:0] proc2Dmem_addr;
-    logic [`XLEN-1:0] proc2Dmem_data;
+    logic [63:0] proc2Dmem_data;
 
     /* Signals from icache to memory carrying load or none */
     BUS_COMMAND proc2Imem_command;
@@ -118,7 +118,7 @@ module pipeline (
         if (proc2Dmem_command == BUS_LOAD || proc2Dmem_command == BUS_STORE) begin 
             proc2mem_command = proc2Dmem_command;
             proc2mem_addr = proc2Dmem_addr;
-            proc2mem_data = {32'b0, proc2Dmem_data};
+            proc2mem_data = proc2Dmem_data;
         end else begin
             proc2mem_command = proc2Imem_command;
             proc2mem_addr = proc2Imem_addr;
