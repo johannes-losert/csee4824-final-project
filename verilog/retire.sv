@@ -149,6 +149,7 @@ typedef struct packed {
         endfunction
 
     always @(negedge clock) begin 
+        `ifdef DEBUG_PRINT
         print_retire_buffer();
         $write("Incoming Entry: ");
         print_retire_entry(-1, incoming_entry);
@@ -156,6 +157,7 @@ typedef struct packed {
         $write("Outgoing Entry: ");
         print_retire_entry(-1, outgoing_entry);
         $display("");
+        `endif
 
     end 
 
@@ -169,7 +171,9 @@ typedef struct packed {
             // Adding to retire buffer
             if (do_forward) begin 
                 // If forwarding, we do not add to buffer 
+                `ifdef DEBUG_PRINT
                 $display("[RT] forwarding packet, not added to buffer");
+                `endif
                 assert(retire_buffer[rob_head].valid == 1'b0); // Make sure we are not overwriting? Maybe is OK            
             end else if (incoming_entry.valid) begin 
                 // Add completed packet to retire buffer
