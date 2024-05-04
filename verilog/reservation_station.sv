@@ -38,6 +38,9 @@ module reservation_station (
     // input logic [`MAX_FU_INDEX-1:0] free_fu_index,
     // input function_type free_function_type
 
+    /* Rolling back */
+    input logic rollback,
+
     // DEBUG
     output logic alu_issuable,
     output logic mult_issuable,
@@ -289,7 +292,7 @@ module reservation_station (
 
     always_ff @(posedge clock) begin
        // printReservationStation();
-        if (reset) begin
+        if (reset || rollback) begin
             // $display("[RS] resetting");
             // TODO add valid bit to entries
             // TODO reset packets themeselves
