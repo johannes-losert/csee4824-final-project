@@ -190,7 +190,6 @@ module testbench;
 
 
     initial begin
-        $display("BEGINNING");
         // $dumpvars;
 
         // P4 NOTE: You must keep memory loading here the same for the autograder
@@ -248,8 +247,10 @@ module testbench;
     // Count the number of posedges and number of instructions completed
     // till simulation ends
     always @(posedge clock) begin
+        `ifdef DEBUG_PRINT
         $display("+++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE %0d ++++++++++++++++++++++++++++++++++++++++", clock_count);
-        if(reset) begin
+        `endif
+        if (reset) begin
             clock_count <= 0;
             instr_count <= 0;
         end else begin
@@ -260,8 +261,10 @@ module testbench;
 
 
     always @(negedge clock) begin
+        `ifdef DEBUG_PRINT
         $display("-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE %0d -----------------------------------------", clock_count);
-        if(reset) begin
+        `endif
+        if (reset) begin
             $display("@@\n@@  %t : System STILL at reset, can't show anything\n@@",
                      $realtime);
             debug_counter <= 0;
@@ -293,10 +296,11 @@ module testbench;
             end
 
             // deal with any halting conditions
-            if (pipeline_error_status == LOAD_ACCESS_FAULT && debug_counter < 2000) begin 
-                $display("@@@ System got a memory error");
+            // if (pipeline_error_status == LOAD_ACCESS_FAULT && debug_counter < 2000) begin 
+            //     $display("@@@ System got a memory error");
 
-            end else if(pipeline_error_status != NO_ERROR || debug_counter > 2000) begin
+            // end else
+            if (pipeline_error_status != NO_ERROR || debug_counter > 2000) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");
                 show_mem_with_decimal(0,`MEM_64BIT_LINES - 1);
                 // 8Bytes per line, 16kB total

@@ -29,6 +29,18 @@ void print_header(char* str)
         fprintf(ppfile, "%s", str);
 }
 
+void debug_print(char *str) {
+    if (ppfile != NULL)
+        fprintf(ppfile, "%s", str);
+    else
+        printf("%s", str);
+}
+
+void debug_println(char *str) {
+    debug_print(str);
+    debug_print("\n");
+}
+
 void print_cycles()
 {
     if (ppfile != NULL)
@@ -155,10 +167,11 @@ void print_inst(int inst, int pc, int valid_inst) {
         pc = -1;
     }
 
-    printf("%4d:%-8s", pc, str);
-    // if (ppfile != NULL)
-    //     fprintf(ppfile, "%s%4d:%-8s", div, npc, str);
-    
+   
+    if (ppfile != NULL)
+         fprintf(ppfile, "%4d:%-8s", pc, str);
+    else
+        printf("%4d:%-8s", pc, str);
 }
 
 
