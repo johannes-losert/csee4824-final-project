@@ -13,7 +13,7 @@
 // all files should `include "sys_defs.svh" to at least define the timescale
 `timescale 1ns/100ps
 
-`define DEBUG_PRINT
+// `define DEBUG_PRINT
 
 ///////////////////////////////////
 // ---- Starting Parameters ---- //
@@ -396,6 +396,8 @@ typedef struct packed {
     logic has_dest;
 
     logic [`MAX_FU_INDEX-1:0] issued_fu_index;
+    
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
 
 } ID_IS_PACKET;
 
@@ -428,7 +430,9 @@ ID_IS_PACKET INVALID_ID_IS_PACKET = {
     {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
     1'b0, // has_dest
 
-    {`MAX_FU_INDEX-1{1'b0}} // issued_fu_index
+    {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
+
+    {`REG_IDX_SZ{1'b0}} // arch_dest_reg_num
 };
 
 
@@ -465,6 +469,9 @@ typedef struct packed {
     logic has_dest;
 
     logic [`MAX_FU_INDEX-1:0] issued_fu_index;
+     
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
+
 } IS_EX_PACKET;
 
 IS_EX_PACKET INVALID_IS_EX_PACKET = {
@@ -496,7 +503,9 @@ IS_EX_PACKET INVALID_IS_EX_PACKET = {
     {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
     1'b0, // has_dest
 
-    {`MAX_FU_INDEX-1{1'b0}} // issued_fu_index
+    {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
+
+    {`REG_IDX_SZ{1'b0}} // arch_dest_reg_num
 };
 
 typedef struct packed {
@@ -529,6 +538,8 @@ typedef struct packed {
     logic has_dest;
 
     logic [`MAX_FU_INDEX-1:0] issued_fu_index; // TODO name doesn't make sense anymore, why 'issued'?
+
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
 
     // New stuff from EX stage
     logic [`XLEN-1:0] result;
@@ -568,6 +579,8 @@ EX_CO_PACKET INVALID_EX_CO_PACKET = {
 
     {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
 
+    {`REG_IDX_SZ{1'b0}}, // arch_dest_reg_num
+
     {`XLEN{1'b0}}, // result
     1'b0, // take_branch
     1'b0 // mem_size
@@ -603,6 +616,9 @@ typedef struct packed {
     logic has_dest;
 
     logic [`MAX_FU_INDEX-1:0] issued_fu_index; // TODO name doesn't make sense anymore, why 'issued'?
+
+     
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
 
     // stuff from EX stage
     logic [`XLEN-1:0] result;
@@ -647,6 +663,8 @@ CO_RE_PACKET INVALID_CO_RE_PACKET = {
 
     {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
 
+    {`REG_IDX_SZ{1'b0}}, // arch_dest_reg_num
+
     {`XLEN{1'b0}}, // result
     1'b0, // take_branch
 
@@ -688,13 +706,16 @@ typedef struct packed {
     logic [`XLEN-1:0] rs2_value;
     logic             rd_mem;
     logic             wr_mem;
-    logic [4:0]       dest_reg_idx;
+    logic [`PHYS_REG_IDX_SZ:0]       dest_reg_idx;
     logic             halt;
     logic             illegal;
     logic             csr_op;
     logic             rd_unsigned; // Whether proc2Dmem_data is signed or unsigned
     MEM_SIZE          mem_size;
     logic             valid;
+
+     
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
 } EX_MEM_PACKET;
 
 /**
@@ -706,11 +727,13 @@ typedef struct packed {
 typedef struct packed {
     logic [`XLEN-1:0] result;
     logic [`XLEN-1:0] NPC;
-    logic [4:0]       dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
+    logic [`PHYS_REG_IDX_SZ:0]       dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
     logic             take_branch;
     logic             halt;    // not used by wb stage
     logic             illegal; // not used by wb stage
     logic             valid;
+
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
 } MEM_WB_PACKET;
 
 /**
