@@ -56,7 +56,7 @@ module stage_ex (
     // ALU opA mux
     always_comb begin
         case (is_ex_reg.opa_select)
-            OPA_IS_RS1:  opa_mux_out = is_ex_reg.opa_value;
+            OPA_IS_RS1:  opa_mux_out = is_ex_reg.rs1_value;
             OPA_IS_NPC:  opa_mux_out = is_ex_reg.NPC;
             OPA_IS_PC:   opa_mux_out = is_ex_reg.PC;
             OPA_IS_ZERO: opa_mux_out = 0;
@@ -67,7 +67,7 @@ module stage_ex (
     // ALU opB mux
     always_comb begin
         case (is_ex_reg.opb_select)
-            OPB_IS_RS2:   opb_mux_out = is_ex_reg.opb_value;
+            OPB_IS_RS2:   opb_mux_out = is_ex_reg.rs2_value;
             OPB_IS_I_IMM: opb_mux_out = `RV32_signext_Iimm(is_ex_reg.inst);
             OPB_IS_S_IMM: opb_mux_out = `RV32_signext_Simm(is_ex_reg.inst);
             OPB_IS_B_IMM: opb_mux_out = `RV32_signext_Bimm(is_ex_reg.inst);
@@ -137,8 +137,8 @@ module stage_ex (
         //.clock      (clock),
         //.reset      (reset),
         .func       (is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
-        .rs1        (is_ex_reg.opa_value),
-        .rs2        (is_ex_reg.opb_value),
+        .rs1        (is_ex_reg.rs1_value),
+        .rs2        (is_ex_reg.rs2_value),
         .cond_en    (is_ex_reg.function_type == BRANCH && is_ex_reg.valid && issue_fu_index == 0),
 
         // Output
@@ -256,8 +256,8 @@ module stage_ex (
             ex_packet.opa_select = tmp_alu_packet.opa_select;
             ex_packet.opb_select = tmp_alu_packet.opb_select;
 
-            ex_packet.opa_value = tmp_alu_packet.opa_value;
-            ex_packet.opb_value = tmp_alu_packet.opb_value;
+            ex_packet.rs1_value = tmp_alu_packet.rs1_value;
+            ex_packet.rs2_value = tmp_alu_packet.rs2_value;
 
             ex_packet.dest_reg_idx = tmp_alu_packet.dest_reg_idx;
         
@@ -291,8 +291,8 @@ module stage_ex (
             ex_packet.opa_select = tmp_mult_packet.opa_select;
             ex_packet.opb_select = tmp_mult_packet.opb_select;
 
-            ex_packet.opa_value = tmp_mult_packet.opa_value;
-            ex_packet.opb_value = tmp_mult_packet.opb_value;
+            ex_packet.rs1_value = tmp_mult_packet.rs1_value;
+            ex_packet.rs2_value = tmp_mult_packet.rs2_value;
 
             ex_packet.dest_reg_idx = tmp_mult_packet.dest_reg_idx;
 
@@ -326,8 +326,8 @@ module stage_ex (
             ex_packet.opa_select = tmp_branch_packet.opa_select;
             ex_packet.opb_select = tmp_branch_packet.opb_select;
 
-            ex_packet.opa_value = tmp_branch_packet.opa_value;
-            ex_packet.opb_value = tmp_branch_packet.opb_value;
+            ex_packet.rs1_value = tmp_branch_packet.rs2_value;
+            ex_packet.rs2_value = tmp_branch_packet.rs2_value;
 
             ex_packet.dest_reg_idx = tmp_branch_packet.dest_reg_idx;
 
@@ -362,8 +362,8 @@ module stage_ex (
             ex_packet.opa_select = tmp_load_packet.opa_select;
             ex_packet.opb_select = tmp_load_packet.opb_select;
 
-            ex_packet.opa_value = tmp_load_packet.opa_value;
-            ex_packet.opb_value = tmp_load_packet.opb_value;
+            ex_packet.rs1_value = tmp_load_packet.rs1_value;
+            ex_packet.rs2_value = tmp_load_packet.rs2_value;
 
             ex_packet.dest_reg_idx = tmp_load_packet.dest_reg_idx;
 
@@ -395,8 +395,8 @@ module stage_ex (
             ex_packet.opa_select = tmp_store_packet.opa_select;
             ex_packet.opb_select = tmp_store_packet.opb_select;
 
-            ex_packet.opa_value = tmp_store_packet.opa_value;
-            ex_packet.opb_value = tmp_store_packet.opb_value;
+            ex_packet.rs1_value = tmp_store_packet.rs1_value;
+            ex_packet.rs2_value = tmp_store_packet.rs2_value;
 
             ex_packet.dest_reg_idx = tmp_store_packet.dest_reg_idx;
 

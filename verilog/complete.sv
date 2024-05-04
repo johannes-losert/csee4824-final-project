@@ -32,8 +32,8 @@ module complete(
     assign co_packet.opa_select = ex_co_reg.opa_select;
     assign co_packet.opb_select = ex_co_reg.opb_select;
 
-    assign co_packet.opa_value = ex_co_reg.opa_value;
-    assign co_packet.opb_value = ex_co_reg.opb_value;
+    assign co_packet.rs1_value = ex_co_reg.rs1_value;
+    assign co_packet.rs2_value = ex_co_reg.rs2_value;
 
     assign co_packet.alu_func = ex_co_reg.alu_func;
     assign co_packet.rd_mem = ex_co_reg.rd_mem;

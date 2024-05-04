@@ -57,7 +57,7 @@ module retire(
 	incoming_entry.function_type = co_packet.function_type;
 	incoming_entry.mem_size = co_packet.mem_size;
 	incoming_entry.result = co_packet.result;
-	incoming_entry.opb_value = co_packet.opb_value;
+	incoming_entry.rs2_value = co_packet.rs2_value;
     incoming_entry.completed_insts = {3'b0, co_packet.valid};
     incoming_entry.PC = co_packet.PC;
     incoming_entry.NPC = co_packet.NPC;
@@ -87,11 +87,11 @@ module retire(
     assign store_en = outgoing_entry.function_type == STORE && outgoing_entry.valid && ~reset && ~clear_retire_buffer;
     assign free_store = store_en;
     assign store2Dcache_addr = outgoing_entry.result;
-    assign store2Dcache_data = outgoing_entry.opb_value;
+    assign store2Dcache_data = outgoing_entry.rs2_value;
 
 
 
-    // assign proc2Dmem_data = outgoing_entry.opb_value;
+    // assign proc2Dmem_data = outgoing_entry.rs2_value;
     // assign proc2Dmem_addr = outgoing_entry.result;
     // assign proc2Dmem_size = outgoing_entry.mem_size;
 
@@ -117,7 +117,7 @@ typedef struct packed {
     logic             valid;
     FUNIT 	      function_type;
     MEM_SIZE          mem_size;
-    logic [`XLEN-1:0] opb_value;
+    logic [`XLEN-1:0] rs2_value;
     logic [`XLEN-1:0] result;
 } RETIRE_ENTRY;
 

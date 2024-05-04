@@ -6,19 +6,19 @@ module issue (
     input ID_IS_PACKET id_is_reg,
 
     // input from preg
-    input [`XLEN-1:0] opa_preg_data,
-    input [`XLEN-1:0] opb_preg_data,
+    input [`XLEN-1:0] rs1_preg_data,
+    input [`XLEN-1:0] rs2_preg_data,
 
     // output to preg
-    output [`PHYS_REG_IDX_SZ:0] opa_preg_idx,
-    output [`PHYS_REG_IDX_SZ:0] opb_preg_idx,
+    output [`PHYS_REG_IDX_SZ:0] rs1_preg_idx,
+    output [`PHYS_REG_IDX_SZ:0] rs2_preg_idx,
 
     // output to ex stage
     output IS_EX_PACKET is_packet
 );
 
-    assign opa_preg_idx = id_is_reg.src1_reg.reg_num;
-    assign opb_preg_idx = id_is_reg.src2_reg.reg_num;
+    assign rs1_preg_idx = id_is_reg.src1_reg.reg_num;
+    assign rs2_preg_idx = id_is_reg.src2_reg.reg_num;
 
     assign is_packet.inst = id_is_reg.inst;
     assign is_packet.PC = id_is_reg.PC;
@@ -28,8 +28,8 @@ module issue (
     assign is_packet.opb_select = id_is_reg.opb_select;
 
     // Retrieved data from regfile 
-    assign is_packet.opa_value = opa_preg_data;
-    assign is_packet.opb_value = opb_preg_data;
+    assign is_packet.rs1_value = rs1_preg_data;
+    assign is_packet.rs2_value = rs2_preg_data;
 
     // Unpack dest reg idx (probably not needed)
     assign is_packet.dest_reg_idx = id_is_reg.dest_reg.reg_num;
