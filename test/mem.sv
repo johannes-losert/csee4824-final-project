@@ -65,8 +65,14 @@ module mem (
                 if(proc2mem_command == BUS_LOAD) begin
                     waiting_for_bus[i] = 1'b1;
                     loaded_data[i]     = unified_memory[proc2mem_addr[`XLEN-1:3]];
+                    `ifdef DEBUG_PRINT
+                    $display("MEMORY: Loading data %h from address %h", loaded_data[i], proc2mem_addr);
+                    `endif
                 end else begin
                     unified_memory[proc2mem_addr[`XLEN-1:3]]=proc2mem_data;
+                    `ifdef DEBUG_PRINT
+                    $display("MEMORY: Storing data %h at address %h", proc2mem_data, proc2mem_addr);
+                    `endif
                 end
             end
 
