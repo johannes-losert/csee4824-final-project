@@ -183,6 +183,7 @@ module pipeline (
 
     // Rollback signals 
     logic id_rollback; // TODO probably more
+    logic ex_rollback;
 
    // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
 
@@ -281,6 +282,7 @@ module pipeline (
 
     assign id_rollback = take_branch;
     assign re_rollback = take_branch;
+    assign ex_rollback = take_branch;
 
     assign certain_branch_req = take_branch;
     assign certain_branch_pc = branch_target;
@@ -528,7 +530,9 @@ module pipeline (
         .free_mult(ex_free_mult),
         .free_load(ex_free_load),
         .free_store(ex_free_store),
-        .free_branch(ex_free_branch)
+        .free_branch(ex_free_branch),
+
+        .rollback(ex_rollback)
         
 
         // .proc2Dmem_command (ex_proc2mem_command),
