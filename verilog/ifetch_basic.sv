@@ -122,17 +122,20 @@ module ifetch_basic (
                 n_received_certain_branch = received_certain_branch;
             end
 
-            n_waiting_on_inst = 1;
             if (certain_branch_req) begin 
+                n_waiting_on_inst = 1;
                 n_PC_reg = certain_branch_pc;
             end else begin 
                 n_PC_reg = PC_reg;
+                n_waiting_on_inst = waiting_on_inst;
             end
 
-            n_if_packet.inst = `NOP;
-            n_if_packet.PC = PC_reg;
-            n_if_packet.NPC = PC_reg+4;
-            n_if_packet.valid = 0;
+            n_if_packet = if_packet;
+
+            // n_if_packet.inst = `NOP;
+            // n_if_packet.PC = PC_reg;
+            // n_if_packet.NPC = PC_reg+4;
+            // n_if_packet.valid = 0;
         end
     end
 
