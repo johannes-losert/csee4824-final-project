@@ -234,50 +234,55 @@ module reservation_station (
                 end
             end
         end   
-    end  
+    end   
 
     // combinational: calculating the next available index 
     always_comb begin 
-        for(int i = `NUM_FU_ALU; i > 0; i--) begin
-            if(!alu_entries[i - 1].busy) begin 
-                alu_available_index = i - 1;
+        for(int i = 0; i < `NUM_FU_ALU; i++) begin
+            if(!alu_entries[i].busy) begin 
+                alu_available_index = i;
                 alu_available_index_found = 1;
+                break;
             end else begin 
                 alu_available_index_found = 0;
             end
         end
 
-        for(int i = `NUM_FU_MULT; i > 0; i--) begin
-            if(!mult_entries[i - 1].busy) begin 
-                mult_available_index = i - 1;
+        for(int i = 0; i < `NUM_FU_MULT; i++) begin
+            if(!mult_entries[i].busy) begin 
+                mult_available_index = i;
                 mult_available_index_found = 1;
+                break;
             end else begin 
                 mult_available_index_found = 0;
             end
         end
 
-        for(int i = `NUM_FU_LOAD; i > 0; i--) begin
-            if(!load_entries[i - 1].busy) begin 
-                load_available_index = i - 1;
+        for(int i = 0; i < `NUM_FU_LOAD; i++) begin
+            if(!load_entries[i].busy) begin 
+                load_available_index = i;
                 load_available_index_found = 1;
+                break;
             end else begin 
                 load_available_index_found = 0;
             end
         end
 
-        for(int i = `NUM_FU_STORE; i > 0; i--) begin
-            if(!store_entries[i - 1].busy) begin 
-                store_available_index = i - 1;
+        for(int i = 0; i < `NUM_FU_STORE; i++) begin
+            if(!store_entries[i].busy) begin 
+                store_available_index = i;
                 store_available_index_found = 1;
+                break;
             end else begin 
                 store_available_index_found = 0;
             end
         end
 
-        for(int i = `NUM_FU_BRANCH; i > 0; i--) begin
-            if(!branch_entries[i - 1].busy) begin 
-                branch_available_index = i - 1;
+        for(int i = 0; i < `NUM_FU_BRANCH; i++) begin
+            if(!branch_entries[i].busy) begin 
+                branch_available_index = i;
                 branch_available_index_found = 1;
+                break;
             end else begin 
                 branch_available_index_found = 0;
             end

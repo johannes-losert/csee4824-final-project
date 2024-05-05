@@ -193,7 +193,7 @@ module stage_ex (
 
                 /* Output to dcache */
                 .load_en(load_load_en[idx]),
-                .load2Dcache_addr(load_load2Dcache_addr_arr[idx]),
+                .load2Dcache_addr(load_load2Dcache_addr[idx]),
 
                 /* Output for pipeline */
                 .result(load_result[idx]),
