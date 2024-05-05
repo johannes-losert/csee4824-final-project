@@ -97,7 +97,7 @@ module stage_ex (
     IS_EX_PACKET tmp_branch_packet;
     IS_EX_PACKET tmp_load_packet;
     IS_EX_PACKET tmp_store_packet;
-    MEM_SIZE mem_size;
+    MEM_SIZE store_mem_size, tmp_store_mem_size;
 
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
 
@@ -266,7 +266,7 @@ module stage_ex (
         .prev_dword(prev_dword),
         .out_packet(store_packet),
         .load_done(store_done),
-        .mem_size(mem_size)
+        .mem_size(store_mem_size)
     );
 
 
@@ -484,7 +484,7 @@ module stage_ex (
 
             ex_packet.rob_index = tmp_store_packet.rob_index;
             ex_packet.has_dest = tmp_store_packet.has_dest;
-	         ex_packet.mem_size = mem_size;
+	         ex_packet.mem_size = tmp_store_mem_size;
 
 
             ex_packet.issued_fu_index = tmp_store_packet.issued_fu_index;
@@ -509,6 +509,7 @@ module stage_ex (
             tmp_load_result         <= 0;
             tmp_store_result <= 0;
             tmp_store_prev_dword <= 0;
+            tmp_store_mem_size <= 0;
             tmp_alu_packet <= 0;
             tmp_mult_packet <= 0;
             tmp_branch_packet <= 0;
@@ -569,6 +570,7 @@ module stage_ex (
                 tmp_store_result <= store_result;
                 tmp_store_prev_dword <= prev_dword;
                 tmp_store_packet <= store_packet;
+                tmp_store_mem_size <= store_mem_size;
             end
 
             // Defaults
