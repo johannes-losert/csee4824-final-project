@@ -42,14 +42,18 @@ module ifetch_basic (
 );
 
     logic [`XLEN-1:0] PC_reg; // PC we are currently fetching
-    logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching
+    logic [`XLEN-1:0] n_PC_reg; // PC we are currently fetching 
+    logic received_certain_branch;
+    logic n_received_certain_branch;
+    logic [`XLEN-1:0] certain_branch_pc_temp;
+    logic [`XLEN-1:0] n_certain_branch_pc_temp;
     
     logic waiting_on_inst;
     logic n_waiting_on_inst;  
     assign waiting_on_inst_debug = waiting_on_inst;
     
     logic [1:0] req;
-    assign req = {branch_pred_req, 1'b1};
+    assign req = {received_certain_branch,branch_pred_req, 1'b1};
     logic [1:0] gnt; 
 
     IF_ID_PACKET n_if_packet;
@@ -59,7 +63,7 @@ module ifetch_basic (
     assign gnt_debug = gnt;
     assign PC_reg_debug = PC_reg;
     
-    psel_gen #(.WIDTH(2), .REQS(1)) 
+    psel_gen #(.WIDTH(3), .REQS(1)) 
     if_psel (
         .req(req),       
         .gnt(gnt),       
@@ -69,23 +73,23 @@ module ifetch_basic (
 
     always_comb begin
 
+        if (certain_branch_req) begin 
+            n_received_certain_branch = 1;
+            n_certain_branch_pc_temp = certain_branch_pc;
+        end
 
-        if (if_valid) begin   
-            if (certain_branch_req) begin 
-                /* If there really is a branch, discard everything else and go to certain_branch_pc */
-                n_waiting_on_inst = 1;
-                n_PC_reg = certain_branch_pc;
-
-                n_if_packet.inst = `NOP;
-                n_if_packet.PC = PC_reg;
-                n_if_packet.NPC = certain_branch_pc;
-                n_if_packet.valid = 0;
-            end else if (!waiting_on_inst) begin 
+        if (if_valid) begin       
+            if (!waiting_on_inst) begin 
                 unique case (gnt)
-                    2'b10 : n_PC_reg = branch_pred_pc;
-                    2'b01 : n_PC_reg = PC_reg + 4;
+                    3'b100 : n_PC_reg = certain_branch_pc_temp;
+                    3'b010 : n_PC_reg = branch_pred_pc;
+                    3'b001 : n_PC_reg = PC_reg + 4;
                     default : n_PC_reg = 32'hdeadbeef;
                 endcase
+                if (!received_certain_branch) begin
+                    n_received_certain_branch = 0;
+                end
+
                 n_waiting_on_inst = 1;
 
                 n_if_packet.inst = `NOP;
@@ -94,6 +98,10 @@ module ifetch_basic (
                 n_if_packet.valid = 0;
             end else if (waiting_on_inst) begin 
                 n_PC_reg = PC_reg;
+                if (!received_certain_branch) begin
+                    n_received_certain_branch = received_certain_branch;
+                end 
+
                 if (Icache2proc_data_valid) begin
                     // pushing to the tail of inst buffer
                     n_waiting_on_inst = 0; 
@@ -110,6 +118,10 @@ module ifetch_basic (
                 end
             end
         end else begin
+            if (!received_certain_branch) begin 
+                n_received_certain_branch = received_certain_branch;
+            end
+
             n_waiting_on_inst = 1;
             if (certain_branch_req) begin 
                 n_PC_reg = certain_branch_pc;
@@ -134,6 +146,8 @@ module ifetch_basic (
             PC_reg <= n_PC_reg;
             waiting_on_inst <= n_waiting_on_inst;
             if_packet <= n_if_packet;
+            received_certain_branch <= n_received_certain_branch;
+            certain_branch_pc_temp <= n_certain_branch_pc_temp;
             `ifdef DEBUG_PRINT
             if (if_packet.valid) begin
                 $display("[IF] fetched valid instruction, PC %p", if_packet.PC);
