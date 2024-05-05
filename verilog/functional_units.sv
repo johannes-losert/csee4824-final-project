@@ -259,10 +259,10 @@ module load (
 
     /* Output to dcache */
     output logic load_en,
-    output [`XLEN-1:0] load2Dcache_addr,
+    output [`XLEN-1:0] load2Dcache_addr, /* For stores, this should be hooked up to result */
 
     /* Output for pipeline */
-    output logic [`XLEN-1:0] result,
+    output logic [`XLEN-1:0] result, /* For stores, this should be hooked up to prev_word */
     output IS_EX_PACKET out_packet,
     output logic load_done
 
@@ -353,48 +353,164 @@ module load (
     end
 endmodule 
 
-// ALU: computes the result of FUNC applied with operands A and B
-module store (
-    input [`XLEN-1:0]               opa,
-    input [`XLEN-1:0]               opb,
-    input INST			    inst,
-    input ALU_FUNC                  func,
-    input logic                     store_en,
-    input IS_EX_PACKET              in_packet,
+// // ALU: computes the result of FUNC applied with operands A and B
+// module store (
+//     //input                           clock, 
+//     //input                           reset,
+//     input [`XLEN-1:0]               opa,
+//     input [`XLEN-1:0]               opb,
+//     input INST			    inst,
+//     input ALU_FUNC                  func,
+//     input logic                     store_en,
+//     input IS_EX_PACKET              in_packet,
 
-    output logic [`XLEN-1:0]        result,
-    output logic  store_done,
-    output MEM_SIZE		    mem_size,
-    output IS_EX_PACKET             out_packet
+//     output logic [`XLEN-1:0]        result,
+//     output logic [`NUM_FU_ALU-1:0]  store_done,
+//     output MEM_SIZE		    mem_size,
+//     output IS_EX_PACKET             out_packet
+// );
+
+//     logic [`XLEN-1:0]           store_opa, store_opb;
+//     logic signed [`XLEN-1:0]    signed_opa, signed_opb;
+
+//     assign signed_opa   = store_opa;
+//     assign signed_opb   = store_opb;
+
+//     always_comb begin
+//         case (func)
+//             ALU_ADD:    result = store_opa + store_opb;
+//             ALU_SUB:    result = store_opa - store_opb;
+//             ALU_AND:    result = store_opa & store_opb;
+//             ALU_SLT:    result = signed_opa < signed_opb;
+//             ALU_SLTU:   result = store_opa < store_opb;
+//             ALU_OR:     result = store_opa | store_opb;
+//             ALU_XOR:    result = store_opa ^ store_opb;
+//             ALU_SRL:    result = store_opa >> store_opb[4:0];
+//             ALU_SLL:    result = store_opa << store_opb[4:0];
+//             ALU_SRA:    result = signed_opa >>> store_opb[4:0]; // arithmetic from logical shift
+
+//             default:    result = `XLEN'hfacebeec;  // here to prevent latches
+//         endcase
+//     end
+
+//     assign mem_size     = MEM_SIZE'(inst.r.funct3[1:0]);
+//     assign store_done[0] = store_en;
+//     assign store_opa = opa;
+//     assign store_opb = opb;
+//     assign out_packet = in_packet;
+// /*
+//     always_ff @(posedge clock) begin
+//         if(reset) begin
+//             store_done[0]     <= 1'b0;
+//             out_packet      <= 0;
+//             store_opa         <= 0;
+//             store_opb         <= 0;
+//         end else if (store_en) begin
+//             store_done[0]     <= 1'b1;
+//             out_packet      <= in_packet;
+//             store_opa         <= opa;
+//             store_opb         <= opb;
+//         end else begin
+//             store_done[0]     <= 1'b0;
+//             store_opa         <= store_opa;
+//             store_opb         <= store_opb;
+//             out_packet      <= out_packet;
+//         end
+//     end
+// */
+// endmodule // alu
+
+
+/* Takes in load instruction, calculates address, sends request to dcache, waits for response,
+    but doesn't actually do store yet (that happens in retire)
+*/
+module store ( 
+    input clock, 
+    input reset, 
+
+    input start_store, /* Stays high until load finishes */
+
+    /* Instruction information */
+    input [`XLEN-1:0] in_opa,
+    input [`XLEN-1:0] in_opb,
+    input IS_EX_PACKET in_packet,
+    input ALU_FUNC alu_func,
+
+    /* Input from dcache */
+    input [63:0] Dcache_data_out, // Data is mem[proc2Dcache_addr]
+    input Dcache_valid_out, // When valid is high
+
+    /* Output to dcache */
+    output logic load_en,
+    output [`XLEN-1:0] load2Dcache_addr,
+
+    /* Output for pipeline */
+    output logic [`XLEN-1:0] result, /* Address */ 
+    output logic [63:0] prev_dword, /* Previous data */
+    output MEM_SIZE mem_size,
+    output IS_EX_PACKET out_packet,
+    output logic load_done
+
 );
+    /* Must keep a copy of all the state we need, since inputs may change */
+    logic started;
+    IS_EX_PACKET curr_packet;
+    ALU_FUNC curr_alu_func; 
+    logic [`XLEN-1:0] curr_opa, curr_opb;
 
-    logic [`XLEN-1:0]           store_opa, store_opb;
-    logic signed [`XLEN-1:0]    signed_opa, signed_opb;
+    logic [`XLEN-1:0] store_addr;
 
-    assign signed_opa   = store_opa;
-    assign signed_opb   = store_opb;
+    logic [63:0] curr_dword;
 
-    always_comb begin
-        case (func)
-            ALU_ADD:    result = store_opa + store_opb;
-            ALU_SUB:    result = store_opa - store_opb;
-            ALU_AND:    result = store_opa & store_opb;
-            ALU_SLT:    result = signed_opa < signed_opb;
-            ALU_SLTU:   result = store_opa < store_opb;
-            ALU_OR:     result = store_opa | store_opb;
-            ALU_XOR:    result = store_opa ^ store_opb;
-            ALU_SRL:    result = store_opa >> store_opb[4:0];
-            ALU_SLL:    result = store_opa << store_opb[4:0];
-            ALU_SRA:    result = signed_opa >>> store_opb[4:0]; // arithmetic from logical shift
+    /* Check if we should issue load request to dcache */
+    assign load_en = (started && curr_packet.valid && curr_packet.wr_mem);
 
-            default:    result = `XLEN'hfacebeec;  // here to prevent latches
-        endcase
+    /* Calculate address to load from */
+    arithmetic arith_0 (
+        .arith_opa (curr_opa),
+        .arith_opb (curr_opb),
+        .alu_func (curr_alu_func),
+        .result (store_addr)
+    );
+
+    /* Pass address to dcache to request load */
+    assign load2Dcache_addr = store_addr;
+    /* Also forward so that retire-stage store can use it */
+    assign result = store_addr;
+
+    assign mem_size     = MEM_SIZE'(curr_packet.inst.r.funct3[1:0]);
+    
+    always_comb begin 
+        out_packet = curr_packet;
+        /* If dcache has finished with our request */
+        if (started && Dcache_valid_out) begin
+            prev_dword = Dcache_data_out;
+            load_done = 1; 
+        end else begin
+            prev_dword = 64'hdeadbeef;
+            load_done = 0;
+        end
+    end 
+
+    always_ff @(posedge clock) begin
+        if(reset) begin
+            curr_packet    <= 0;
+            curr_opa      <= 0;
+            curr_opb      <= 0;
+            curr_alu_func <= 0;
+            started <= 0;
+        end else if (start_store) begin
+            curr_packet    <= in_packet;
+            curr_opa      <= in_opa;
+            curr_opb      <= in_opb;
+            curr_alu_func <= alu_func;
+            started <= 1;
+        end else if (load_done) begin 
+	        curr_packet   <= 0;
+            curr_opa      <= 0;
+            curr_opb      <= 0;
+            curr_alu_func <= 0;
+            started <= 0; 
+        end
     end
-
-    assign mem_size     = MEM_SIZE'(inst.r.funct3[1:0]);
-    assign store_done = store_en;
-    assign store_opa = opa;
-    assign store_opb = opb;
-    assign out_packet = in_packet;
-
-endmodule // alu
+endmodule 

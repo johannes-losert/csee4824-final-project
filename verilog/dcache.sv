@@ -56,7 +56,7 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
     // Store command addr (from retire stage)
     input logic store_en,
     input [`XLEN-1:0] store2Dcache_addr,
-    input [`XLEN-1:0] store2Dcache_data,
+    input [63:0] store2Dcache_data,
 
     // Load command addr (from execute stage)
     input logic load_en,
@@ -83,7 +83,7 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
     */
 
     logic [`XLEN-1:0] proc2Dcache_addr;
-    logic [`XLEN-1:0] proc2Dcache_data; /* Only defined for stores */  
+    logic [63:0] proc2Dcache_data; /* Only defined for stores */  
     BUS_COMMAND proc2Dcache_command;
 
     always_comb begin
@@ -134,15 +134,16 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
                              : BUS_NONE;
 
     /* Calculate 64-bit data to send to memory */
-    always_comb begin 
-        if (store_en) begin 
-            if (proc2Dcache_addr[2])
-                proc2Dmem_data = {proc2Dcache_data, 32'b0};
-            else
-                proc2Dmem_data = {32'b0, proc2Dcache_data};
-        end else
-            proc2Dmem_data = 64'hdeadbeef;
-    end
+    assign proc2Dmem_data = store_en ? proc2Dcache_data : 64'hdeadbeef;
+    // always_comb begin 
+    //     if (store_en) begin 
+    //         if (proc2Dcache_addr[2])
+    //             proc2Dmem_data = {proc2Dcache_data, 32'b0};
+    //         else
+    //             proc2Dmem_data = {32'b0, proc2Dcache_data};
+    //     end else
+    //         proc2Dmem_data = 64'hdeadbeef;
+    // end
 
 
     // ---- Main cache logic ---- //
@@ -166,6 +167,7 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
 
     // Keep sending memory requests until we receive a response tag or change addresses
     //assign proc2Dmem_command = (miss_outstanding && !changed_addr) ? BUS_LOAD : BUS_NONE;
+    // TODO i think we are doing this twice, could remove
     assign proc2Dmem_addr    = {proc2Dcache_addr[31:3],3'b0};
 
     // ---- Cache state registers ---- //

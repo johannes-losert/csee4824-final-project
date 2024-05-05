@@ -545,6 +545,9 @@ typedef struct packed {
     logic [`XLEN-1:0] result;
     logic take_branch;
     MEM_SIZE          mem_size;
+
+    logic [63:0] prev_dword; // Only for stores
+
 } EX_CO_PACKET;
 
 
@@ -583,7 +586,9 @@ EX_CO_PACKET INVALID_EX_CO_PACKET = {
 
     {`XLEN{1'b0}}, // result
     1'b0, // take_branch
-    1'b0 // mem_size
+    1'b0, // mem_size
+
+    {64{1'b0}} // prev_dword
 };
 
 typedef struct packed {
@@ -629,6 +634,8 @@ typedef struct packed {
     logic [`PHYS_REG_IDX_SZ-1:0] regfile_idx;
     logic [`XLEN-1:0] regfile_data;
     MEM_SIZE          mem_size;
+
+    logic [63:0] prev_dword; // Only for stores
 } CO_RE_PACKET;
 
 
@@ -671,7 +678,9 @@ CO_RE_PACKET INVALID_CO_RE_PACKET = {
     1'b0, // regfile_en
     {`PHYS_REG_IDX_SZ{1'b0}}, // regfile_idx
     {`XLEN{1'b0}}, // regfile_data
-    1'b0 // mem_size
+    1'b0, // mem_size
+
+    {64{1'b0}} // prev_dword
 };
 
 // // TODO can clean this up, for now just duplicates everything
@@ -858,6 +867,8 @@ typedef struct packed {
     MEM_SIZE          mem_size;
     logic [`XLEN-1:0] rs2_value;
     logic [`XLEN-1:0] result;
+
+    logic [63:0] prev_dword; // Only for stores
 } RETIRE_ENTRY;
 
 
