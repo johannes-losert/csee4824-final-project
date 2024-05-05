@@ -13,16 +13,17 @@ module alu (
     input IS_EX_PACKET              in_packet,
 
     output logic [`XLEN-1:0]        result,
-    output logic [`NUM_FU_ALU-1:0]  alu_done,
+    output logic alu_done,
     output IS_EX_PACKET             out_packet
 );
 
     logic [`XLEN-1:0]           alu_opa, alu_opb;
     logic signed [`XLEN-1:0]    signed_opa, signed_opb;
+    logic [`MAX_FU_INDEX-1:0]   idx;
 
     assign signed_opa   = alu_opa;
     assign signed_opb   = alu_opb;
-    assign alu_done[0] = alu_en;
+    assign alu_done = alu_en;
     assign alu_opa = opa;
     assign alu_opb = opb;
     assign out_packet = in_packet;
@@ -44,32 +45,10 @@ module alu (
         endcase
     end
 
-/*
-    always_ff @(posedge clock) begin
-        if(reset) begin
-            alu_done[0]     <= 1'b0;
-            out_packet      <= 0;
-            alu_opa         <= 0;
-            alu_opb         <= 0;
-        end else if (alu_en) begin
-            alu_done[0]     <= 1'b1;
-            out_packet      <= in_packet;
-            alu_opa         <= opa;
-            alu_opb         <= opb;
-        end else begin
-            alu_done[0]     <= 1'b0;
-            alu_opa         <= alu_opa;
-            alu_opb         <= alu_opb;
-            out_packet      <= out_packet;
-        end
-    end
-*/
 endmodule // alu
 
 // For calculating branch addresses 
 module branch_calculation (
-    //input               clock, 
-    //input               reset,
     input [`XLEN-1:0]   opa,
     input [`XLEN-1:0]   opb,
     input ALU_FUNC      alu_func,
@@ -77,7 +56,7 @@ module branch_calculation (
     input IS_EX_PACKET  in_packet,
 
     output logic [`XLEN-1:0]        result,
-    output logic [`NUM_FU_BRANCH]   branch_done,
+    output logic    branch_done,
     output IS_EX_PACKET             out_packet
 );
 
@@ -102,36 +81,16 @@ module branch_calculation (
             default:    result = `XLEN'hfacebeec;  // here to prevent latches
         endcase
     end
-    assign branch_done[0] = branch_en;
+
+    assign branch_done = branch_en;
     assign out_packet = in_packet;
     assign branch_opa = opa;
     assign branch_opb = opb;
-/*
-    always_ff @(posedge clock) begin
-        if(reset) begin
-            branch_done[0]  <= 1'b0;
-            out_packet      <= 0;
-            branch_opa      <= 0;
-            branch_opb      <= 0;
-        end else if (branch_en) begin
-            branch_done[0]  <= 1'b1;
-            out_packet      <= in_packet;
-            branch_opa      <= opa;
-            branch_opb      <= opb;
-        end else begin
-            branch_done[0]  <= 1'b0;
-            branch_opa      <= branch_opa;
-            branch_opb      <= branch_opb;
-            out_packet      <= out_packet;
-        end
-    end
-*/
+
 endmodule
 
 // Conditional branch module: compute whether to take conditional branches
 module conditional_branch (
-    //input               clock,
-    //input               reset,
     input [2:0]         func, // Specifies which condition to check
     input [`XLEN-1:0]   rs1,  // Value to check against condition
     input [`XLEN-1:0]   rs2,
@@ -161,20 +120,6 @@ module conditional_branch (
     assign cond_rs1 = rs1;
     assign cond_rs2 = rs2;
 
-/*
-    always_ff @(posedge clock) begin
-        if (reset) begin
-            cond_rs1 <= 0;
-            cond_rs2 <= 0;
-        end else if (cond_en) begin
-            cond_rs1 <= rs1; 
-            cond_rs2 <= rs2;
-        end else begin
-            cond_rs1 <= cond_rs1; 
-            cond_rs2 <= cond_rs2;
-        end
-    end
-*/
 endmodule // conditional_branch
 
 
@@ -188,7 +133,7 @@ module multiply (
     input IS_EX_PACKET                  in_packet,
 
     output logic [`XLEN-1:0]            product,
-    output logic [`NUM_FU_MULT-1:0]     mult_done,
+    output logic     mult_done,
     output IS_EX_PACKET                 out_packet
 );
 
@@ -233,7 +178,7 @@ module multiply (
         .func           (mult_func),
         .start          (tmp_mult_en),
         .product        (product),
-        .done           (mult_done[0])
+        .done           (mult_done)
     );
 
     always_ff @(posedge clock) begin
@@ -319,7 +264,7 @@ module load (
     /* Output for pipeline */
     output logic [`XLEN-1:0] result,
     output IS_EX_PACKET out_packet,
-    output logic [`NUM_FU_LOAD] load_done
+    output logic load_done
 
 );
     /* Must keep a copy of all the state we need, since inputs may change */
@@ -408,122 +353,8 @@ module load (
     end
 endmodule 
 
-
-
-// module load_alu (
-//     input clock,
-//     input reset, 
-
-//     input start_load,
-
-//     /* Instruction information */
-//     input [`XLEN-1:0] opa, 
-//     input [`XLEN-1:0] opb,
-//     input IS_EX_PACKET in_packet,
-//     input ALU_FUNC alu_func,
-
-//     /* Input from dcache */
-//     input [63:0] Dcache_data_out, // Data is mem[proc2Dcache_addr]
-//     input Dcache_valid_out // When valid is high
-
-//     /* Output to dcache */
-//     output logic load_en,
-//     output [`XLEN-1:0] load2Dcache_addr,
-
-//     // the BUS_LOAD response will magically be present in the *same* cycle it's requested (0ns latency)
-//     // this will not be true in project 4 (100ns latency)
-//     input [`XLEN-1:0]   Dmem2proc_data,
-//     input [3:0]         Dmem2proc_response,
-
-//     output logic [`XLEN-1:0]  result,
-//     output IS_EX_PACKET out_packet,
-//     output logic [`NUM_FU_LOAD] load_done,
-//     output logic [1:0]       proc2Dmem_command, // The memory command
-//     output MEM_SIZE          proc2Dmem_size,    // Size of data to read or write
-//     output logic [`XLEN-1:0] proc2Dmem_addr,    // Address sent to Data memory
-//     output logic [`XLEN-1:0] proc2Dmem_data     // Data sent to Data memory
-// ); 
-
-//     logic [`XLEN-1:0] load_opa, load_opb, address;
-//     logic start;
-//     assign signed_opa   = load_opa;
-//     assign signed_opb   = load_opb;
-
-
-//     /* Calculate address to load from */
-//     always_comb begin
-//         case (alu_func)
-//             ALU_ADD:    address = load_opa + load_opb;
-//             ALU_SUB:    address = load_opa - load_opb;
-//             ALU_AND:    address = load_opa & load_opb;
-//             ALU_SLT:    address = signed_opa < signed_opb;
-//             ALU_SLTU:   address = load_opa < load_opb;
-//             ALU_OR:     address = load_opa | load_opb;
-//             ALU_XOR:    address = load_opa ^ load_opb;
-//             ALU_SRL:    address = load_opa >> load_opb[4:0];
-//             ALU_SLL:    address = load_opa << load_opb[4:0];
-//             ALU_SRA:    address = signed_opa >>> load_opb[4:0]; // arithmetic from logical shift
-
-//             default:    address = `XLEN'hfacebeec;  // here to prevent latches
-//         endcase
-//     end
-
-
-    
-
-//     /* Calculate signals to send to dcache */
-//     assign proc2Dmem_command = (is_ex_reg.valid && is_ex_reg.rd_mem) ? BUS_LOAD : BUS_NONE;
-
-//     load load_0 (
-//         .start (start),
-//         .is_ex_reg (out_packet), 
-//         .address (address),
-//         .Dmem2proc_data (Dmem2proc_data),
-//         .Dmem2proc_response (Dmem2proc_response),
-
-//         .proc2Dmem_command (proc2Dmem_command),
-//         .proc2Dmem_size (proc2Dmem_size),
-//         .proc2Dmem_addr (proc2Dmem_addr),
-//         .proc2Dmem_data (proc2Dmem_data),
-//         .result(result),
-//         .done(load_done)
-//     );
-// /*
-//     assign out_packet = in_packet;
-//     assign load_opa = opa;
-//     assign load_opb = opb;
-//     assign start = load_en;
-// */
-//     always_ff @(posedge clock) begin
-//         if(reset) begin
-//             out_packet      <= 0;
-//             load_opa      <= 0;
-//             load_opb      <= 0;
-//             start <= 0;
-//         end else if (load_alu_en) begin
-//             out_packet      <= in_packet;
-//             load_opa      <= opa;
-//             load_opb      <= opb;
-//             start <= 1;
-//         end else if(!load_done) begin
-//             load_opa      <= load_opa;
-//             load_opb      <= load_opb;
-//             out_packet    <= out_packet;
-//             start <= start; 
-//         end else begin
-// 	    load_opa      <= load_opa;
-//             load_opb      <= load_opb;
-//             out_packet    <= out_packet;
-//             start <= 0; 
-// 	end
-//     end
-
-// endmodule
-
 // ALU: computes the result of FUNC applied with operands A and B
 module store (
-    //input                           clock, 
-    //input                           reset,
     input [`XLEN-1:0]               opa,
     input [`XLEN-1:0]               opb,
     input INST			    inst,
@@ -532,7 +363,7 @@ module store (
     input IS_EX_PACKET              in_packet,
 
     output logic [`XLEN-1:0]        result,
-    output logic [`NUM_FU_ALU-1:0]  store_done,
+    output logic  store_done,
     output MEM_SIZE		    mem_size,
     output IS_EX_PACKET             out_packet
 );
@@ -561,28 +392,9 @@ module store (
     end
 
     assign mem_size     = MEM_SIZE'(inst.r.funct3[1:0]);
-    assign store_done[0] = store_en;
+    assign store_done = store_en;
     assign store_opa = opa;
     assign store_opb = opb;
     assign out_packet = in_packet;
-/*
-    always_ff @(posedge clock) begin
-        if(reset) begin
-            store_done[0]     <= 1'b0;
-            out_packet      <= 0;
-            store_opa         <= 0;
-            store_opb         <= 0;
-        end else if (store_en) begin
-            store_done[0]     <= 1'b1;
-            out_packet      <= in_packet;
-            store_opa         <= opa;
-            store_opb         <= opb;
-        end else begin
-            store_done[0]     <= 1'b0;
-            store_opa         <= store_opa;
-            store_opb         <= store_opb;
-            out_packet      <= out_packet;
-        end
-    end
-*/
+
 endmodule // alu

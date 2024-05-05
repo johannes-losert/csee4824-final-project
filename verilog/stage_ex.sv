@@ -41,20 +41,24 @@ module stage_ex (
     input logic rollback,
 
     // debug outputs
-    output IS_EX_PACKET alu_packet,
-    output IS_EX_PACKET mult_packet,
-    output IS_EX_PACKET branch_packet,
-    output IS_EX_PACKET load_packet,
-    output IS_EX_PACKET store_packet
+    output IS_EX_PACKET [`NUM_FU_ALU-1:0] alu_packet,
+    output IS_EX_PACKET [`NUM_FU_MULT-1:0] mult_packet,
+    output IS_EX_PACKET [`NUM_FU_BRANCH-1:0] branch_packet,
+    output IS_EX_PACKET [`NUM_FU_LOAD-1:0] load_packet,
+    output IS_EX_PACKET [`NUM_FU_STORE-1:0] store_packet
 );
 
-    logic [`XLEN-1:0]   alu_result;
-    logic [`XLEN-1:0]   mult_result;
-    logic [`XLEN-1:0]   branch_result;
-    logic [`XLEN-1:0]   load_result;
-    logic [`XLEN-1:0] store_result;
+    logic [`NUM_FU_ALU-1:0] [`XLEN-1:0]   alu_result;
+    logic [`NUM_FU_MULT-1:0] [`XLEN-1:0]   mult_result;
+    logic [`NUM_FU_BRANCH-1:0] [`XLEN-1:0]   branch_result;
+    logic [`NUM_FU_LOAD-1:0] [`XLEN-1:0]   load_result;
+    logic [`NUM_FU_STORE-1:0] [`XLEN-1:0] store_result;
     logic [`XLEN-1:0]   opa_mux_out, opb_mux_out;
-    logic               take_conditional;
+
+    logic [`NUM_FU_BRANCH-1:0]              take_conditional;
+    MEM_SIZE [`NUM_FU_STORE-1:0] mem_size;
+    logic [`NUM_FU_LOAD-1:0] load_en_arr;
+    logic [`NUM_FU_LOAD-1:0] [`XLEN-1:0] load2Dcache_addr_arr;
 
     // ALU opA mux
     always_comb begin
@@ -80,361 +84,361 @@ module stage_ex (
         endcase
     end
 
-    logic alu_done; 
-    logic mult_done; 
-    logic branch_done;
-    logic load_done; 
-    logic store_done;
-    logic [`XLEN-1:0] tmp_alu_result; 
-    logic [`XLEN-1:0] tmp_mult_result;
-    logic [`XLEN-1:0] tmp_branch_result;
-    logic [`XLEN-1:0] tmp_load_result;
-    logic [`XLEN-1:0] tmp_store_result;
-    IS_EX_PACKET tmp_alu_packet;
-    IS_EX_PACKET tmp_mult_packet;
-    IS_EX_PACKET tmp_branch_packet;
-    IS_EX_PACKET tmp_load_packet;
-    IS_EX_PACKET tmp_store_packet;
-    MEM_SIZE mem_size;
+    logic [`NUM_FU_ALU-1:0] alu_done; 
+    logic [`NUM_FU_MULT-1:0] mult_done; 
+    logic [`NUM_FU_BRANCH-1:0] branch_done;
+    logic [`NUM_FU_LOAD-1:0] load_done; 
+    logic [`NUM_FU_STORE-1:0] store_done;
+    logic [`NUM_FU_ALU-1:0] [`XLEN-1:0] tmp_alu_result;
+    logic [`NUM_FU_MULT-1:0] [`XLEN-1:0] tmp_mult_result;
+    logic [`NUM_FU_BRANCH-1:0] [`XLEN-1:0] tmp_branch_result;
+    logic [`NUM_FU_LOAD-1:0] [`XLEN-1:0] tmp_load_result;
+    logic [`NUM_FU_STORE-1:0] [`XLEN-1:0] tmp_store_result;
+    IS_EX_PACKET [`NUM_FU_ALU-1:0] tmp_alu_packet;
+    IS_EX_PACKET [`NUM_FU_MULT-1:0] tmp_mult_packet;
+    IS_EX_PACKET [`NUM_FU_BRANCH-1:0] tmp_branch_packet;
+    IS_EX_PACKET [`NUM_FU_LOAD-1:0] tmp_load_packet;
+    IS_EX_PACKET [`NUM_FU_STORE-1:0] tmp_store_packet;
 
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
-
     assign issue_fu_index = is_ex_reg.issued_fu_index;
 
-    // Instantiate the ALU
-    alu alu_0 (
-        // Inputs
-        //.clock      (clock),
-        //.reset      (reset),
-        .opa        (opa_mux_out),
-        .opb        (opb_mux_out),
-        .func       (is_ex_reg.alu_func),
-        .alu_en     (is_ex_reg.function_type == ALU && is_ex_reg.valid && issue_fu_index == 0),
-        .in_packet  (is_ex_reg),
+    genvar idx;
+    generate
+        for (idx = 0; idx < `NUM_FU_ALU; idx++) begin : generate_alu_fus
+            alu alu_0 (
+                .opa        (opa_mux_out),
+                .opb        (opb_mux_out),
+                .func       (is_ex_reg.alu_func),
+                .alu_en     (is_ex_reg.function_type == ALU && is_ex_reg.valid && issue_fu_index == idx),
+                .in_packet  (is_ex_reg),
 
-        // Output
-        .result     (alu_result),
-        .alu_done   (alu_done),
-        .out_packet (alu_packet)
-    );
+                // Output
+                .result     (alu_result[idx]),
+                .alu_done   (alu_done[idx]),
+                .out_packet (alu_packet[idx])
+            );
+        end 
+    endgenerate
 
-    branch_calculation branch_0 (
-        // Inputs
-        //.clock      (clock),
-        //.reset      (reset),
-        .opa        (opa_mux_out),
-        .opb        (opb_mux_out),
-        .alu_func   (is_ex_reg.alu_func),
-        .branch_en  (is_ex_reg.function_type == BRANCH && is_ex_reg.valid && issue_fu_index == 0),
-        .in_packet  (is_ex_reg),
+    generate
+        for (idx = 0; idx < `NUM_FU_BRANCH; idx++) begin : generate_branch_fus
+            branch_calculation branch_0 (
+                .opa        (opa_mux_out),
+                .opb        (opb_mux_out),
+                .alu_func   (is_ex_reg.alu_func),
+                .branch_en  (is_ex_reg.function_type == BRANCH && is_ex_reg.valid && issue_fu_index == idx),
+                .in_packet  (is_ex_reg),
 
-        // Output
-        .result         (branch_result),
-        .branch_done    (branch_done),
-        .out_packet     (branch_packet)
-    );
+                // Output
+                .result         (branch_result[idx]),
+                .branch_done    (branch_done[idx]),
+                .out_packet     (branch_packet[idx])
+            );
+        end 
+    endgenerate
 
-    // Instantiate the conditional branch module
-    conditional_branch conditional_branch_0 (
-        // Inputs
-        //.clock      (clock),
-        //.reset      (reset),
-        .func       (is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
-        .rs1        (is_ex_reg.rs1_value),
-        .rs2        (is_ex_reg.rs2_value),
-        .cond_en    (is_ex_reg.function_type == BRANCH && is_ex_reg.valid && issue_fu_index == 0),
+    generate
+        for (idx = 0; idx < `NUM_FU_BRANCH; idx++) begin : generate_take_branch_fus
+            conditional_branch conditional_branch_0 (
+                .func       (is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
+                .rs1        (is_ex_reg.rs1_value),
+                .rs2        (is_ex_reg.rs2_value),
+                .cond_en    (is_ex_reg.function_type == BRANCH && is_ex_reg.valid && issue_fu_index == idx),
 
-        // Output
-        .take       (take_conditional)
-    );  
+                // Output
+                .take       (take_conditional[idx])
+            );
+        end 
+    endgenerate
 
-    // Instantiate multiply functional unit
-    multiply mult_0 (
-        // Inputs
-        .clock      (clock),
-        .reset      (reset),
-        .mcand      (opa_mux_out),
-        .mplier     (opb_mux_out),
-        .func       (is_ex_reg.alu_func),
-        .mult_en    (is_ex_reg.function_type == MULT && is_ex_reg.valid && issue_fu_index == 0),
-        .in_packet  (is_ex_reg),
+    generate
+        for (idx = 0; idx < `NUM_FU_MULT; idx++) begin : generate_mult_fus
+            multiply multiply_0 (
+                .clock      (clock),
+                .reset      (reset),
+                .mcand      (opa_mux_out),
+                .mplier     (opb_mux_out),
+                .func       (is_ex_reg.alu_func),
+                .mult_en    (is_ex_reg.function_type == MULT && is_ex_reg.valid && issue_fu_index == idx),
+                .in_packet  (is_ex_reg),
 
-        // Output
-        .product    (mult_result),
-        .mult_done  (mult_done),
-        .out_packet (mult_packet)
-    );
+                // Output
+                .product    (mult_result[idx]),
+                .mult_done  (mult_done[idx]),
+                .out_packet (mult_packet[idx])
+            );
+        end 
+    endgenerate
 
-    load load_0 (
-        .clock(clock),
-        .reset(reset),
+    generate
+        for (idx = 0; idx < `NUM_FU_LOAD; idx++) begin : generate_load_fus
+            load load_0 (
+                .clock(clock),
+                .reset(reset),
 
-        .start_load(is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
-        
-        /* Instruction info */
-        .in_opa(opa_mux_out),
-        .in_opb(opb_mux_out),
-        .in_packet(is_ex_reg),
-        .alu_func(is_ex_reg.alu_func),
+                .start_load(is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == idx),
+                
+                /* Instruction info */
+                .in_opa(opa_mux_out),
+                .in_opb(opb_mux_out),
+                .in_packet(is_ex_reg),
+                .alu_func(is_ex_reg.alu_func),
 
-        /* Input from dcache */
-        .Dcache_data_out(Dcache_data_out),
-        .Dcache_valid_out(Dcache_valid_out),
+                /* Input from dcache */
+                .Dcache_data_out(Dcache_data_out),
+                .Dcache_valid_out(Dcache_valid_out),
 
-        /* Output to dcache */
-        .load_en(load_en),
-        .load2Dcache_addr(load2Dcache_addr),
+                /* Output to dcache */
+                .load_en(load_en_arr[idx]),
+                .load2Dcache_addr(load2Dcache_addr_arr[idx]),
 
-        /* Output for pipeline */
-        .result(load_result),
-        .out_packet(load_packet),
-        .load_done(load_done)
-    );
+                /* Output for pipeline */
+                .result(load_result[idx]),
+                .out_packet(load_packet[idx]),
+                .load_done(load_done[idx])
+            );
+        end 
+    endgenerate   
 
+    generate
+        for (idx = 0; idx < `NUM_FU_STORE; idx++) begin : generate_store_fus
+            store store_0 (
+                .opa        (opa_mux_out),
+                .opb        (opb_mux_out),
+                .inst       (is_ex_reg.inst),
+                .func       (is_ex_reg.alu_func),
+                .store_en     (is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == idx),
+                .in_packet  (is_ex_reg),
 
-    // load load (
-    //     .clock (clock), 
-    //     .reset (reset),
-    //     .opa (opa_mux_out),
-    //     .opb (opb_mux_out),
-    //     .in_packet (is_ex_reg),
-    //     .alu_func (is_ex_reg.alu_func),
-
-    //     .start_load (is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
-    //     .Dmem2proc_data (Dmem2proc_data),
-    //     .Dmem2proc_response (Dmem2proc_response),
-
-    //     .result (load_result),
-    //     .load_done (load_done),
-    //     .out_packet (load_packet),
-    //     .proc2Dmem_command (proc2Dmem_command),
-    //     .proc2Dmem_size (proc2Dmem_size),
-    //     .proc2Dmem_addr (proc2Dmem_addr),
-    //     .proc2Dmem_data (proc2Dmem_data)
-    // );
-    
-    // Instantiate the ALU
-    store store_0 (
-        // Inputs
-        //.clock      (clock),
-        //.reset      (reset),
-        .opa        (opa_mux_out),
-        .opb        (opb_mux_out),
-	.inst       (is_ex_reg.inst),
-        .func       (is_ex_reg.alu_func),
-        .store_en     (is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
-        .in_packet  (is_ex_reg),
-
-        // Output
-        .result     (store_result),
-        .store_done   (store_done),
-	.mem_size	(mem_size),
-        .out_packet (store_packet)
-    );
+                // Output
+                .result     (store_result[idx]),
+                .store_done   (store_done[idx]),
+                .mem_size	(mem_size[idx]),
+                .out_packet (store_packet[idx])
+            );
+        end 
+    endgenerate
 
     // Choose which FU to move to the next stage
-
-    logic [5:0] waiting_fus; 
-    logic alu_done_process;
-    logic mult_done_process;
-    logic branch_done_process;
-    logic load_done_process;
-    logic store_done_process;
-    logic tmp_take_conditional;
+    logic [`NUM_FU_ALU-1:0] alu_ready; 
+    logic [`NUM_FU_ALU-1:0] alu_done_process;
+    logic [`NUM_FU_MULT-1:0] mult_ready; 
+    logic [`NUM_FU_MULT-1:0] mult_done_process;
+    logic [`NUM_FU_BRANCH-1:0] branch_ready; 
+    logic [`NUM_FU_BRANCH-1:0] branch_done_process;
+    logic [`NUM_FU_LOAD-1:0] load_ready; 
+    logic [`NUM_FU_LOAD-1:0] load_done_process;
+    logic [`NUM_FU_STORE-1:0] store_ready; 
+    logic [`NUM_FU_STORE-1:0] store_done_process;
+    logic [`NUM_FU_BRANCH] tmp_take_conditional;
+    logic [`NUM_FU_STORE] tmp_mem_size;
+    logic [`NUM_FU_LOAD] tmp_load_en;
+    logic [`NUM_FU_LOAD] tmp_load2Dcache_addr;
 
     // If a FU is selected to be done with the ex stage, then set the ex_packet attributes to their
     // corresponding values
     always_comb begin
-        if(alu_done_process) begin
-            ex_packet.result        = tmp_alu_result;
-            ex_packet.take_branch   = 0;
-	        ex_packet.mem_size = 0;
+        for (int i = 0; i < `NUM_FU_ALU; i++)  begin
+                if (alu_done_process[i]) begin
+                    ex_packet.result        = tmp_alu_result[i][`XLEN-1:0];
+                    ex_packet.take_branch   = 0;
+                    ex_packet.mem_size = 0;
 
+                    // Pass throughs 
+                    ex_packet.inst = tmp_alu_packet[i].inst;
+                    ex_packet.PC = tmp_alu_packet[i].PC;
+                    ex_packet.NPC = tmp_alu_packet[i].NPC;
 
-            // Pass throughs 
-            ex_packet.inst = tmp_alu_packet.inst;
-            ex_packet.PC = tmp_alu_packet.PC;
-            ex_packet.NPC = tmp_alu_packet.NPC;
+                    ex_packet.opa_select = tmp_alu_packet[i].opa_select;
+                    ex_packet.opb_select = tmp_alu_packet[i].opb_select;
 
-            ex_packet.opa_select = tmp_alu_packet.opa_select;
-            ex_packet.opb_select = tmp_alu_packet.opb_select;
+                    ex_packet.rs1_value = tmp_alu_packet[i].rs1_value;
+                    ex_packet.rs2_value = tmp_alu_packet[i].rs2_value;
 
-            ex_packet.rs1_value = tmp_alu_packet.rs1_value;
-            ex_packet.rs2_value = tmp_alu_packet.rs2_value;
+                    ex_packet.dest_reg_idx = tmp_alu_packet[i].dest_reg_idx;
+                
+                    ex_packet.alu_func = tmp_alu_packet[i].alu_func;
+                    ex_packet.rd_mem = tmp_alu_packet[i].rd_mem;
+                    ex_packet.wr_mem = tmp_alu_packet[i].wr_mem;
+                    ex_packet.cond_branch = tmp_alu_packet[i].cond_branch;
+                    ex_packet.uncond_branch = tmp_alu_packet[i].uncond_branch;
+                    ex_packet.halt = tmp_alu_packet[i].halt;
+                    ex_packet.illegal = tmp_alu_packet[i].illegal;
+                    ex_packet.csr_op = tmp_alu_packet[i].csr_op;
 
-            ex_packet.dest_reg_idx = tmp_alu_packet.dest_reg_idx;
-        
-            ex_packet.alu_func = tmp_alu_packet.alu_func;
-            ex_packet.rd_mem = tmp_alu_packet.rd_mem;
-            ex_packet.wr_mem = tmp_alu_packet.wr_mem;
-            ex_packet.cond_branch = tmp_alu_packet.cond_branch;
-            ex_packet.uncond_branch = tmp_alu_packet.uncond_branch;
-            ex_packet.halt = tmp_alu_packet.halt;
-            ex_packet.illegal = tmp_alu_packet.illegal;
-            ex_packet.csr_op = tmp_alu_packet.csr_op;
+                    ex_packet.function_type = tmp_alu_packet[i].function_type;
+                    ex_packet.valid = tmp_alu_packet[i].valid;
 
-            ex_packet.function_type = tmp_alu_packet.function_type;
-            ex_packet.valid = tmp_alu_packet.valid;
+                    ex_packet.rob_index = tmp_alu_packet[i].rob_index;
+                    ex_packet.has_dest = tmp_alu_packet[i].has_dest;
 
-            ex_packet.rob_index = tmp_alu_packet.rob_index;
-            ex_packet.has_dest = tmp_alu_packet.has_dest;
+                    ex_packet.issued_fu_index = tmp_alu_packet[i].issued_fu_index;
+                    ex_packet.arch_dest_reg_num = tmp_alu_packet[i].arch_dest_reg_num;
+                end
+        end
+        for (int i = 0; i < `NUM_FU_MULT; i++) begin
+            if(mult_done_process[i]) begin
+                ex_packet.result        = tmp_mult_result[i];
+                ex_packet.take_branch   = 0;
+                ex_packet.mem_size = 0;
 
-            ex_packet.issued_fu_index = tmp_alu_packet.issued_fu_index;
-            ex_packet.arch_dest_reg_num = tmp_alu_packet.arch_dest_reg_num;
+                
+                // Pass throughs
+                ex_packet.inst = tmp_mult_packet[i].inst;
+                ex_packet.PC = tmp_mult_packet[i].PC;
+                ex_packet.NPC = tmp_mult_packet[i].NPC;
 
-        end else if (mult_done_process) begin
-            ex_packet.result        = tmp_mult_result;
-            ex_packet.take_branch   = 0;
-	    ex_packet.mem_size = 0;
+                ex_packet.opa_select = tmp_mult_packet[i].opa_select;
+                ex_packet.opb_select = tmp_mult_packet[i].opb_select;
 
-            
-            // Pass throughs
-            ex_packet.inst = tmp_mult_packet.inst;
-            ex_packet.PC = tmp_mult_packet.PC;
-            ex_packet.NPC = tmp_mult_packet.NPC;
+                ex_packet.rs1_value = tmp_mult_packet[i].rs1_value;
+                ex_packet.rs2_value = tmp_mult_packet[i].rs2_value;
 
-            ex_packet.opa_select = tmp_mult_packet.opa_select;
-            ex_packet.opb_select = tmp_mult_packet.opb_select;
+                ex_packet.dest_reg_idx = tmp_mult_packet[i].dest_reg_idx;
 
-            ex_packet.rs1_value = tmp_mult_packet.rs1_value;
-            ex_packet.rs2_value = tmp_mult_packet.rs2_value;
+                ex_packet.alu_func = tmp_mult_packet[i].alu_func;
+                ex_packet.rd_mem = tmp_mult_packet[i].rd_mem;
+                ex_packet.wr_mem = tmp_mult_packet[i].wr_mem;
+                ex_packet.cond_branch = tmp_mult_packet[i].cond_branch;
+                ex_packet.uncond_branch = tmp_mult_packet[i].uncond_branch;
+                ex_packet.halt = tmp_mult_packet[i].halt;
+                ex_packet.illegal = tmp_mult_packet[i].illegal;
+                ex_packet.csr_op = tmp_mult_packet[i].csr_op;
 
-            ex_packet.dest_reg_idx = tmp_mult_packet.dest_reg_idx;
+                ex_packet.function_type = tmp_mult_packet[i].function_type;
+                ex_packet.valid = tmp_mult_packet[i].valid;
 
-            ex_packet.alu_func = tmp_mult_packet.alu_func;
-            ex_packet.rd_mem = tmp_mult_packet.rd_mem;
-            ex_packet.wr_mem = tmp_mult_packet.wr_mem;
-            ex_packet.cond_branch = tmp_mult_packet.cond_branch;
-            ex_packet.uncond_branch = tmp_mult_packet.uncond_branch;
-            ex_packet.halt = tmp_mult_packet.halt;
-            ex_packet.illegal = tmp_mult_packet.illegal;
-            ex_packet.csr_op = tmp_mult_packet.csr_op;
+                ex_packet.rob_index = tmp_mult_packet[i].rob_index;
+                ex_packet.has_dest = tmp_mult_packet[i].has_dest;
 
-            ex_packet.function_type = tmp_mult_packet.function_type;
-            ex_packet.valid = tmp_mult_packet.valid;
+                ex_packet.issued_fu_index = tmp_mult_packet[i].issued_fu_index;
 
-            ex_packet.rob_index = tmp_mult_packet.rob_index;
-            ex_packet.has_dest = tmp_mult_packet.has_dest;
+                ex_packet.arch_dest_reg_num = tmp_mult_packet[i].arch_dest_reg_num;
+            end
+        end
+        for (int i = 0; i < `NUM_FU_BRANCH; i++) begin
+            if(branch_done_process[i]) begin
+                ex_packet.result        = tmp_branch_result[i];
+                ex_packet.take_branch   = tmp_branch_packet[i].uncond_branch || (tmp_branch_packet[i].cond_branch && tmp_take_conditional[i]);
+                ex_packet.mem_size = 0;
 
-            ex_packet.issued_fu_index = tmp_mult_packet.issued_fu_index;
+                // Pass throughs
 
-            ex_packet.arch_dest_reg_num = tmp_mult_packet.arch_dest_reg_num;
+                ex_packet.inst = tmp_branch_packet[i].inst;
+                ex_packet.PC = tmp_branch_packet[i].PC;
+                ex_packet.NPC = tmp_branch_packet[i].NPC;
 
-        end else if (branch_done_process) begin
-            ex_packet.result        = tmp_branch_result;
-            ex_packet.take_branch   = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
-	        ex_packet.mem_size = 0;
+                ex_packet.opa_select = tmp_branch_packet[i].opa_select;
+                ex_packet.opb_select = tmp_branch_packet[i].opb_select;
 
-            // Pass throughs
+                ex_packet.rs1_value = tmp_branch_packet[i].rs2_value;
+                ex_packet.rs2_value = tmp_branch_packet[i].rs2_value;
 
-            ex_packet.inst = tmp_branch_packet.inst;
-            ex_packet.PC = tmp_branch_packet.PC;
-            ex_packet.NPC = tmp_branch_packet.NPC;
+                ex_packet.dest_reg_idx = tmp_branch_packet[i].dest_reg_idx;
 
-            ex_packet.opa_select = tmp_branch_packet.opa_select;
-            ex_packet.opb_select = tmp_branch_packet.opb_select;
+                ex_packet.alu_func = tmp_branch_packet[i].alu_func;
+                ex_packet.rd_mem = tmp_branch_packet[i].rd_mem;
+                ex_packet.wr_mem = tmp_branch_packet[i].wr_mem;
+                ex_packet.cond_branch = tmp_branch_packet[i].cond_branch;
+                ex_packet.uncond_branch = tmp_branch_packet[i].uncond_branch;
+                ex_packet.halt = tmp_branch_packet[i].halt;
+                ex_packet.illegal = tmp_branch_packet[i].illegal;
+                ex_packet.csr_op = tmp_branch_packet[i].csr_op;
 
-            ex_packet.rs1_value = tmp_branch_packet.rs2_value;
-            ex_packet.rs2_value = tmp_branch_packet.rs2_value;
+                ex_packet.function_type = tmp_branch_packet[i].function_type;
+                ex_packet.valid = tmp_branch_packet[i].valid;
 
-            ex_packet.dest_reg_idx = tmp_branch_packet.dest_reg_idx;
+                ex_packet.rob_index = tmp_branch_packet[i].rob_index;
+                ex_packet.has_dest = tmp_branch_packet[i].has_dest;
 
-            ex_packet.alu_func = tmp_branch_packet.alu_func;
-            ex_packet.rd_mem = tmp_branch_packet.rd_mem;
-            ex_packet.wr_mem = tmp_branch_packet.wr_mem;
-            ex_packet.cond_branch = tmp_branch_packet.cond_branch;
-            ex_packet.uncond_branch = tmp_branch_packet.uncond_branch;
-            ex_packet.halt = tmp_branch_packet.halt;
-            ex_packet.illegal = tmp_branch_packet.illegal;
-            ex_packet.csr_op = tmp_branch_packet.csr_op;
+                ex_packet.issued_fu_index = tmp_branch_packet[i].issued_fu_index;
 
-            ex_packet.function_type = tmp_branch_packet.function_type;
-            ex_packet.valid = tmp_branch_packet.valid;
+                ex_packet.arch_dest_reg_num = tmp_branch_packet[i].arch_dest_reg_num;
+            end
+        end
 
-            ex_packet.rob_index = tmp_branch_packet.rob_index;
-            ex_packet.has_dest = tmp_branch_packet.has_dest;
+        for (int i = 0; i < `NUM_FU_LOAD; i++) begin
+            if(load_done_process[i]) begin
+                ex_packet.result        = tmp_load_result[i];
+                ex_packet.take_branch   = 0;
+                ex_packet.mem_size = 0;
 
-            ex_packet.issued_fu_index = tmp_branch_packet.issued_fu_index;
+                
+                // Pass throughs
+                ex_packet.inst = tmp_load_packet[i].inst;
+                ex_packet.PC = tmp_load_packet[i].PC;
+                ex_packet.NPC = tmp_load_packet[i].NPC;
 
-            ex_packet.arch_dest_reg_num = tmp_branch_packet.arch_dest_reg_num;
+                ex_packet.opa_select = tmp_load_packet[i].opa_select;
+                ex_packet.opb_select = tmp_load_packet[i].opb_select;
 
-        end else if (load_done_process) begin
-            ex_packet.result        = tmp_load_result;
-            ex_packet.take_branch   = 0;
-	        ex_packet.mem_size = 0;
+                ex_packet.rs1_value = tmp_load_packet[i].rs1_value;
+                ex_packet.rs2_value = tmp_load_packet[i].rs2_value;
 
-            
-            // Pass throughs
-            ex_packet.inst = tmp_load_packet.inst;
-            ex_packet.PC = tmp_load_packet.PC;
-            ex_packet.NPC = tmp_load_packet.NPC;
+                ex_packet.dest_reg_idx = tmp_load_packet[i].dest_reg_idx;
 
-            ex_packet.opa_select = tmp_load_packet.opa_select;
-            ex_packet.opb_select = tmp_load_packet.opb_select;
+                ex_packet.alu_func = tmp_load_packet[i].alu_func;
+                ex_packet.rd_mem = tmp_load_packet[i].rd_mem;
+                ex_packet.wr_mem = tmp_load_packet[i].wr_mem;
+                ex_packet.cond_branch = tmp_load_packet[i].cond_branch;
+                ex_packet.uncond_branch = tmp_load_packet[i].uncond_branch;
+                ex_packet.halt = tmp_load_packet[i].halt;
+                ex_packet.illegal = tmp_load_packet[i].illegal;
+                ex_packet.csr_op = tmp_load_packet[i].csr_op;
 
-            ex_packet.rs1_value = tmp_load_packet.rs1_value;
-            ex_packet.rs2_value = tmp_load_packet.rs2_value;
+                ex_packet.function_type = tmp_load_packet[i].function_type;
+                ex_packet.valid = tmp_load_packet[i].valid;
 
-            ex_packet.dest_reg_idx = tmp_load_packet.dest_reg_idx;
+                ex_packet.rob_index = tmp_load_packet[i].rob_index;
+                ex_packet.has_dest = tmp_load_packet[i].has_dest;
 
-            ex_packet.alu_func = tmp_load_packet.alu_func;
-            ex_packet.rd_mem = tmp_load_packet.rd_mem;
-            ex_packet.wr_mem = tmp_load_packet.wr_mem;
-            ex_packet.cond_branch = tmp_load_packet.cond_branch;
-            ex_packet.uncond_branch = tmp_load_packet.uncond_branch;
-            ex_packet.halt = tmp_load_packet.halt;
-            ex_packet.illegal = tmp_load_packet.illegal;
-            ex_packet.csr_op = tmp_load_packet.csr_op;
+                ex_packet.issued_fu_index = tmp_load_packet[i].issued_fu_index;
 
-            ex_packet.function_type = tmp_load_packet.function_type;
-            ex_packet.valid = tmp_load_packet.valid;
+                ex_packet.arch_dest_reg_num = tmp_load_packet[i].arch_dest_reg_num;
+            end
+        end
+        for (int i = 0; i < `NUM_FU_STORE; i++) begin
+            if(store_done_process[i]) begin
+                ex_packet.result        = tmp_store_result[i];
+                ex_packet.take_branch   = 0;
+                
+                // Pass throughs
+                ex_packet.inst = tmp_store_packet[i].inst;
+                ex_packet.PC = tmp_store_packet[i].PC;
+                ex_packet.NPC = tmp_store_packet[i].NPC;
 
-            ex_packet.rob_index = tmp_load_packet.rob_index;
-            ex_packet.has_dest = tmp_load_packet.has_dest;
+                ex_packet.opa_select = tmp_store_packet[i].opa_select;
+                ex_packet.opb_select = tmp_store_packet[i].opb_select;
 
-            ex_packet.issued_fu_index = tmp_load_packet.issued_fu_index;
+                ex_packet.rs1_value = tmp_store_packet[i].rs1_value;
+                ex_packet.rs2_value = tmp_store_packet[i].rs2_value;
 
-            ex_packet.arch_dest_reg_num = tmp_load_packet.arch_dest_reg_num;
+                ex_packet.dest_reg_idx = tmp_store_packet[i].dest_reg_idx;
 
-        end else if (store_done_process) begin
-            ex_packet.result        = tmp_store_result;
-            ex_packet.take_branch   = 0;
-            
-            // Pass throughs
-            ex_packet.inst = tmp_store_packet.inst;
-            ex_packet.PC = tmp_store_packet.PC;
-            ex_packet.NPC = tmp_store_packet.NPC;
+                ex_packet.alu_func = tmp_store_packet[i].alu_func;
+                ex_packet.rd_mem = tmp_store_packet[i].rd_mem;
+                ex_packet.wr_mem = tmp_store_packet[i].wr_mem;
+                ex_packet.cond_branch = tmp_store_packet[i].cond_branch;
+                ex_packet.uncond_branch = tmp_store_packet[i].uncond_branch;
+                ex_packet.halt = tmp_store_packet[i].halt;
+                ex_packet.illegal = tmp_store_packet[i].illegal;
+                ex_packet.csr_op = tmp_store_packet[i].csr_op;
 
-            ex_packet.opa_select = tmp_store_packet.opa_select;
-            ex_packet.opb_select = tmp_store_packet.opb_select;
+                ex_packet.function_type = tmp_store_packet[i].function_type;
+                ex_packet.valid = tmp_store_packet[i].valid;
 
-            ex_packet.rs1_value = tmp_store_packet.rs1_value;
-            ex_packet.rs2_value = tmp_store_packet.rs2_value;
+                ex_packet.rob_index = tmp_store_packet[i].rob_index;
+                ex_packet.has_dest = tmp_store_packet[i].has_dest;
+                ex_packet.mem_size = tmp_mem_size[i];
 
-            ex_packet.dest_reg_idx = tmp_store_packet.dest_reg_idx;
+                ex_packet.issued_fu_index = tmp_store_packet[i].issued_fu_index;
 
-            ex_packet.alu_func = tmp_store_packet.alu_func;
-            ex_packet.rd_mem = tmp_store_packet.rd_mem;
-            ex_packet.wr_mem = tmp_store_packet.wr_mem;
-            ex_packet.cond_branch = tmp_store_packet.cond_branch;
-            ex_packet.uncond_branch = tmp_store_packet.uncond_branch;
-            ex_packet.halt = tmp_store_packet.halt;
-            ex_packet.illegal = tmp_store_packet.illegal;
-            ex_packet.csr_op = tmp_store_packet.csr_op;
+                ex_packet.arch_dest_reg_num = tmp_store_packet[i].arch_dest_reg_num;
 
-            ex_packet.function_type = tmp_store_packet.function_type;
-            ex_packet.valid = tmp_store_packet.valid;
-
-            ex_packet.rob_index = tmp_store_packet.rob_index;
-            ex_packet.has_dest = tmp_store_packet.has_dest;
-	         ex_packet.mem_size = mem_size;
-
-
-            ex_packet.issued_fu_index = tmp_store_packet.issued_fu_index;
-
-            ex_packet.arch_dest_reg_num = tmp_store_packet.arch_dest_reg_num;
-
-        end else begin 
+            end 
+        end
+        if (!alu_done_process && !mult_done_process && !branch_done_process && !load_done_process && !store_done_process) begin 
             ex_packet = INVALID_EX_CO_PACKET;
         end
     end
@@ -442,11 +446,15 @@ module stage_ex (
     // Chooses which FU to move forward to the next stage
     always_ff @(posedge clock) begin
         if(reset || rollback) begin
-            waiting_fus             <= 0;
+            alu_ready <= 0;
             tmp_alu_result          <= 0;
+            mult_ready <= 0;
             tmp_mult_result         <= 0;
+            branch_ready <= 0;
             tmp_branch_result       <= 0;
+            load_ready <= 0;
             tmp_load_result         <= 0;
+            store_ready <= 0;
             tmp_store_result <= 0;
             tmp_alu_packet <= 0;
             tmp_mult_packet <= 0;
@@ -459,54 +467,59 @@ module stage_ex (
             load_done_process <= 0;
             store_done_process <= 0;
             tmp_take_conditional    <= 0;
+            tmp_mem_size <= 0;
+            tmp_load_en <= 0;
+            tmp_load2Dcache_addr <= 0;
         end
         else begin
             // If any of the FUs is outputting its down signal, add it to a list that signifies that that 
             // FU is ready to move forward to the next stage (waiting_fus)
-            if(alu_done) begin
-                `ifdef DEBUG_PRINT
-                $display("[EX] ALU done, result=%h", alu_result);
-                `endif
-                waiting_fus[ALU]    <= 1;
-                tmp_alu_result      <= alu_result;
-                tmp_alu_packet <= alu_packet;
+            for(int i = 0; i < `NUM_FU_ALU; i++) begin
+                if(alu_done[i]) begin
+                    `ifdef DEBUG_PRINT
+                    $display("[EX] ALU done, result=%h", alu_result[i]);
+                    `endif
+                    // waiting_fus[ALU]    <= 1;
+                    alu_ready[i] <= 1;
+                    tmp_alu_result[i]      <= alu_result[i];
+                    tmp_alu_packet[i] <= alu_packet[i];
+                end
             end
 
-            if(mult_done) begin
-                `ifdef DEBUG_PRINT
-                $display("[EX] MULT done, result=%h", mult_result);
-                `endif
-                waiting_fus[MULT]   <= 1; 
-                tmp_mult_result     <= mult_result;
-                tmp_mult_packet <= mult_packet;
-            end
-            if(branch_done) begin
-                `ifdef DEBUG_PRINT
-                $write("[EX] BRANCH done,");
-                if (take_conditional) begin
-                    $write(" take branch=true");
-                end else begin 
-                    $write(" take branch=false");
+            for(int i = 0; i < `NUM_FU_MULT; i++) begin
+                if(mult_done[i]) begin
+                    mult_ready[i] <= 1;
+                    tmp_mult_result[i]      <= mult_result[i];
+                    tmp_mult_packet[i] <= mult_packet[i];
                 end
-                $display(" branch_result=%h", branch_result);
-                `endif
-                waiting_fus[BRANCH] <= 1; 
-                tmp_branch_result   <= branch_result;
-                tmp_branch_packet <= branch_packet;
-                tmp_take_conditional<= take_conditional;
-            end 
-            if (load_done) begin
-                `ifdef DEBUG_PRINT
-                $display("[EX] LOAD done, result=%h", load_result);
-                `endif
-                waiting_fus[LOAD] <= 1; 
-                tmp_load_result   <= load_result;
-                tmp_load_packet <= load_packet;
             end
-            if (store_done) begin
-                waiting_fus[STORE] <= 1;
-                tmp_store_result <= store_result;
-                tmp_store_packet <= store_packet;
+
+            for(int i = 0; i < `NUM_FU_BRANCH; i++) begin
+                if(branch_done[i]) begin
+                    branch_ready[i] <= 1;
+                    tmp_branch_result[i]      <= branch_result[i];
+                    tmp_take_conditional[i] <= take_conditional[i];
+                    tmp_branch_packet[i] <= branch_packet[i];
+                end
+            end
+
+            for(int i = 0; i < `NUM_FU_LOAD; i++) begin
+                if(load_done[i]) begin
+                    load_ready[i] <= 1;
+                    tmp_load_result[i]      <= load_result[i];
+                    tmp_load_en <= load_en_arr[i];
+                    tmp_load2Dcache_addr[i] <= load2Dcache_addr_arr[i];
+                    tmp_load_packet[i] <= load_packet[i];
+                end
+            end
+
+            for(int i = 0; i < `NUM_FU_STORE; i++) begin
+                if(store_done[i]) begin
+                    store_ready[i] <= 1;
+                    tmp_store_result[i]      <= store_result[i];
+                    tmp_mem_size[i] <= mem_size[i];
+                    tmp_store_packet[i] <= store_packet[i];
+                end
             end
 
             // Defaults
@@ -515,37 +528,59 @@ module stage_ex (
             branch_done_process     <= 0;
             load_done_process <= 0;
             store_done_process <= 0;
-            free_alu[0]             <= 0;
-            free_mult[0]            <= 0;
-            free_branch[0]          <= 0;
-            free_load[0] <= 0;
-            free_store[0] <= 0;
+            free_alu             <= 0;
+            free_mult            <= 0;
+            free_branch          <= 0;
+            free_load <= 0;
+            free_store <= 0;
 
             // Choose one of those FUs from waiting_fus. Set its passthroughs (in an always_comb block above), 
             // and set that free_[FU] variable to 1. Also remember to say that that FU is no longer ready to move on to the
             // next stage. 
-            if(waiting_fus[ALU] == 1) begin
-                waiting_fus[ALU]    <= 0;
-                alu_done_process    <= 1; 
-                free_alu[0]         <= 1;
-            end else if(waiting_fus[MULT] == 1) begin
-                waiting_fus[MULT]   <= 0;
-                mult_done_process   <= 1;
-                free_mult[0]        <= 1;
-            end else if(waiting_fus[BRANCH] == 1) begin
-                waiting_fus[BRANCH] <= 0;
-                branch_done_process <= 1;
-                free_branch[0]      <= 1;
-            end else if(waiting_fus[LOAD] == 1) begin
-                waiting_fus[LOAD] <= 0;
-                load_done_process <= 1;
-                free_load[0] <= 1;
-            end else if(waiting_fus[STORE] == 1) begin
-                waiting_fus[STORE] <= 0;
-                store_done_process <= 1;
-                free_store[0] <= 1;
-            end
-            
+            if(alu_ready != 0) begin
+                for(int i = 0; i < `NUM_FU_ALU; i++) 
+                    if (alu_ready[i]) begin
+                        $display("[EX] ALU done, result=%h", tmp_alu_result[i]);
+                        alu_ready[i] <= 0;
+                        alu_done_process[i] <= 1;
+                        free_alu[i] <= 1;
+                        break;
+                    end
+            end else if(mult_ready != 0) begin
+                for(int i = 0; i < `NUM_FU_MULT; i++) 
+                    if (mult_ready[i]) begin
+                        mult_ready[i] <= 0;
+                        mult_done_process[i] <= 1;
+                        free_mult[i] <= 1;
+                        break;
+                    end
+            end else if(branch_ready != 0) begin
+                for(int i = 0; i < `NUM_FU_BRANCH; i++) 
+                    if (branch_ready[i]) begin
+                        branch_ready[i] <= 0;
+                        branch_done_process[i] <= 1;
+                        free_branch[i] <= 1;
+                        break;
+                    end
+            end else if (load_ready != 0) begin
+                for(int i = 0; i < `NUM_FU_LOAD; i++) 
+                    if (load_ready[i]) begin
+                        load_ready[i] <= 0;
+                        load_done_process[i] <= 1;
+                        free_load[i] <= 1;
+                        load_en <= tmp_load_en;
+                        load2Dcache_addr <= tmp_load2Dcache_addr;
+                        break;
+                    end
+            end else if (store_ready != 0) begin
+                for(int i = 0; i < `NUM_FU_STORE; i++) 
+                    if (store_ready[i]) begin
+                        store_ready[i] <= 0;
+                        store_done_process[i] <= 1;
+                        free_store[i] <= 1;
+                        break;
+                    end
+            end 
         end
     end     
 
