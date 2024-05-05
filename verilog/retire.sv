@@ -24,10 +24,10 @@ module retire(
     output logic             pipeline_commit_wr_en,
     output logic [`XLEN-1:0] pipeline_commit_NPC,
 
-    /* Output of store to memory */
+    /* Output of store to memory (full dword) */
     output logic store_en,
     output logic [`XLEN-1:0] store2Dcache_addr,
-    output logic [`XLEN-1:0] store2Dcache_data,
+    output logic [63:0] store2Dcache_data,
 
 
     // output logic [1:0]       proc2Dmem_command, // The memory command
@@ -61,6 +61,7 @@ module retire(
     incoming_entry.completed_insts = {3'b0, co_packet.valid};
     incoming_entry.PC = co_packet.PC;
     incoming_entry.NPC = co_packet.NPC;
+    incoming_entry.prev_dword = co_packet.prev_dword;
     // TODO this is definitely wrong, in p3 this was exiting immediately not along with instruction \/
     incoming_entry.error_status = co_packet.illegal ? ILLEGAL_INST :
                                       co_packet.halt    ? HALTED_ON_WFI :
@@ -86,9 +87,46 @@ module retire(
     /* Signal dcache if we need to do a store */
     assign store_en = outgoing_entry.function_type == STORE && outgoing_entry.valid && ~reset && ~clear_retire_buffer;
     assign free_store = store_en;
-    assign store2Dcache_addr = outgoing_entry.result;
-    assign store2Dcache_data = outgoing_entry.rs2_value;
 
+    /* Calculate dword to store based on mem size, previous word, and new value */
+    // TODO should probably do this in dcache, and pass full address, previous, and mem_size
+    // OR could have dcache itself remember prev_dword?
+    EXAMPLE_CACHE_BLOCK c;
+    always_comb begin 
+        c.byte_level = outgoing_entry.prev_dword;
+        c.half_level = outgoing_entry.prev_dword;
+        c.word_level = outgoing_entry.prev_dword;
+        if (store_en) begin 
+            case (outgoing_entry.mem_size)
+                BYTE: begin
+                    c.byte_level[outgoing_entry.result[2:0]] = outgoing_entry.rs2_value[7:0];
+                    store2Dcache_data = c.byte_level;
+                end
+                HALF: begin
+                    assert(outgoing_entry.result[0] == 0);
+                    c.half_level[outgoing_entry.result[2:1]] = outgoing_entry.rs2_value[15:0];
+                    store2Dcache_data = c.half_level;
+                end
+                WORD: begin
+                    assert(outgoing_entry.result[1:0] == 0);
+                    c.word_level[outgoing_entry.result[2]] = outgoing_entry.rs2_value[31:0];
+                    store2Dcache_data = c.word_level;
+                end
+                default: begin
+                    assert(outgoing_entry.result[1:0] == 0);
+                    c.byte_level[outgoing_entry.result[2]] = outgoing_entry.rs2_value[31:0];
+                    store2Dcache_data = c.word_level;
+                end
+            endcase
+        end else begin 
+            store2Dcache_data = 64'hfacefeed;
+        end
+    end
+
+    assign store2Dcache_addr = {outgoing_entry.result[31:3],3'b0};
+
+
+    // ---- 
 
 
     // assign proc2Dmem_data = outgoing_entry.rs2_value;

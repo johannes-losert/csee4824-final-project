@@ -34,8 +34,8 @@ module stage_ex (
     input logic         Dcache_valid_out,
 
     /* output to dcache*/
-    output logic         load_en,
-    output logic [`XLEN-1:0] load2Dcache_addr,    // Address sent to Data memory
+    output logic         ex_load_en,
+    output logic [`XLEN-1:0] ex_load2Dcache_addr,    // Address sent to Data memory
 
     /* Input to roll back */
     input logic rollback,
@@ -52,7 +52,8 @@ module stage_ex (
     logic [`XLEN-1:0]   mult_result;
     logic [`XLEN-1:0]   branch_result;
     logic [`XLEN-1:0]   load_result;
-    logic [`XLEN-1:0] store_result;
+    logic [`XLEN-1:0]   store_result;
+    logic [63:0]   prev_dword;
     logic [`XLEN-1:0]   opa_mux_out, opb_mux_out;
     logic               take_conditional;
 
@@ -90,12 +91,13 @@ module stage_ex (
     logic [`XLEN-1:0] tmp_branch_result;
     logic [`XLEN-1:0] tmp_load_result;
     logic [`XLEN-1:0] tmp_store_result;
+    logic [63:0] tmp_store_prev_dword;
     IS_EX_PACKET tmp_alu_packet;
     IS_EX_PACKET tmp_mult_packet;
     IS_EX_PACKET tmp_branch_packet;
     IS_EX_PACKET tmp_load_packet;
     IS_EX_PACKET tmp_store_packet;
-    MEM_SIZE mem_size;
+    MEM_SIZE store_mem_size, tmp_store_mem_size;
 
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
 
@@ -165,6 +167,10 @@ module stage_ex (
         .out_packet (mult_packet)
     );
 
+    // TODO terrible naming, should really combine load/store into single FU
+    logic load_load_en;
+    logic [`XLEN-1:0] load_load2Dcache_addr;
+    
     load load_0 (
         .clock(clock),
         .reset(reset),
@@ -182,8 +188,8 @@ module stage_ex (
         .Dcache_valid_out(Dcache_valid_out),
 
         /* Output to dcache */
-        .load_en(load_en),
-        .load2Dcache_addr(load2Dcache_addr),
+        .load_en(load_load_en),
+        .load2Dcache_addr(load_load2Dcache_addr),
 
         /* Output for pipeline */
         .result(load_result),
@@ -213,24 +219,71 @@ module stage_ex (
     //     .proc2Dmem_data (proc2Dmem_data)
     // );
     
-    // Instantiate the ALU
-    store store_0 (
-        // Inputs
-        //.clock      (clock),
-        //.reset      (reset),
-        .opa        (opa_mux_out),
-        .opb        (opb_mux_out),
-	.inst       (is_ex_reg.inst),
-        .func       (is_ex_reg.alu_func),
-        .store_en     (is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
-        .in_packet  (is_ex_reg),
+    // // Instantiate the ALU
+    // store store_0 (
+    //     // Inputs
+    //     //.clock      (clock),
+    //     //.reset      (reset),
+    //     .opa        (opa_mux_out),
+    //     .opb        (opb_mux_out),
+	// .inst       (is_ex_reg.inst),
+    //     .func       (is_ex_reg.alu_func),
+    //     .store_en     (is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
+    //     .in_packet  (is_ex_reg),
 
-        // Output
-        .result     (store_result),
-        .store_done   (store_done),
-	.mem_size	(mem_size),
-        .out_packet (store_packet)
+    //     // Output
+    //     .result     (store_result),
+    //     .store_done   (store_done),
+	// .mem_size	(mem_size),
+    //     .out_packet (store_packet)
+    // );
+
+    logic store_load_en;
+    logic [`XLEN-1:0] store_load2Dcache_addr;
+
+    store store (
+        .clock(clock),
+        .reset(reset),
+
+        .start_store(is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
+        
+        /* Instruction info */
+        .in_opa(opa_mux_out),
+        .in_opb(opb_mux_out),
+        .in_packet(is_ex_reg),
+        .alu_func(is_ex_reg.alu_func),
+
+        /* Input from dcache */
+        .Dcache_data_out(Dcache_data_out),
+        .Dcache_valid_out(Dcache_valid_out),
+
+        /* Output to dcache */
+        .load_en(store_load_en),
+        .load2Dcache_addr(store_load2Dcache_addr),
+
+        /* Output for pipeline */
+        .result(store_result),
+        .prev_dword(prev_dword),
+        .out_packet(store_packet),
+        .load_done(store_done),
+        .mem_size(store_mem_size)
     );
+
+
+    /* Select whether to send signal from load or store to dcache */
+    always_comb begin 
+        if (load_load_en) begin 
+            ex_load_en = 1;
+            ex_load2Dcache_addr = load_load2Dcache_addr;
+        end else if (store_load_en) begin 
+            ex_load_en = 1;
+            ex_load2Dcache_addr = store_load2Dcache_addr;
+        end else begin 
+            assert(!(load_load_en && store_load_en)); // Shouldn't do both at the same time
+            ex_load_en = 0;
+            ex_load2Dcache_addr = 0;
+        end
+    end 
 
     // Choose which FU to move to the next stage
 
@@ -281,6 +334,7 @@ module stage_ex (
 
             ex_packet.issued_fu_index = tmp_alu_packet.issued_fu_index;
             ex_packet.arch_dest_reg_num = tmp_alu_packet.arch_dest_reg_num;
+            ex_packet.prev_dword = 64'hdeadface;
 
         end else if (mult_done_process) begin
             ex_packet.result        = tmp_mult_result;
@@ -319,6 +373,7 @@ module stage_ex (
             ex_packet.issued_fu_index = tmp_mult_packet.issued_fu_index;
 
             ex_packet.arch_dest_reg_num = tmp_mult_packet.arch_dest_reg_num;
+            ex_packet.prev_dword = 64'hdeadface;
 
         end else if (branch_done_process) begin
             ex_packet.result        = tmp_branch_result;
@@ -357,6 +412,7 @@ module stage_ex (
             ex_packet.issued_fu_index = tmp_branch_packet.issued_fu_index;
 
             ex_packet.arch_dest_reg_num = tmp_branch_packet.arch_dest_reg_num;
+            ex_packet.prev_dword = 64'hdeadface;
 
         end else if (load_done_process) begin
             ex_packet.result        = tmp_load_result;
@@ -395,6 +451,7 @@ module stage_ex (
             ex_packet.issued_fu_index = tmp_load_packet.issued_fu_index;
 
             ex_packet.arch_dest_reg_num = tmp_load_packet.arch_dest_reg_num;
+            ex_packet.prev_dword = 64'hdeadface;
 
         end else if (store_done_process) begin
             ex_packet.result        = tmp_store_result;
@@ -427,12 +484,15 @@ module stage_ex (
 
             ex_packet.rob_index = tmp_store_packet.rob_index;
             ex_packet.has_dest = tmp_store_packet.has_dest;
-	         ex_packet.mem_size = mem_size;
+	         ex_packet.mem_size = tmp_store_mem_size;
 
 
             ex_packet.issued_fu_index = tmp_store_packet.issued_fu_index;
 
             ex_packet.arch_dest_reg_num = tmp_store_packet.arch_dest_reg_num;
+
+            ex_packet.prev_dword = tmp_store_prev_dword;
+
 
         end else begin 
             ex_packet = INVALID_EX_CO_PACKET;
@@ -448,6 +508,8 @@ module stage_ex (
             tmp_branch_result       <= 0;
             tmp_load_result         <= 0;
             tmp_store_result <= 0;
+            tmp_store_prev_dword <= 0;
+            tmp_store_mem_size <= 0;
             tmp_alu_packet <= 0;
             tmp_mult_packet <= 0;
             tmp_branch_packet <= 0;
@@ -506,7 +568,9 @@ module stage_ex (
             if (store_done) begin
                 waiting_fus[STORE] <= 1;
                 tmp_store_result <= store_result;
+                tmp_store_prev_dword <= prev_dword;
                 tmp_store_packet <= store_packet;
+                tmp_store_mem_size <= store_mem_size;
             end
 
             // Defaults

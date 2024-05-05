@@ -103,7 +103,7 @@ module pipeline (
     /* Signals from store (in retire stage) to dcache */
     logic store_en;
     logic [`XLEN-1:0] store2Dcache_addr;
-    logic [`XLEN-1:0] store2Dcache_data;
+    logic [63:0] store2Dcache_data;
 
     /* Signals from load (in execute stage) to dcache */
     logic load_en;
@@ -541,8 +541,8 @@ module pipeline (
         .Dcache_valid_out(Dcache_valid_out),
 
         /* output to dcache*/
-        .load_en(load_en),
-        .load2Dcache_addr(load2Dcache_addr),    // Address sent to Data memory
+        .ex_load_en(load_en),
+        .ex_load2Dcache_addr(load2Dcache_addr),    // Address sent to Data memory
 
         // outputs
         .ex_packet(ex_packet),
