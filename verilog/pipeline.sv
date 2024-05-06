@@ -379,7 +379,10 @@ module pipeline (
             if_id_reg.NPC   <= 0;
             if_id_reg.PC    <= 0;
         end else if (if_id_enable) begin
-            if_id_reg <= if_packet;
+            if (id_needs_stall)
+                if_id_reg <= if_id_reg;
+            else
+                if_id_reg <= if_packet;
         end
     end
 

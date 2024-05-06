@@ -347,15 +347,17 @@ module dispatch (
     /* Calculate STALL logic */
     //logic rs_full;
     
-    assign rs_full = (alu_entries_full & (decoded_packet.function_type == ALU))
+    assign rs_full = if_id_packet.valid && ((alu_entries_full & (decoded_packet.function_type == ALU))
                    | (mult_entries_full & (decoded_packet.function_type == MULT)) 
                    | (load_entries_full & (decoded_packet.function_type == LOAD)) 
                    | (store_entries_full & (decoded_packet.function_type == STORE)) 
-                   | (branch_entries_full & (decoded_packet.function_type == BRANCH));
+                   | (branch_entries_full & (decoded_packet.function_type == BRANCH)));
 
     assign is_branch = decoded_packet.function_type == BRANCH;
                    
     // rstall if ROB full or RS full or free list empty
+
+    /* Stall if current packet couldn't be accepted */
     assign stall = (rob_full | rs_full | free_list_empty);
 
     assign branch_decoded = is_branch;

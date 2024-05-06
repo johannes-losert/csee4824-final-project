@@ -69,7 +69,11 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
 
     // To load (stage ex)
     output [63:0] Dcache_data_out, // Data is mem[proc2Dcache_addr]
-    output Dcache_valid_out // When valid is high
+    output Dcache_valid_out, // When valid is high
+
+
+    // DEBUG 
+    logic first_load_cycle
 );
 
     // ---- Cache data ---- //
@@ -148,6 +152,7 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
 
     // ---- Main cache logic ---- //
 
+
     logic [3:0] current_mem_tag; // The current memory tag we might be waiting on
     //logic miss_outstanding; // Whether a miss has received its response tag to wait on
 
@@ -178,11 +183,18 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
             last_index       <= -1; // These are -1 to get ball rolling when
             last_tag         <= -1; // reset goes low because addr "changes"
             current_mem_tag  <= 0;
+            has_load_tag <= 0;
+            awaiting_store_tag <= 0;
             // miss_outstanding <= 0;
             dcache_data      <= 0; // Set all cache data to 0 (including valid bits)
         end else begin
             last_index       <= current_index;
             last_tag         <= current_tag;
+
+
+
+
+            
             // miss_outstanding <= unanswered_miss;
             if (update_mem_tag) begin
                 current_mem_tag <= Dmem2proc_response;

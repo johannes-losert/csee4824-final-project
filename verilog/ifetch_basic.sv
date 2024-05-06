@@ -110,8 +110,10 @@ module ifetch_basic (
             n_pending_branch_pc = pending_branch_pc;
         end
 
+        /* if_valid is true if dispatch accepted the packet in if_packet */
         if (if_valid) begin       
             if (!waiting_on_inst) begin 
+                /* last packet accepted, and we're not waiting--move on */
                 // unique case (gnt)
                 //     3'b100 : n_PC_reg = certain_branch_pc_temp;
                 //     3'b010 : n_PC_reg = branch_pred_pc;
@@ -132,12 +134,16 @@ module ifetch_basic (
                 end
 
                 n_waiting_on_inst = 1;
-
+                
+                /* Clear the output, last packet was accepted */
                 n_if_packet.inst = `NOP;
                 n_if_packet.PC = PC_reg;
                 n_if_packet.NPC = PC_reg + 4;
                 n_if_packet.valid = 0;
             end else if (waiting_on_inst) begin 
+
+                /* if_packet accepted, but still waiting on an inst */
+
                 n_PC_reg = PC_reg;
                 // if (!received_certain_branch) begin
                 //     n_received_certain_branch = received_certain_branch;
@@ -145,12 +151,14 @@ module ifetch_basic (
 
                 if (Icache2proc_data_valid) begin
                     // pushing to the tail of inst buffer
+                    /* Instruction just came it, take it */
                     n_waiting_on_inst = 0; 
                     n_if_packet.inst = PC_reg[2] ? Icache2proc_data[63:32] : Icache2proc_data[31:0];
                     n_if_packet.PC = PC_reg;
                     n_if_packet.NPC = PC_reg + 4;
                     n_if_packet.valid = 1;
                 end else if (!Icache2proc_data_valid) begin
+                    /* Still waiting, keep packet as nop */
                     n_waiting_on_inst = 1; 
                     n_if_packet.inst = `NOP;
                     n_if_packet.PC = PC_reg;
@@ -159,6 +167,8 @@ module ifetch_basic (
                 end
             end
         end else begin
+            /* If_packet not yet accepted, so try again next cycle */
+
             // if (!received_certain_branch) begin 
             //     n_received_certain_branch = received_certain_branch;
             // end
