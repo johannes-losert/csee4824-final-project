@@ -154,7 +154,7 @@ module stage_ex (
     multiply mult_0 (
         // Inputs
         .clock      (clock),
-        .reset      (reset),
+        .reset      (reset || rollback),
         .mcand      (opa_mux_out),
         .mplier     (opb_mux_out),
         .func       (is_ex_reg.alu_func),
@@ -173,7 +173,7 @@ module stage_ex (
     
     load load_0 (
         .clock(clock),
-        .reset(reset),
+        .reset(reset || rollback),
 
         .start_load(is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
         
@@ -243,7 +243,7 @@ module stage_ex (
 
     store store (
         .clock(clock),
-        .reset(reset),
+        .reset(reset || rollback),
 
         .start_store(is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
         

@@ -13,8 +13,8 @@
 // all files should `include "sys_defs.svh" to at least define the timescale
 `timescale 1ns/100ps
 
- `define DEBUG_PRINT
-`define MAX_CYCLES 2000
+//  `define DEBUG_PRINT
+`define MAX_CYCLES 20000
 
 ///////////////////////////////////
 // ---- Starting Parameters ---- //

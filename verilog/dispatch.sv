@@ -334,7 +334,7 @@ module dispatch (
     end
 
     always_ff @(posedge clock) begin
-        if (reset) begin
+        if (reset || rollback) begin
             ls_issue_enable <= 1;
         end else begin
             ls_issue_enable <= next_ls_issue_enable;
