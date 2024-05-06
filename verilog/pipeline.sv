@@ -40,12 +40,12 @@ module pipeline (
     output logic [4:0]       pipeline_commit_wr_idx,
     output logic [`XLEN-1:0] pipeline_commit_wr_data,
     output logic             pipeline_commit_wr_en,
-    output logic [`XLEN-1:0] pipeline_commit_NPC
+    output logic [`XLEN-1:0] pipeline_commit_NPC,
 
     // debug 
-    output [3:0] mem2icache_response,
-    output [63:0] mem2icache_data,
-    output [3:0] mem2icache_tag
+    output logic [3:0] mem2icache_response,
+    output logic [63:0] mem2icache_data,
+    output logic [3:0] mem2icache_tag
 
     // Debug outputs: these signals are solely used for debugging in testbenches
     // Do not change for project 3
@@ -129,6 +129,7 @@ module pipeline (
             proc2mem_command = proc2Dmem_command;
             proc2mem_addr = proc2Dmem_addr;
             proc2mem_data = proc2Dmem_data;
+            mem2icache_response = 0;
         end else begin
             proc2mem_command = proc2Imem_command;
             proc2mem_addr = proc2Imem_addr;

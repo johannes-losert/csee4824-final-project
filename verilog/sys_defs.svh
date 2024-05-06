@@ -15,6 +15,8 @@
 
 /* If DEBUG_PRINT is defined, don't set MAX_CYCLES to more than ~2000 */
 //  `define DEBUG_PRINT
+// `define MAX_CYCLES 10000
+
 `define MAX_CYCLES 200000
 
 ///////////////////////////////////
