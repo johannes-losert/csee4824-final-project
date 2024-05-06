@@ -24,10 +24,13 @@ module map_table (
 
     // Retire operation (copies this preg to retired_preg)
     input logic [`REG_IDX_SZ:0] retire_arch_reg,
+    input PREG retire_phys_reg,
     input logic retire_enable,
     
     // Restore operation (copies all retired_pregs back to preg)
     input logic restore_enable,
+    input logic [`REG_IDX_SZ:0] immune_reg_idx, // Don't restore this register
+    input PREG immune_preg,
 
     // SET READY operation (CDB)
     input logic set_ready_enable,
@@ -84,7 +87,8 @@ module map_table (
             arch_map_phys_reg_out.reg_num = `ZERO_REG;
         end else begin 
             if (retire_enable && (retire_arch_reg == arch_map_arch_reg_idx)) begin
-                arch_map_phys_reg_out = preg_entries[arch_map_arch_reg_idx];
+               // arch_map_phys_reg_out = preg_entries[arch_map_arch_reg_idx];
+                arch_map_phys_reg_out = retire_phys_reg;
             end else begin
                 arch_map_phys_reg_out = retired_preg_entries[arch_map_arch_reg_idx];
             end
@@ -221,17 +225,27 @@ module map_table (
 
             // If retiring, copy preg to retired_pre
             if (retire_enable) begin
-                retired_preg_entries[retire_arch_reg] <= preg_entries[retire_arch_reg];
+                //etired_preg_entries[retire_arch_reg] <= preg_entries[retire_arch_reg];
+                retired_preg_entries[retire_arch_reg].reg_num <= retire_phys_reg.reg_num;
                 // If retiring and broadcast to CDB, update ready bit (TODO check logic)
-                if (set_ready_enable && preg_entries[retire_arch_reg].reg_num == ready_phys_idx) begin
+                if (set_ready_enable && retire_phys_reg.reg_num == ready_phys_idx) begin
                     retired_preg_entries[retire_arch_reg].ready <= 1;
+                end else begin 
+                    retired_preg_entries[retire_arch_reg].ready <= retire_phys_reg.ready;
                 end
+                // if (set_ready_enable && preg_entries[retire_arch_reg].reg_num == ready_phys_idx) begin
+                //     retired_preg_entries[retire_arch_reg].ready <= 1;
+                // end
             end
 
             // If restoring, copy all retired_pregs back to preg
             if (restore_enable) begin
                 for (int i = 0; i < `PHYS_REG_SZ; i++) begin
-                    preg_entries[i] <= retired_preg_entries[i];
+                    if (i == immune_reg_idx) begin
+                        preg_entries[i] <= immune_preg;
+                    end else begin 
+                        preg_entries[i] <= retired_preg_entries[i];
+                    end
                 end
             end
 

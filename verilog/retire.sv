@@ -16,6 +16,9 @@ module retire(
     output logic move_head,
     output logic free_store,
 
+    output logic [`REG_IDX_SZ:0] retire_reg_arch_idx,
+    output PREG retire_reg_preg,
+
     //output of the processor
     output logic [3:0]       pipeline_completed_insts,
     output EXCEPTION_CODE    pipeline_error_status,
@@ -68,7 +71,8 @@ module retire(
                                       /*(Dcache2store_response==4'h0) ? LOAD_ACCESS_FAULT : */
                                       NO_ERROR;
         incoming_entry.regfile_en = co_packet.regfile_en;
-        incoming_entry.regfile_idx = co_packet.arch_dest_reg_num; // Switch from phys to arch compared to actual
+        incoming_entry.regfile_idx = co_packet.regfile_idx;
+        incoming_entry.arch_dest_reg_num = co_packet.arch_dest_reg_num; 
         incoming_entry.regfile_data = co_packet.regfile_data;
     end 
 
@@ -83,6 +87,10 @@ module retire(
 
    // Move head if outgoing entry is valid
     assign move_head = ~reset && ~clear_retire_buffer && outgoing_entry.valid;
+
+    assign retire_reg_arch_idx = outgoing_entry.arch_dest_reg_num;
+    assign retire_reg_preg.reg_num = outgoing_entry.regfile_idx;
+    assign retire_reg_preg.ready = 1;
 
     /* Signal dcache if we need to do a store */
     assign store_en = outgoing_entry.function_type == STORE && outgoing_entry.valid && ~reset && ~clear_retire_buffer;
@@ -143,21 +151,21 @@ module retire(
 	// end
     // end
 
-typedef struct packed {
-    INST              inst;
-    logic [3:0]       completed_insts;
-    logic [`XLEN-1:0] PC;
-    logic [`XLEN-1:0] NPC;
-    EXCEPTION_CODE    error_status;
-    logic             regfile_en;   // register write enable
-    logic [`PHYS_REG_IDX_SZ:0]  regfile_idx;  // register write index
-    logic [`XLEN-1:0] regfile_data; // register write data 
-    logic             valid;
-    FUNIT 	      function_type;
-    MEM_SIZE          mem_size;
-    logic [`XLEN-1:0] rs2_value;
-    logic [`XLEN-1:0] result;
-} RETIRE_ENTRY;
+// typedef struct packed {
+//     INST              inst;
+//     logic [3:0]       completed_insts;
+//     logic [`XLEN-1:0] PC;
+//     logic [`XLEN-1:0] NPC;
+//     EXCEPTION_CODE    error_status;
+//     logic             regfile_en;   // register write enable
+//     logic [`PHYS_REG_IDX_SZ:0]  regfile_idx;  // register write index
+//     logic [`XLEN-1:0] regfile_data; // register write data 
+//     logic             valid;
+//     FUNIT 	      function_type;
+//     MEM_SIZE          mem_size;
+//     logic [`XLEN-1:0] rs2_value;
+//     logic [`XLEN-1:0] result;
+// } RETIRE_ENTRY;
 
 
     function void print_retire_entry(int i, RETIRE_ENTRY ret_entry);
@@ -205,7 +213,7 @@ typedef struct packed {
         if (outgoing_entry.valid) begin 
             pipeline_completed_insts = outgoing_entry.completed_insts;
             pipeline_error_status    = outgoing_entry.error_status;
-            pipeline_commit_wr_idx   = outgoing_entry.regfile_idx;
+            pipeline_commit_wr_idx   = outgoing_entry.arch_dest_reg_num;
             pipeline_commit_wr_data  = outgoing_entry.regfile_data;
             pipeline_commit_wr_en    = outgoing_entry.regfile_en;
             pipeline_commit_NPC      = outgoing_entry.NPC;

@@ -15,7 +15,9 @@
 
 /* If DEBUG_PRINT is defined, don't set MAX_CYCLES to more than ~2000 */
 //  `define DEBUG_PRINT
-`define MAX_CYCLES 20000
+// `define MAX_CYCLES 10000
+
+`define MAX_CYCLES 2000000
 
 ///////////////////////////////////
 // ---- Starting Parameters ---- //
@@ -869,6 +871,8 @@ typedef struct packed {
     MEM_SIZE          mem_size;
     logic [`XLEN-1:0] rs2_value;
     logic [`XLEN-1:0] result;
+
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; 
 
     logic [63:0] prev_dword; // Only for stores
 } RETIRE_ENTRY;

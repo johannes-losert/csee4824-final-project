@@ -19,7 +19,6 @@ module stage_ex (
     input                               clock,
     input                               reset,
     input IS_EX_PACKET                  is_ex_reg,
-    // input logic [`MAX_FU_INDEX-1:0]     issue_fu_index, // add this to packet at earlier stage of the pipeline
 
     output EX_CO_PACKET ex_packet,
 
@@ -39,6 +38,8 @@ module stage_ex (
 
     /* Input to roll back */
     input logic rollback,
+    output logic [`REG_IDX_SZ:0] rollback_immune_reg,
+    output PREG rollback_immune_preg,
 
     // debug outputs
     output IS_EX_PACKET alu_packet,
@@ -105,9 +106,6 @@ module stage_ex (
 
     // Instantiate the ALU
     alu alu_0 (
-        // Inputs
-        //.clock      (clock),
-        //.reset      (reset),
         .opa        (opa_mux_out),
         .opb        (opb_mux_out),
         .func       (is_ex_reg.alu_func),
@@ -122,8 +120,6 @@ module stage_ex (
 
     branch_calculation branch_0 (
         // Inputs
-        //.clock      (clock),
-        //.reset      (reset),
         .opa        (opa_mux_out),
         .opb        (opb_mux_out),
         .alu_func   (is_ex_reg.alu_func),
@@ -139,8 +135,6 @@ module stage_ex (
     // Instantiate the conditional branch module
     conditional_branch conditional_branch_0 (
         // Inputs
-        //.clock      (clock),
-        //.reset      (reset),
         .func       (is_ex_reg.inst.b.funct3), // instruction bits for which condition to check
         .rs1        (is_ex_reg.rs1_value),
         .rs2        (is_ex_reg.rs2_value),
@@ -196,47 +190,6 @@ module stage_ex (
         .out_packet(load_packet),
         .load_done(load_done)
     );
-
-
-    // load load (
-    //     .clock (clock), 
-    //     .reset (reset),
-    //     .opa (opa_mux_out),
-    //     .opb (opb_mux_out),
-    //     .in_packet (is_ex_reg),
-    //     .alu_func (is_ex_reg.alu_func),
-
-    //     .start_load (is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
-    //     .Dmem2proc_data (Dmem2proc_data),
-    //     .Dmem2proc_response (Dmem2proc_response),
-
-    //     .result (load_result),
-    //     .load_done (load_done),
-    //     .out_packet (load_packet),
-    //     .proc2Dmem_command (proc2Dmem_command),
-    //     .proc2Dmem_size (proc2Dmem_size),
-    //     .proc2Dmem_addr (proc2Dmem_addr),
-    //     .proc2Dmem_data (proc2Dmem_data)
-    // );
-    
-    // // Instantiate the ALU
-    // store store_0 (
-    //     // Inputs
-    //     //.clock      (clock),
-    //     //.reset      (reset),
-    //     .opa        (opa_mux_out),
-    //     .opb        (opb_mux_out),
-	// .inst       (is_ex_reg.inst),
-    //     .func       (is_ex_reg.alu_func),
-    //     .store_en     (is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
-    //     .in_packet  (is_ex_reg),
-
-    //     // Output
-    //     .result     (store_result),
-    //     .store_done   (store_done),
-	// .mem_size	(mem_size),
-    //     .out_packet (store_packet)
-    // );
 
     logic store_load_en;
     logic [`XLEN-1:0] store_load2Dcache_addr;
@@ -301,6 +254,8 @@ module stage_ex (
         if(alu_done_process) begin
             ex_packet.result        = tmp_alu_result;
             ex_packet.take_branch   = 0;
+            rollback_immune_reg = 0;
+            rollback_immune_preg = 0;
 	        ex_packet.mem_size = 0;
 
 
@@ -339,7 +294,9 @@ module stage_ex (
         end else if (mult_done_process) begin
             ex_packet.result        = tmp_mult_result;
             ex_packet.take_branch   = 0;
-	    ex_packet.mem_size = 0;
+            rollback_immune_reg = 0;
+            rollback_immune_preg = 0;
+	        ex_packet.mem_size = 0;
 
             
             // Pass throughs
@@ -378,6 +335,9 @@ module stage_ex (
         end else if (branch_done_process) begin
             ex_packet.result        = tmp_branch_result;
             ex_packet.take_branch   = tmp_branch_packet.uncond_branch || (tmp_branch_packet.cond_branch && tmp_take_conditional);
+            rollback_immune_reg = tmp_branch_packet.arch_dest_reg_num;
+            rollback_immune_preg.reg_num = tmp_branch_packet.dest_reg_idx;
+            rollback_immune_preg.ready = 1;
 	        ex_packet.mem_size = 0;
 
             // Pass throughs
@@ -417,6 +377,8 @@ module stage_ex (
         end else if (load_done_process) begin
             ex_packet.result        = tmp_load_result;
             ex_packet.take_branch   = 0;
+                 rollback_immune_reg = 0;
+                 rollback_immune_preg = 0;
 	        ex_packet.mem_size = 0;
 
             
@@ -456,6 +418,8 @@ module stage_ex (
         end else if (store_done_process) begin
             ex_packet.result        = tmp_store_result;
             ex_packet.take_branch   = 0;
+                 rollback_immune_reg = 0;
+                 rollback_immune_preg = 0;
             
             // Pass throughs
             ex_packet.inst = tmp_store_packet.inst;
