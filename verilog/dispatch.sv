@@ -261,6 +261,11 @@ module dispatch (
     assign rs_ready_reg.reg_num = cdb_ready_reg;
     assign rs_ready_reg.ready = cdb_broadcast_en; // TODO this is duplicate
 
+    logic load_entries_full, store_entries_full, alu_entries_full, mult_entries_full, branch_entries_full;
+    logic load_store_entries_full;
+    
+    assign load_store_entries_full = load_entries_full | store_entries_full;
+
     /* TODO figure out if we ever need to not issue */
     logic issue_enable, ls_issue_enable, next_ls_issue_enable;
     assign issue_enable = 1;
@@ -352,9 +357,11 @@ module dispatch (
     
     assign rs_full = if_id_packet.valid && ((alu_entries_full & (decoded_packet.function_type == ALU))
                    | (mult_entries_full & (decoded_packet.function_type == MULT)) 
-                   | (load_entries_full & (decoded_packet.function_type == LOAD)) 
-                   | (store_entries_full & (decoded_packet.function_type == STORE)) 
+                   | (load_store_entries_full & (decoded_packet.function_type == LOAD || decoded_packet.function_type == STORE))
                    | (branch_entries_full & (decoded_packet.function_type == BRANCH)));
+                  /* | (load_entries_full & (decoded_packet.function_type == LOAD)) 
+                   | (store_entries_full & (decoded_packet.function_type == STORE)) */
+                
 
     assign is_branch = decoded_packet.function_type == BRANCH;
                    
