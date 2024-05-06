@@ -102,6 +102,7 @@ module stage_ex (
     logic [`MAX_FU_INDEX-1:0] issue_fu_index;
     assign issue_fu_index = is_ex_reg.issued_fu_index;
 
+    // Instantiate functional units
     genvar idx;
     generate
         for (idx = 0; idx < `NUM_FU_ALU; idx++) begin : generate_alu_fus
@@ -199,47 +200,6 @@ module stage_ex (
         .out_packet(load_packet),
         .load_done(load_done)
     );
-
-
-    // load load (
-    //     .clock (clock), 
-    //     .reset (reset),
-    //     .opa (opa_mux_out),
-    //     .opb (opb_mux_out),
-    //     .in_packet (is_ex_reg),
-    //     .alu_func (is_ex_reg.alu_func),
-
-    //     .start_load (is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == 0),
-    //     .Dmem2proc_data (Dmem2proc_data),
-    //     .Dmem2proc_response (Dmem2proc_response),
-
-    //     .result (load_result),
-    //     .load_done (load_done),
-    //     .out_packet (load_packet),
-    //     .proc2Dmem_command (proc2Dmem_command),
-    //     .proc2Dmem_size (proc2Dmem_size),
-    //     .proc2Dmem_addr (proc2Dmem_addr),
-    //     .proc2Dmem_data (proc2Dmem_data)
-    // );
-    
-    // // Instantiate the ALU
-    // store store_0 (
-    //     // Inputs
-    //     //.clock      (clock),
-    //     //.reset      (reset),
-    //     .opa        (opa_mux_out),
-    //     .opb        (opb_mux_out),
-	// .inst       (is_ex_reg.inst),
-    //     .func       (is_ex_reg.alu_func),
-    //     .store_en     (is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == 0),
-    //     .in_packet  (is_ex_reg),
-
-    //     // Output
-    //     .result     (store_result),
-    //     .store_done   (store_done),
-	// .mem_size	(mem_size),
-    //     .out_packet (store_packet)
-    // );
 
     logic store_load_en;
     logic [`XLEN-1:0] store_load2Dcache_addr;
@@ -536,7 +496,7 @@ module stage_ex (
             tmp_store_mem_size <= 0;
         end
         else begin
-            // If any of the FUs is outputting its down signal, add it to a list that signifies that that 
+            // If any of the FUs is outputting its done signal, add it to a list that signifies that that 
             // FU is ready to move forward to the next stage (waiting_fus)
             for(int i = 0; i < `NUM_FU_ALU; i++) begin
                 if(alu_done[i]) begin
