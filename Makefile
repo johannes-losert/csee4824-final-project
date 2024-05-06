@@ -333,7 +333,6 @@ SOURCES = verilog/pipeline.sv \
 		  verilog/issue.sv \
 		  verilog/map_table.sv \
 		  verilog/mem_controller.sv \
-		  verilog/psel_gen.sv \
 		  verilog/reservation_station.sv \
 		  verilog/retire.sv \
 		  verilog/rob.sv \
