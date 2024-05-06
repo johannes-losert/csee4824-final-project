@@ -14,11 +14,14 @@ module free_list (
 
     // Rollback mask includes things from ROB to free (TODO could pack this to be more efficient if actually synthesizing)
     input logic rollback,
-    input logic [`PHYS_REG_SZ-1:0] rollback_mask
+    input logic [`PHYS_REG_SZ-1:0] rollback_mask,
+
+    // DEBUG 
+    output logic [`PHYS_REG_SZ-1:0] free_list_bitmap
 
 );
 
-    logic [`PHYS_REG_SZ-1:0] free_list_bitmap;
+   // logic [`PHYS_REG_SZ-1:0] free_list_bitmap;
 
     /* True if current dequeue_pr comes via enqueue_pr, not the bitmap */
     logic passthrough;

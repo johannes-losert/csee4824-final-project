@@ -91,21 +91,32 @@ module map_table (
         end
     end
 
-    // GET old dest (TODO test that new dest doesn't corrupt this)
+
+    // GET old dest 
     always_comb begin 
         if (arch_dest_idx == `ZERO_REG) begin
             old_dest_pr.ready = 1;
             old_dest_pr.reg_num = `ZERO_REG;
         end else begin 
-            if (set_ready_enable && (ready_phys_idx == temp_old_dest_pr.reg_num)) begin
-                old_dest_pr.ready = 1;
-            end else begin
-                old_dest_pr.ready = temp_old_dest_pr.ready;
-            end 
-
-            old_dest_pr.reg_num = temp_old_dest_pr.reg_num;
+            old_dest_pr = preg_entries[arch_dest_idx];
         end
-    end 
+    end
+
+    // // GET old dest (TODO test that new dest doesn't corrupt this)
+    // always_comb begin 
+    //     if (arch_dest_idx == `ZERO_REG) begin
+    //         old_dest_pr.ready = 1;
+    //         old_dest_pr.reg_num = `ZERO_REG;
+    //     end else begin 
+    //         if (set_ready_enable && (ready_phys_idx == temp_old_dest_pr.reg_num)) begin
+    //             old_dest_pr.ready = 1;
+    //         end else begin
+    //             old_dest_pr.ready = temp_old_dest_pr.ready;
+    //         end 
+
+    //         old_dest_pr.reg_num = temp_old_dest_pr.reg_num;
+    //     end
+    // end 
 
     function void print_mt_entry(int arch_idx, PREG entry); 
         $write("%0d \t| ", arch_idx);
@@ -182,10 +193,10 @@ module map_table (
             for (int i = 0; i < `PHYS_REG_SZ; i++) begin
                 // TODO make sure this is right
                 preg_entries[i].reg_num <= 0;
-                preg_entries[i].ready <= 0;
+                preg_entries[i].ready <= 1;
 
                 retired_preg_entries[i].reg_num <= 0;
-                retired_preg_entries[i].ready <= 0;
+                retired_preg_entries[i].ready <= 1;
             end
         end else begin 
             // Store for forwarding (in case new dest overwrites)

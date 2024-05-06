@@ -69,7 +69,12 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
 
     // To load (stage ex)
     output [63:0] Dcache_data_out, // Data is mem[proc2Dcache_addr]
-    output Dcache_valid_out // When valid is high
+    output Dcache_valid_out, // When valid is high
+
+
+    // DEBUG 
+    output logic last_load_en,
+    output logic last_store_en
 );
 
     // ---- Cache data ---- //
@@ -129,8 +134,8 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
     // If load_en and invalid, send BUS_LOAD to memory
     // If store_en, send BUS_STORE to memory
     // Otherwise, send BUS_NONE
-    assign proc2Dmem_command = (load_en && !Dcache_valid_out) ? BUS_LOAD
-                             : (store_en) ? BUS_STORE
+    assign proc2Dmem_command = ((load_en != last_load_en) && load_en && !Dcache_valid_out) ? BUS_LOAD
+                             : ((store_en != last_store_en) && store_en) ? BUS_STORE
                              : BUS_NONE;
 
     /* Calculate 64-bit data to send to memory */
@@ -148,8 +153,9 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
 
     // ---- Main cache logic ---- //
 
+
     logic [3:0] current_mem_tag; // The current memory tag we might be waiting on
-    logic miss_outstanding; // Whether a miss has received its response tag to wait on
+    //logic miss_outstanding; // Whether a miss has received its response tag to wait on
 
     wire got_mem_data = (current_mem_tag == Dmem2proc_tag) && (current_mem_tag != 0);
 
@@ -158,12 +164,13 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
     // Set mem tag to zero if we changed_addr, and keep resetting while there is
     // a miss_outstanding. Then set to zero when we got_mem_data.
     // (this relies on Imem2proc_response being zero when there is no request)
-    wire update_mem_tag = changed_addr || miss_outstanding || got_mem_data;
+    // wire update_mem_tag = changed_addr || miss_outstanding || got_mem_data;
+    wire update_mem_tag = changed_addr || got_mem_data;
 
     // If we have a new miss or still waiting for the response tag, we might
     // need to wait for the response tag because dcache has priority over icache
-    wire unanswered_miss = changed_addr ? !Dcache_valid_out
-                                        : miss_outstanding && (Dmem2proc_response == 0);
+    // wire unanswered_miss = changed_addr ? !Dcache_valid_out
+    //                                     : miss_outstanding && (Dmem2proc_response == 0);
 
     // Keep sending memory requests until we receive a response tag or change addresses
     //assign proc2Dmem_command = (miss_outstanding && !changed_addr) ? BUS_LOAD : BUS_NONE;
@@ -177,12 +184,17 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
             last_index       <= -1; // These are -1 to get ball rolling when
             last_tag         <= -1; // reset goes low because addr "changes"
             current_mem_tag  <= 0;
-            miss_outstanding <= 0;
+            // miss_outstanding <= 0;
             dcache_data      <= 0; // Set all cache data to 0 (including valid bits)
         end else begin
             last_index       <= current_index;
             last_tag         <= current_tag;
-            miss_outstanding <= unanswered_miss;
+
+
+            last_load_en <= load_en;
+            last_store_en <= store_en;
+
+            // miss_outstanding <= unanswered_miss;
             if (update_mem_tag) begin
                 current_mem_tag <= Dmem2proc_response;
             end

@@ -188,6 +188,7 @@ module pipeline (
     // Rollback signals 
     logic id_rollback; // TODO probably more
     logic ex_rollback;
+    logic co_rollback;
 
    // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
 
@@ -273,7 +274,7 @@ module pipeline (
 
 
     /* if valid unless id needs stall, or we are taking a branch */
-    assign if_valid = ~id_needs_stall && ~branch_lock && ~branch_decoded || branch_resolved; 
+    assign if_valid = ~id_needs_stall; // && ~branch_lock && ~branch_decoded || branch_resolved; 
     assign branch_resolved = ex_packet.cond_branch || ex_packet.uncond_branch;
 
     // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
@@ -293,25 +294,26 @@ module pipeline (
     assign id_rollback = take_branch;
     assign re_rollback = take_branch;
     assign ex_rollback = take_branch;
+    assign co_rollback = take_branch;
 
     assign certain_branch_req = take_branch;
     assign certain_branch_pc = branch_target; 
 
-    always_comb begin 
-        if (branch_lock) begin
-            if (branch_resolved) begin 
-                n_branch_lock = 0;
-            end else begin 
-                n_branch_lock = 1;
-            end
-        end else begin 
-            if (branch_decoded) begin 
-                n_branch_lock = 1;
-            end else begin 
-                n_branch_lock = 0;
-            end
-        end
-    end
+    // always_comb begin 
+    //     if (branch_lock) begin
+    //         if (branch_resolved) begin 
+    //             n_branch_lock = 0;
+    //         end else begin 
+    //             n_branch_lock = 1;
+    //         end
+    //     end else begin 
+    //         if (branch_decoded) begin 
+    //             n_branch_lock = 1;
+    //         end else begin 
+    //             n_branch_lock = 0;
+    //         end
+    //     end
+    // end
     assign branch_pred_req = 0; // commented out for branch prediction 
     
     //////////////////////////////////////////////////
@@ -379,7 +381,10 @@ module pipeline (
             if_id_reg.NPC   <= 0;
             if_id_reg.PC    <= 0;
         end else if (if_id_enable) begin
-            if_id_reg <= if_packet;
+            if (id_needs_stall)
+                if_id_reg <= if_id_reg;
+            else
+                if_id_reg <= if_packet;
         end
     end
 
@@ -597,6 +602,8 @@ module pipeline (
     complete complete_0 (
         .ex_co_reg(ex_co_reg),
         .co_packet(co_packet),
+
+        .rollback(co_rollback),
 
         // CDB output
         .co_output_en(cdb_broadcast_en),
