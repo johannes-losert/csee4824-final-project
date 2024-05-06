@@ -73,7 +73,8 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
 
 
     // DEBUG 
-    logic first_load_cycle
+    output logic last_load_en,
+    output logic last_store_en
 );
 
     // ---- Cache data ---- //
@@ -133,8 +134,8 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
     // If load_en and invalid, send BUS_LOAD to memory
     // If store_en, send BUS_STORE to memory
     // Otherwise, send BUS_NONE
-    assign proc2Dmem_command = (load_en && !Dcache_valid_out) ? BUS_LOAD
-                             : (store_en) ? BUS_STORE
+    assign proc2Dmem_command = ((load_en != last_load_en) && load_en && !Dcache_valid_out) ? BUS_LOAD
+                             : ((store_en != last_store_en) && store_en) ? BUS_STORE
                              : BUS_NONE;
 
     /* Calculate 64-bit data to send to memory */
@@ -183,8 +184,6 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
             last_index       <= -1; // These are -1 to get ball rolling when
             last_tag         <= -1; // reset goes low because addr "changes"
             current_mem_tag  <= 0;
-            has_load_tag <= 0;
-            awaiting_store_tag <= 0;
             // miss_outstanding <= 0;
             dcache_data      <= 0; // Set all cache data to 0 (including valid bits)
         end else begin
@@ -192,9 +191,9 @@ input [3:0]  Dmem2proc_response, // Should be zero unless there is a response
             last_tag         <= current_tag;
 
 
+            last_load_en <= load_en;
+            last_store_en <= store_en;
 
-
-            
             // miss_outstanding <= unanswered_miss;
             if (update_mem_tag) begin
                 current_mem_tag <= Dmem2proc_response;
