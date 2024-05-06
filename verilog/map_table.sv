@@ -182,10 +182,10 @@ module map_table (
             for (int i = 0; i < `PHYS_REG_SZ; i++) begin
                 // TODO make sure this is right
                 preg_entries[i].reg_num <= 0;
-                preg_entries[i].ready <= 0;
+                preg_entries[i].ready <= 1;
 
                 retired_preg_entries[i].reg_num <= 0;
-                retired_preg_entries[i].ready <= 0;
+                retired_preg_entries[i].ready <= 1;
             end
         end else begin 
             // Store for forwarding (in case new dest overwrites)
