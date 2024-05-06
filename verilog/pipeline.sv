@@ -42,6 +42,11 @@ module pipeline (
     output logic             pipeline_commit_wr_en,
     output logic [`XLEN-1:0] pipeline_commit_NPC
 
+    // debug 
+    output [3:0] mem2icache_response,
+    output [63:0] mem2icache_data,
+    output [3:0] mem2icache_tag
+
     // Debug outputs: these signals are solely used for debugging in testbenches
     // Do not change for project 3
     // You should definitely change these for project 4
@@ -115,6 +120,11 @@ module pipeline (
 
     /* Assign either dmem or imem (dmem has priority) to actual memory inputs */
     always_comb begin 
+
+        mem2icache_data = mem2proc_data;
+        mem2icache_response = mem2proc_response;
+        mem2icache_tag = mem2proc_tag;
+
         if (proc2Dmem_command == BUS_LOAD || proc2Dmem_command == BUS_STORE) begin 
             proc2mem_command = proc2Dmem_command;
             proc2mem_addr = proc2Dmem_addr;
@@ -325,9 +335,9 @@ module pipeline (
         .reset(reset),
 
         // input from memory
-        .Imem2proc_response(mem2proc_response),
-        .Imem2proc_data(mem2proc_data),
-        .Imem2proc_tag(mem2proc_tag),
+        .Imem2proc_response(mem2icache_response),
+        .Imem2proc_data(mem2icache_data),
+        .Imem2proc_tag(mem2icache_tag),
 
         // From fetch stage
         .proc2Icache_addr(icache_input_addr),
@@ -406,6 +416,11 @@ module pipeline (
     assign rs_free_store = re_free_store;
     assign rs_free_branch = co_free_branch;
 
+    logic [`REG_IDX_SZ:0] rollback_immune_reg;
+
+    PREG retire_reg_preg;
+    logic [`REG_IDX_SZ:0] retire_reg_arch_idx;
+
     dispatch dispatch_0 (
         // Inputs 
         .clock(clock),
@@ -419,9 +434,13 @@ module pipeline (
         
         // from rollback logic
         .rollback(id_rollback), 
+        .rollback_immune_reg(rollback_immune_reg),
 
         // from retire stage
         .retire_move_head(retire_move_head), 
+        .retire_arch_reg(retire_reg_arch_idx),
+        .retire_phys_reg(retire_reg_preg),
+
 
         // from either EX or CO stage? 
         .free_alu(rs_free_alu),
@@ -558,7 +577,11 @@ module pipeline (
         .free_store(ex_free_store),
         .free_branch(ex_free_branch),
 
-        .rollback(ex_rollback)
+        // rollback input
+        .rollback(ex_rollback),
+
+        // register to make immune from rollback (for jal/jalr)
+        .rollback_immune_reg(rollback_immune_reg)
         
 
         // .proc2Dmem_command (ex_proc2mem_command),
@@ -652,6 +675,10 @@ module pipeline (
 
         .move_head(retire_move_head),
 	    .free_store(re_free_store),
+
+        // Ouptuts to map table
+        .retire_reg_arch_idx(retire_reg_arch_idx),
+        .retire_reg_preg(retire_reg_preg),
 
         // pipeline output
         .pipeline_completed_insts(pipeline_completed_insts),

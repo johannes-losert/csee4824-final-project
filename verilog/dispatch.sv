@@ -14,9 +14,12 @@ module dispatch (
 
     // Rollback signal (from ex stage?)
     input logic rollback,              // (new) will clear ROB and revert Map Table 
+    input logic [`REG_IDX_SZ:0] rollback_immune_reg, // (new) will not clear these registers
 
     // Input from retire stage
     input logic retire_move_head,       // (new) retire signal to move head
+    input PREG retire_phys_reg,
+    input logic [`REG_IDX_SZ:0] retire_arch_reg,
 
     // Input from complete stage, freeing reservation station (TODO make into enum)
     input logic [`NUM_FU_ALU-1:0]free_alu,              // (new) free ALU entry
@@ -112,9 +115,10 @@ module dispatch (
     logic [`PHYS_REG_IDX_SZ:0] mt_new_dest_pr_idx;
 
     PREG mt_old_dest_pr;
+    // PREG mt_retire_phys_reg;
 
-    logic [`REG_IDX_SZ:0] mt_retire_arch_reg;
-    logic mt_retire_enable;
+    // logic [`REG_IDX_SZ:0] mt_retire_arch_reg;
+    // logic mt_retire_enable;
 
 
     map_table map_table_0 (
@@ -148,12 +152,18 @@ module dispatch (
 
         /* Retire operation */
         // inputs
-        .retire_arch_reg(mt_retire_arch_reg),
-        .retire_enable(mt_retire_enable),
+        // .retire_arch_reg(mt_retire_arch_reg),
+        // .retire_phys_reg(mt_retire_phys_reg),
+        // .retire_enable(mt_retire_enable),
+
+        .retire_enable(retire_move_head),
+        .retire_arch_reg(retire_arch_reg),
+        .retire_phys_reg(retire_phys_reg),
 
         /* Restore operation */
         // inputs
         .restore_enable(rollback),
+        .immune_reg_idx(rollback_immune_reg), // Set to zero for none
 
         /* SET READY operation (CDB) */
         // inputs
@@ -240,9 +250,10 @@ module dispatch (
         .free_index(fl_enqueue_pr),
         
         // Output to update arch map to mark arch_told->phys_told as retired/committed
-        .update_arch_map(mt_retire_enable),
-        .update_arch_told(mt_retire_arch_reg),
-        //.update_phys_told(update_phys_told),
+        // .reg_retire_en(mt_retire_enable),
+        // .retire_reg_arch_idx(mt_retire_arch_reg),
+        // .retire_reg_preg(mt_retire_phys_reg),
+        // //.update_phys_told(update_phys_told),
 
         // Retrieve told from arch map
         //.arch_told(mt_arch_map_arch_reg_idx), // output

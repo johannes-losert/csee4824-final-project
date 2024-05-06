@@ -34,8 +34,9 @@ module reorder_buffer(
 
     /* Signal to indicate we should update arch map and send packet( reg and corresponding old tag) to arch table */
     // Same as the MAP table 
-    output logic update_arch_map,
-    output logic [`REG_IDX_SZ:0] update_arch_told,
+    output logic reg_retire_en,
+    output logic [`REG_IDX_SZ:0] retire_reg_arch_idx,
+    output PREG retire_reg_preg,
     /* signal to update arch_map*/
     output logic [`REG_IDX_SZ:0] arch_told,
     input logic [`PHYS_REG_IDX_SZ:0] phys_told,
@@ -144,7 +145,7 @@ module reorder_buffer(
     always_comb begin
         //update ROB & map table
         if (undo) begin
-            next_tail = undo_index; //+ 1;
+            next_tail = undo_index;
         end else begin
             if (write) begin
                 inst_buffer[tail].inst = inst;
@@ -182,8 +183,10 @@ module reorder_buffer(
         if (move_head) begin
             update_free_list = 1;
             free_index = inst_buffer[head].Told.reg_num;
-            update_arch_map = 1;
-            update_arch_told = inst_buffer[head].inst.r.rd;
+            reg_retire_en = 1;
+            retire_reg_arch_idx = inst_buffer[head].inst.r.rd;
+            retire_reg_preg = inst_buffer[head].T;
+            retire_reg_preg.ready = 1;
             // update_phys_told = inst_buffer[head].T;
             if (head != tail) begin
                 next_head = head + 1;
@@ -194,8 +197,10 @@ module reorder_buffer(
             next_head = head;
             update_free_list = 0;
             free_index = inst_buffer[head].Told.reg_num;
-            update_arch_map = 0;
-            update_arch_told = inst_buffer[head].inst.r.rd;
+            reg_retire_en = 0;
+            retire_reg_arch_idx = inst_buffer[head].inst.r.rd;
+            retire_reg_preg = inst_buffer[head].T;
+            retire_reg_preg.ready = 0;
             // update_phys_told = inst_buffer[head].T;
         end    
     end
