@@ -16,6 +16,7 @@ module reservation_station (
 
     /* Issuing */
     input logic issue_enable,
+    input logic ls_issue_enable,
   //  output logic ready, Replaced with valid bit inside issued packet
     output ID_IS_PACKET issued_packet,
 
@@ -390,12 +391,12 @@ module reservation_station (
                     issued_packet <= mult_entries[mult_issue_index].packet;
                     mult_entries[mult_issue_index].issued <= 1;
                     issued_packet.issued_fu_index <= mult_issue_index;
-                end else if (load_issuable) begin
+                end else if (load_issuable && ls_issue_enable) begin
              //       ready <= 1'b1;
                     issued_packet <= load_entries[load_issue_index].packet;
                     load_entries[load_issue_index].issued <= 1;
                     issued_packet.issued_fu_index <= load_issue_index;
-                end else if (store_issuable) begin
+                end else if (store_issuable && ls_issue_enable) begin
               //      ready <= 1'b1;
                     issued_packet <= store_entries[store_issue_index].packet;
                     store_entries[store_issue_index].issued <= 1;

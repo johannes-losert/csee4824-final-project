@@ -375,7 +375,7 @@ module pipeline (
     assign if_id_enable = 1;
     always_ff @(posedge clock) begin
       //  $display("New cycle -----------");
-        if (reset) begin // TODO make sure these are correct
+        if (reset || id_rollback) begin // TODO make sure these are correct
             if_id_reg.inst  <= `NOP;
             if_id_reg.valid <= `FALSE;
             if_id_reg.NPC   <= 0;
@@ -447,7 +447,7 @@ module pipeline (
     // TODO figure out this logic 
     assign id_is_enable = 1'b1; 
     always_ff @(posedge clock) begin
-        if (reset) begin   
+        if (reset || id_rollback) begin   
             id_is_reg <= INVALID_ID_IS_PACKET;
             branch_lock <= 0;
         end else if (id_is_enable) begin

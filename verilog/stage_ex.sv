@@ -158,7 +158,7 @@ module stage_ex (
         for (idx = 0; idx < `NUM_FU_MULT; idx++) begin : generate_mult_fus
             multiply multiply_0 (
                 .clock      (clock),
-                .reset      (reset),
+                .reset      (reset || rollback),
                 .mcand      (opa_mux_out),
                 .mplier     (opb_mux_out),
                 .func       (is_ex_reg.alu_func),
@@ -177,7 +177,7 @@ module stage_ex (
         for (idx = 0; idx < `NUM_FU_LOAD; idx++) begin : generate_load_fus
             load load_0 (
                 .clock(clock),
-                .reset(reset),
+                .reset(reset || rollback),
 
                 .start_load(is_ex_reg.function_type == LOAD && is_ex_reg.valid && issue_fu_index == idx),
                 
@@ -210,7 +210,7 @@ module stage_ex (
         for (idx = 0; idx < `NUM_FU_STORE; idx++) begin : generate_store_fus
             store store (
                 .clock(clock),
-                .reset(reset),
+                .reset(reset || rollback),
 
                 .start_store(is_ex_reg.function_type == STORE && is_ex_reg.valid && issue_fu_index == idx),
                 

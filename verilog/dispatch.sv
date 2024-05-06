@@ -261,9 +261,14 @@ module dispatch (
     assign rs_ready_reg.reg_num = cdb_ready_reg;
     assign rs_ready_reg.ready = cdb_broadcast_en; // TODO this is duplicate
 
+    logic load_entries_full, store_entries_full, alu_entries_full, mult_entries_full, branch_entries_full;
+    logic load_store_entries_full;
+    
+    assign load_store_entries_full = load_entries_full | store_entries_full;
+
     /* TODO figure out if we ever need to not issue */
-    logic issue_enable, next_issue_enable;
-    //assign issue_enable = 1;
+    logic issue_enable, ls_issue_enable, next_ls_issue_enable;
+    assign issue_enable = 1;
 
     reservation_station reservation_station_0(
         .clock(clock),
@@ -281,6 +286,7 @@ module dispatch (
 
         /* Issue */
         .issue_enable(issue_enable), // TODO figure out
+        .ls_issue_enable(ls_issue_enable),
        // .ready(id_packet.valid),
         .issued_packet(id_packet),
 
@@ -308,35 +314,35 @@ module dispatch (
 
     // stall when issue a load or store
     always_comb begin
-        if (issue_enable) begin
-            if (id_packet.function_type == LOAD || id_packet.function_type == STORE || id_packet.function_type == BRANCH) begin
+        if (ls_issue_enable) begin
+            if (id_packet.function_type == LOAD || id_packet.function_type == STORE /*|| id_packet.function_type == BRANCH*/) begin
                 `ifdef DEBUG_PRINT
                 $display ("[RS] stops issuing, waiting for load,store, or branch to finish");
                 `endif
-                next_issue_enable = 0;
+                next_ls_issue_enable = 0;
             end else begin
-                next_issue_enable = 1;
+                next_ls_issue_enable = 1;
             end
         end else begin
-            if ((free_load != 0) || (free_store != 0) || (free_branch != 0))begin
+            if ((free_load != 0) || (free_store != 0) /*|| (free_branch != 0)*/)begin
                 `ifdef DEBUG_PRINT
                 $display ("load, store, or branch finished, {RS} starts to issue");
                 `endif
-                next_issue_enable = 1;
+                next_ls_issue_enable = 1;
             end else begin
                 `ifdef DEBUG_PRINT
                 $display ("[RS] stops issuing, waiting for load or store to finish");
                 `endif
-                next_issue_enable = 0;
+                next_ls_issue_enable = 0;
             end
         end
     end
 
     always_ff @(posedge clock) begin
-        if (reset) begin
-            issue_enable <= 1;
+        if (reset || rollback) begin
+            ls_issue_enable <= 1;
         end else begin
-            issue_enable <= next_issue_enable;
+            ls_issue_enable <= next_ls_issue_enable;
         end
     end
 
@@ -351,9 +357,11 @@ module dispatch (
     
     assign rs_full = if_id_packet.valid && ((alu_entries_full & (decoded_packet.function_type == ALU))
                    | (mult_entries_full & (decoded_packet.function_type == MULT)) 
-                   | (load_entries_full & (decoded_packet.function_type == LOAD)) 
-                   | (store_entries_full & (decoded_packet.function_type == STORE)) 
+                   | (load_store_entries_full & (decoded_packet.function_type == LOAD || decoded_packet.function_type == STORE))
                    | (branch_entries_full & (decoded_packet.function_type == BRANCH)));
+                  /* | (load_entries_full & (decoded_packet.function_type == LOAD)) 
+                   | (store_entries_full & (decoded_packet.function_type == STORE)) */
+                
 
     assign is_branch = decoded_packet.function_type == BRANCH;
                    

@@ -240,6 +240,11 @@ typedef struct packed {
             end
 
             if (outgoing_entry.valid) begin
+                `ifdef DEBUG_PRINT
+                $write("[RT] retiring packet: ");
+                print_inst(outgoing_entry.inst, outgoing_entry.PC, outgoing_entry.valid);
+                $display("");
+                `endif
                 // Remove from retire buffer
                 if (!do_forward) begin 
                     // If we are forwarding, do not remove head from buffer? TODO this is weird b/c move head will still be raised
