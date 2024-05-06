@@ -245,9 +245,11 @@ module dispatch (
         //.update_phys_told(update_phys_told),
 
         // Retrieve told from arch map
-        .arch_told(mt_arch_map_arch_reg_idx), // output
-        .phys_told(mt_arch_map_phys_reg_out.reg_num), // input (from arch map)
+        //.arch_told(mt_arch_map_arch_reg_idx), // output
+      //  .phys_told(mt_arch_map_phys_reg_out.reg_num), // input (from arch map)
         
+        .phys_told(mt_old_dest_pr.reg_num),
+
         // output 
         .inst_index(rob_index),
         .full(rob_full), // Output if ROB is full (new)
