@@ -163,15 +163,20 @@ void print_inst(int inst, int pc, int valid_inst) {
         }
     }
     
+    char pc_str[100];
+
+
     if (pc > 10000 || pc < 0) {
-        pc = -1;
+        sprintf(pc_str, "--");
+    } else {
+        sprintf(pc_str, "%4x", pc);
     }
 
    
     if (ppfile != NULL)
-         fprintf(ppfile, "%4d:%-8s", pc, str);
+         fprintf(ppfile, "%s:%-8s", pc_str, str);
     else
-        printf("%4d:%-8s", pc, str);
+        printf("%s:%-8s", pc_str, str);
 }
 
 
