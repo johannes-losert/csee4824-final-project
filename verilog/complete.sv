@@ -7,6 +7,9 @@ module complete(
     
     output CO_RE_PACKET co_packet,
 
+    // If rolling back, invalidate the current instruction 
+    input logic rollback,
+
     // Completed instruction info (to CDB)
     output logic co_output_en,  // register write enable
     output logic [`PHYS_REG_IDX_SZ:0] co_output_idx, // register write index
@@ -41,7 +44,10 @@ module complete(
     assign co_packet.csr_op = ex_co_reg.csr_op;
 
     assign co_packet.function_type = ex_co_reg.function_type;
-    assign co_packet.valid = ex_co_reg.valid;
+
+
+    /* If rolling back, invalidate packet */
+    assign co_packet.valid = rollback ? 0 : ex_co_reg.valid;
 
     assign co_packet.rob_index = ex_co_reg.rob_index;
     assign co_packet.has_dest = ex_co_reg.has_dest;
@@ -94,7 +100,7 @@ module complete(
     // This enable computation is sort of overkill since the reg file
     // also handles the `ZERO_REG case, but there's no harm in putting this here
     // the valid check is also somewhat redundant
-    assign co_output_en = ex_co_reg.valid && (ex_co_reg.dest_reg_idx != `ZERO_REG);
+    assign co_output_en = ~rollback && ex_co_reg.valid && (ex_co_reg.dest_reg_idx != `ZERO_REG);
 
     assign co_output_idx = ex_co_reg.dest_reg_idx; // PHYSICAL register index 
 

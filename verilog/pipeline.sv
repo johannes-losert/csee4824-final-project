@@ -188,6 +188,7 @@ module pipeline (
     // Rollback signals 
     logic id_rollback; // TODO probably more
     logic ex_rollback;
+    logic co_rollback;
 
    // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
 
@@ -293,6 +294,7 @@ module pipeline (
     assign id_rollback = take_branch;
     assign re_rollback = take_branch;
     assign ex_rollback = take_branch;
+    assign co_rollback = take_branch;
 
     assign certain_branch_req = take_branch;
     assign certain_branch_pc = branch_target; 
@@ -600,6 +602,8 @@ module pipeline (
     complete complete_0 (
         .ex_co_reg(ex_co_reg),
         .co_packet(co_packet),
+
+        .rollback(co_rollback),
 
         // CDB output
         .co_output_en(cdb_broadcast_en),
