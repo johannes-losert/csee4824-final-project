@@ -300,7 +300,7 @@ module testbench;
             //     $display("@@@ System got a memory error");
 
             // end else
-            if (pipeline_error_status != NO_ERROR || debug_counter > 2000) begin
+            if (pipeline_error_status != NO_ERROR || debug_counter > `MAX_CYCLES) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");
                 show_mem_with_decimal(0,`MEM_64BIT_LINES - 1);
                 // 8Bytes per line, 16kB total

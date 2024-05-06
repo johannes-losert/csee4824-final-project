@@ -14,6 +14,7 @@
 `timescale 1ns/100ps
 
 `define DEBUG_PRINT
+`define MAX_CYCLES 2000
 
 ///////////////////////////////////
 // ---- Starting Parameters ---- //
