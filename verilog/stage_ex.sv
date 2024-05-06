@@ -19,7 +19,6 @@ module stage_ex (
     input                               clock,
     input                               reset,
     input IS_EX_PACKET                  is_ex_reg,
-    // input logic [`MAX_FU_INDEX-1:0]     issue_fu_index, // add this to packet at earlier stage of the pipeline
 
     output EX_CO_PACKET ex_packet,
 
@@ -39,6 +38,7 @@ module stage_ex (
 
     /* Input to roll back */
     input logic rollback,
+    output logic [`REG_IDX_SZ:0] rollback_immune_reg,
 
     // debug outputs
     output IS_EX_PACKET [`NUM_FU_ALU-1:0] alu_packet,
@@ -268,6 +268,7 @@ module stage_ex (
                 if (alu_done_process[i]) begin
                     ex_packet.result        = tmp_alu_result[i][`XLEN-1:0];
                     ex_packet.take_branch   = 0;
+                    rollback_immune_reg = 0;
                     ex_packet.mem_size = 0;
 
                     // Pass throughs 
@@ -307,6 +308,7 @@ module stage_ex (
             if(mult_done_process[i]) begin
                 ex_packet.result        = tmp_mult_result[i];
                 ex_packet.take_branch   = 0;
+                rollback_immune_reg = 0;
                 ex_packet.mem_size = 0;
 
                 // Pass throughs
@@ -347,6 +349,7 @@ module stage_ex (
             if(branch_done_process[i]) begin
                 ex_packet.result        = tmp_branch_result[i];
                 ex_packet.take_branch   = tmp_branch_packet[i].uncond_branch || (tmp_branch_packet[i].cond_branch && tmp_take_conditional[i]);
+                rollback_immune_reg = tmp_branch_packet.arch_dest_reg_num;
                 ex_packet.mem_size = 0;
 
                 // Pass throughs
@@ -387,6 +390,7 @@ module stage_ex (
         if (load_done_process) begin
             ex_packet.result        = tmp_load_result;
             ex_packet.take_branch   = 0;
+                 rollback_immune_reg = 0;
 	        ex_packet.mem_size = 0;
             
             // Pass throughs
@@ -425,6 +429,7 @@ module stage_ex (
         if (store_done_process) begin
                         ex_packet.result        = tmp_store_result;
             ex_packet.take_branch   = 0;
+                 rollback_immune_reg = 0;
             
             // Pass throughs
             ex_packet.inst = tmp_store_packet.inst;
