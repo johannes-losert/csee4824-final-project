@@ -163,6 +163,11 @@ retired, tail is youngest dispatched)
 - Instructions enter when dispatched, leave when retired
 - Does not hold values, now purely for control/tag management
 
+### Implementation notes
+    - need some way to stall ROB if no free regs AND instruction needs a dest (set free_reg to ZERO_REG to stall ROB)
+
+
+
 ## Common Data Bus
 - Broadcasts that FU has completed instruction and stored result in PR number
 - Triggers update of 'ready' bit in Map Table AND issuing of any instructions

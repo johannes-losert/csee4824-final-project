@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 `include "verilog/sys_defs.svh"
-
+//`include "test/mem.sv"
 // P4 TODO: Add your own debugging framework. Basic printing of data structures
 //          is an absolute necessity for the project. You can use C functions
 //          like in test/pipeline_print.c or just do everything in verilog.
@@ -93,14 +93,15 @@ module testbench;
         .proc2mem_command (proc2mem_command),
         .proc2mem_addr    (proc2mem_addr),
         .proc2mem_data    (proc2mem_data),
+`ifndef CACHE_MODE
         .proc2mem_size    (proc2mem_size),
-
+`endif
         .pipeline_completed_insts (pipeline_completed_insts),
         .pipeline_error_status    (pipeline_error_status),
         .pipeline_commit_wr_data  (pipeline_commit_wr_data),
         .pipeline_commit_wr_idx   (pipeline_commit_wr_idx),
         .pipeline_commit_wr_en    (pipeline_commit_wr_en),
-        .pipeline_commit_NPC      (pipeline_commit_NPC),
+        .pipeline_commit_NPC      (pipeline_commit_NPC)
 
         // .if_NPC_dbg       (if_NPC_dbg),
         // .if_inst_dbg      (if_inst_dbg),
@@ -138,10 +139,18 @@ module testbench;
     );
 
 
-    // Generate System Clock
-    always begin
+    // integer mem_latency_edges = `MEM_LATENCY_IN_CYCLES * 2;
+    // integer counter_edges = 0; 
+
+    always begin       
         #(`CLOCK_PERIOD/2.0);
         clock = ~clock;
+        // counter_edges = counter_edges + 1; 
+
+        // if (counter_edges == mem_latency_edges) begin
+        //     clock = ~clock;
+        //     counter_edges = 0; 
+        // end
     end
 
 
@@ -181,7 +190,7 @@ module testbench;
 
 
     initial begin
-        //$dumpvars;
+        // $dumpvars;
 
         // P4 NOTE: You must keep memory loading here the same for the autograder
         //          Other things can be tampered with somewhat
@@ -238,7 +247,10 @@ module testbench;
     // Count the number of posedges and number of instructions completed
     // till simulation ends
     always @(posedge clock) begin
-        if(reset) begin
+        `ifdef DEBUG_PRINT
+        $display("+++++++++++++++++++++++++++++++++++++++++++++POSITIVE EDGE OF CLOCK CYCLE %0d ++++++++++++++++++++++++++++++++++++++++", clock_count);
+        `endif
+        if (reset) begin
             clock_count <= 0;
             instr_count <= 0;
         end else begin
@@ -249,7 +261,10 @@ module testbench;
 
 
     always @(negedge clock) begin
-        if(reset) begin
+        `ifdef DEBUG_PRINT
+        $display("-----------------------------------------NEGATIVE EDGE OF CLOCK CYCLE %0d -----------------------------------------", clock_count);
+        `endif
+        if (reset) begin
             $display("@@\n@@  %t : System STILL at reset, can't show anything\n@@",
                      $realtime);
             debug_counter <= 0;
@@ -281,7 +296,11 @@ module testbench;
             end
 
             // deal with any halting conditions
-            if(pipeline_error_status != NO_ERROR || debug_counter > 50000000) begin
+            // if (pipeline_error_status == LOAD_ACCESS_FAULT && debug_counter < 2000) begin 
+            //     $display("@@@ System got a memory error");
+
+            // end else
+            if (pipeline_error_status != NO_ERROR || debug_counter > `MAX_CYCLES) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");
                 show_mem_with_decimal(0,`MEM_64BIT_LINES - 1);
                 // 8Bytes per line, 16kB total

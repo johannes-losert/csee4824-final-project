@@ -163,7 +163,7 @@ GREP = grep -E --color=auto
 # - with dependencies: 'rob.simv', 'rob.cov', and 'synth/rob.vg'
 
 # TODO: add more modules here
-TESTED_MODULES = mult rob reservation_station
+TESTED_MODULES = mult rob reservation_station map_table free_list stage_ex ifetch ifetch_basic btb branch_predictor dispatch pipeline
 
 # TODO: add verilog module dependencies here:
 # (do not include header files)
@@ -173,9 +173,19 @@ DEPS = $(1).simv $(1).cov synth/$(1).vg
 MULT_DEPS = verilog/mult_stage.sv
 $(call DEPS,mult): $(MULT_DEPS)
 
-# No dependencies for the rob (TODO: add any you create)
-ROB_DEPS =
-$(call DEPS,rob): $(ROB_DEPS)
+STAGE_EX_DEPS = verilog/functional_units.sv verilog/mult.sv $(MULT_DEPS)
+$(call DEPS,stage_ex): $(STAGE_EX_DEPS)
+
+# IFETCH_DEPS = verilog/psel_gen.sv
+# $(call DEPS,ifetch): $(IFETCH_DEPS)
+
+DISPATCH_DEPS = verilog/decoder.sv verilog/map_table.sv verilog/free_list.sv verilog/rob.sv verilog/reservation_station.sv
+$(call DEPS,dispatch): $(DISPATCH_DEPS)
+
+PIPELINE_DEPS = verilog/icache.sv verilog/ifetch_basic.sv $(IFETCH_DEPS) verilog/dispatch.sv $(DISPATCH_DEPS) verilog/issue.sv verilog/stage_ex.sv $(STAGE_EX_DEPS) verilog/complete.sv verilog/retire.sv verilog/regfile.sv verilog/mem_controller.sv
+$(call DEPS,pipeline): $(PIPELINE_DEPS)
+
+
 
 # This allows you to use the following make targets:
 # make <module>.pass   <- greps for "@@@ Passed" or "@@@ Incorrect" in the output
@@ -311,8 +321,22 @@ TESTBENCH = test/pipeline_test.sv \
 SOURCES = verilog/pipeline.sv \
           verilog/regfile.sv \
           verilog/icache.sv \
+		  verilog/dcache.sv \
           verilog/mult.sv \
           verilog/mult_stage.sv \
+		  verilog/complete.sv \
+		  verilog/decoder.sv \
+		  verilog/dispatch.sv \
+		  verilog/free_list.sv \
+		  verilog/functional_units.sv \
+		  verilog/ifetch_basic.sv \
+		  verilog/issue.sv \
+		  verilog/map_table.sv \
+		  verilog/mem_controller.sv \
+		  verilog/reservation_station.sv \
+		  verilog/retire.sv \
+		  verilog/rob.sv \
+		  verilog/stage_ex.sv
 
 SYNTH_FILES = synth/pipeline.vg
 

@@ -13,6 +13,10 @@
 // all files should `include "sys_defs.svh" to at least define the timescale
 `timescale 1ns/100ps
 
+/* If DEBUG_PRINT is defined, don't set MAX_CYCLES to more than ~2000 */
+//  `define DEBUG_PRINT
+`define MAX_CYCLES 20000
+
 ///////////////////////////////////
 // ---- Starting Parameters ---- //
 ///////////////////////////////////
@@ -24,9 +28,18 @@
 `define N 1
 
 // sizes
-`define ROB_SZ 1
+`define ROB_SZ 8
 `define RS_SZ 1 // TODO should this be num FUs?
-`define PHYS_REG_SZ (32 + `ROB_SZ)
+
+`define REG_SZ 32
+// REG_IDX_SZ MUST BE 4, because instruction logic assumes it
+`define REG_IDX_SZ ($clog2(`REG_SZ-1))
+`define PHYS_REG_SZ (`REG_SZ + `ROB_SZ)
+`define PHYS_REG_IDX_SZ ($clog2(`PHYS_REG_SZ-1))
+
+`define FREE_LIST_SIZE `PHYS_REG_SZ+1 /* One additional 'always free' slot */
+
+
 
 // worry about these later
 `define BRANCH_PRED_SZ 1
@@ -37,12 +50,13 @@
 `define NUM_FU_MULT 1
 `define NUM_FU_LOAD 1
 `define NUM_FU_STORE 1
+`define NUM_FU_BRANCH 1
 
 // TODO make this automated, should equal clog2(max(NUM_FU_ALU, NUM_FU_MULT, NUM_FU_LOAD, NUM_FU_STORE))
 `define MAX_FU_INDEX 1
 
 // number of mult stages (2, 4, or 8)
-`define MULT_STAGES 4
+`define MULT_STAGES 8
 
 ///////////////////////////////
 // ---- Basic Constants ---- //
@@ -148,6 +162,7 @@ typedef enum logic [3:0] {
 ///////////////////////////////////
 
 // from the RISC-V ISA spec
+// TODO update to make architectural register sizes more dynamic
 typedef union packed {
     logic [31:0] inst;
     struct packed {
@@ -271,6 +286,14 @@ typedef enum logic [4:0] {
 // ---- Datapath Packets ---- //
 ////////////////////////////////
 
+typedef enum logic [2:0] {
+    ALU = 3'b000,
+    MULT = 3'b001,
+    LOAD = 3'b010,
+    STORE = 3'b011,
+    BRANCH = 3'b100
+} FUNIT;
+
 /**
  * Packets are used to move many variables between modules with
  * just one datatype, but can be cumbersome in some circumstances.
@@ -293,18 +316,72 @@ typedef struct packed {
  * ID_EX Packet:
  * Data exchanged from the ID to the EX stage
  */
+// typedef struct packed {
+//     INST              inst;
+//     logic [`XLEN-1:0] PC;
+//     logic [`XLEN-1:0] NPC; // PC + 4
+
+//     logic [`XLEN-1:0] rs1_value; // reg A value
+//     logic [`XLEN-1:0] rs2_value; // reg B value
+
+//     ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
+//     ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
+
+//     logic [4:0] dest_reg_idx;  // destination (writeback) register index
+//     ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
+//     logic       rd_mem;        // Does inst read memory?
+//     logic       wr_mem;        // Does inst write memory?
+//     logic       cond_branch;   // Is inst a conditional branch?
+//     logic       uncond_branch; // Is inst an unconditional branch?
+//     logic       halt;          // Is this a halt?
+//     logic       illegal;       // Is this instruction illegal?
+//     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+
+//     logic       valid;
+// } ID_EX_PACKET;
+
+// TODO change all the 4s to `PHYS_REG_IDX_SZ
+
+
+typedef struct packed {
+    logic [`PHYS_REG_IDX_SZ:0] reg_num;
+    logic ready;
+} PREG;
+
+import "DPI-C" function void print_inst(int inst, int pc, int valid_inst);
+import "DPI-C" function void debug_print(string str);
+import "DPI-C" function void debug_prinln(string str);
+
+function void print_preg(PREG preg);
+    if (preg.ready)
+        $write("%0d+", preg.reg_num);
+    else
+        $write("%0d-", preg.reg_num);
+endfunction
+
+
+/**
+ * ID_IS Packet:
+ * Data from the ID stage to the IS stage AND 
+ * packed stored in RS while waiting to issue
+ */
 typedef struct packed {
     INST              inst;
     logic [`XLEN-1:0] PC;
     logic [`XLEN-1:0] NPC; // PC + 4
 
-    logic [`XLEN-1:0] rs1_value; // reg A value
-    logic [`XLEN-1:0] rs2_value; // reg B value
-
     ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
     ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
 
-    logic [4:0] dest_reg_idx;  // destination (writeback) register index
+    // logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
+    // logic [`PHYS_REG_IDX_SZ:0] opa_phys_reg_idx; // reg A physical register
+    // logic [`PHYS_REG_IDX_SZ:0] opb_phys_reg_idx; // reg B physical register
+    
+    /* Includes 'ready' bit and index*/
+    PREG dest_reg;
+    PREG src1_reg;
+    PREG src2_reg;
+
     ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
     logic       rd_mem;        // Does inst read memory?
     logic       wr_mem;        // Does inst write memory?
@@ -313,9 +390,319 @@ typedef struct packed {
     logic       halt;          // Is this a halt?
     logic       illegal;       // Is this instruction illegal?
     logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
-
+    
+    FUNIT       function_type;
     logic       valid;
-} ID_EX_PACKET;
+
+    logic [$clog2(`ROB_SZ)-1:0] rob_index;
+    logic has_dest;
+
+    logic [`MAX_FU_INDEX-1:0] issued_fu_index;
+    
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
+
+} ID_IS_PACKET;
+
+ID_IS_PACKET INVALID_ID_IS_PACKET = {
+    `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    
+    {`XLEN{1'b0}}, // PC
+    {`XLEN{1'b0}}, // NPC
+    
+    OPA_IS_RS1, // opa_select
+    OPB_IS_RS2, // opb_select
+    
+    // TODO these sizes could be wrong
+    {`PHYS_REG_IDX_SZ+1{1'b0}}, // dest_reg
+    {`PHYS_REG_IDX_SZ+1{1'b0}}, // src1_reg
+    {`PHYS_REG_IDX_SZ+1{1'b0}}, // src2_reg
+
+    ALU_ADD, // alu_func
+    1'b0, // rd_mem
+    1'b0, // wr_mem
+    1'b0, // cond_branch
+    1'b0, // uncond_branch
+    1'b0, // halt
+    1'b0, // illegal
+    1'b0, // csr_op
+
+    ALU, // function_type
+    1'b0, // valid
+
+    {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
+    1'b0, // has_dest
+
+    {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
+
+    {`REG_IDX_SZ{1'b0}} // arch_dest_reg_num
+};
+
+
+/**
+ * ID_IS Packet:
+ * Data exchanged from the ID to the IS stage
+ */
+typedef struct packed {
+    INST              inst;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC; // PC + 4
+
+    ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
+    ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
+
+    logic [`XLEN-1:0] rs1_value; // reg A value
+    logic [`XLEN-1:0] rs2_value; // reg B value
+
+    logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
+    
+    ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
+    logic       rd_mem;        // Does inst read memory?
+    logic       wr_mem;        // Does inst write memory?
+    logic       cond_branch;   // Is inst a conditional branch?
+    logic       uncond_branch; // Is inst an unconditional branch?
+    logic       halt;          // Is this a halt?
+    logic       illegal;       // Is this instruction illegal?
+    logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    
+    FUNIT function_type;
+    logic       valid;
+    
+    logic [$clog2(`ROB_SZ)-1:0] rob_index;
+    logic has_dest;
+
+    logic [`MAX_FU_INDEX-1:0] issued_fu_index;
+     
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
+
+} IS_EX_PACKET;
+
+IS_EX_PACKET INVALID_IS_EX_PACKET = {
+    `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    
+    {`XLEN{1'b0}}, // PC
+    {`XLEN{1'b0}}, // NPC
+    
+    OPA_IS_RS1, // opa_select
+    OPB_IS_RS2, // opb_select
+    
+    {`XLEN{1'b0}}, // rs1_value
+    {`XLEN{1'b0}}, // rs2_value
+
+    {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
+
+    ALU_ADD, // alu_func
+    1'b0, // rd_mem
+    1'b0, // wr_mem
+    1'b0, // cond_branch
+    1'b0, // uncond_branch
+    1'b0, // halt
+    1'b0, // illegal
+    1'b0, // csr_op
+
+    ALU, // function_type
+    1'b0, // valid
+    
+    {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
+    1'b0, // has_dest
+
+    {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
+
+    {`REG_IDX_SZ{1'b0}} // arch_dest_reg_num
+};
+
+typedef struct packed {
+    // Mostly pass through (TODO a lot is not needed)
+    INST              inst;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC; // PC + 4
+
+    ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
+    ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
+
+    logic [`XLEN-1:0] rs1_value; // reg A value
+    logic [`XLEN-1:0] rs2_value; // reg B value
+
+    logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
+    
+    ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
+    logic       rd_mem;        // Does inst read memory?
+    logic       wr_mem;        // Does inst write memory?
+    logic       cond_branch;   // Is inst a conditional branch?
+    logic       uncond_branch; // Is inst an unconditional branch?
+    logic       halt;          // Is this a halt?
+    logic       illegal;       // Is this instruction illegal?
+    logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    
+    FUNIT function_type;
+    logic       valid;
+    
+    logic [$clog2(`ROB_SZ)-1:0] rob_index;
+    logic has_dest;
+
+    logic [`MAX_FU_INDEX-1:0] issued_fu_index; // TODO name doesn't make sense anymore, why 'issued'?
+
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
+
+    // New stuff from EX stage
+    logic [`XLEN-1:0] result;
+    logic take_branch;
+    MEM_SIZE          mem_size;
+
+    logic [63:0] prev_dword; // Only for stores
+
+} EX_CO_PACKET;
+
+
+EX_CO_PACKET INVALID_EX_CO_PACKET = {
+    `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    
+    {`XLEN{1'b0}}, // PC
+    {`XLEN{1'b0}}, // NPC
+    
+    OPA_IS_RS1, // opa_select
+    OPB_IS_RS2, // opb_select
+    
+    {`XLEN{1'b0}}, // rs1_value
+    {`XLEN{1'b0}}, // rs2_value
+
+    {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
+
+    ALU_ADD, // alu_func
+    1'b0, // rd_mem
+    1'b0, // wr_mem
+    1'b0, // cond_branch
+    1'b0, // uncond_branch
+    1'b0, // halt
+    1'b0, // illegal
+    1'b0, // csr_op
+
+    ALU, // function_type
+    1'b0, // valid
+    
+    {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
+    1'b0, // has_dest
+
+    {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
+
+    {`REG_IDX_SZ{1'b0}}, // arch_dest_reg_num
+
+    {`XLEN{1'b0}}, // result
+    1'b0, // take_branch
+    1'b0, // mem_size
+
+    {64{1'b0}} // prev_dword
+};
+
+typedef struct packed {
+    // Mostly pass through (TODO a lot is not needed)
+    INST              inst;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC; // PC + 4
+
+    ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
+    ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
+
+    logic [`XLEN-1:0] rs1_value; // reg A value
+    logic [`XLEN-1:0] rs2_value; // reg B value
+
+    logic [`PHYS_REG_IDX_SZ:0] dest_reg_idx;  // destination (writeback) register index
+    
+    ALU_FUNC    alu_func;      // ALU function select (ALU_xxx *)
+    logic       rd_mem;        // Does inst read memory?
+    logic       wr_mem;        // Does inst write memory?
+    logic       cond_branch;   // Is inst a conditional branch?
+    logic       uncond_branch; // Is inst an unconditional branch?
+    logic       halt;          // Is this a halt?
+    logic       illegal;       // Is this instruction illegal?
+    logic       csr_op;        // Is this a CSR operation? (we use this to get return code)
+    
+    FUNIT function_type;
+    logic       valid;
+    
+    logic [$clog2(`ROB_SZ)-1:0] rob_index;
+    logic has_dest;
+
+    logic [`MAX_FU_INDEX-1:0] issued_fu_index; // TODO name doesn't make sense anymore, why 'issued'?
+
+     
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
+
+    // stuff from EX stage
+    logic [`XLEN-1:0] result;
+    logic take_branch;
+
+    // new stuff from complete stage
+    logic regfile_en;
+    logic [`PHYS_REG_IDX_SZ-1:0] regfile_idx;
+    logic [`XLEN-1:0] regfile_data;
+    MEM_SIZE          mem_size;
+
+    logic [63:0] prev_dword; // Only for stores
+} CO_RE_PACKET;
+
+
+CO_RE_PACKET INVALID_CO_RE_PACKET = {
+    `NOP, // inst we can't simply assign 0 because NOP is non-zero
+    
+    {`XLEN{1'b0}}, // PC
+    {`XLEN{1'b0}}, // NPC
+    
+    OPA_IS_RS1, // opa_select
+    OPB_IS_RS2, // opb_select
+    
+    {`XLEN{1'b0}}, // rs1_value
+    {`XLEN{1'b0}}, // rs2_value
+
+    {`PHYS_REG_IDX_SZ{1'b0}}, // dest_reg_idx
+
+    ALU_ADD, // alu_func
+    1'b0, // rd_mem
+    1'b0, // wr_mem
+    1'b0, // cond_branch
+    1'b0, // uncond_branch
+    1'b0, // halt
+    1'b0, // illegal
+    1'b0, // csr_op
+
+    ALU, // function_type
+    1'b0, // valid
+    
+    {$clog2(`ROB_SZ)-1{1'b0}}, // rob_index
+    1'b0, // has_dest
+
+    {`MAX_FU_INDEX-1{1'b0}}, // issued_fu_index
+
+    {`REG_IDX_SZ{1'b0}}, // arch_dest_reg_num
+
+    {`XLEN{1'b0}}, // result
+    1'b0, // take_branch
+
+    1'b0, // regfile_en
+    {`PHYS_REG_IDX_SZ{1'b0}}, // regfile_idx
+    {`XLEN{1'b0}}, // regfile_data
+    1'b0, // mem_size
+
+    {64{1'b0}} // prev_dword
+};
+
+// // TODO can clean this up, for now just duplicates everything
+// typedef CO_RE_PACKET EX_CO_PACKET;
+// CO_RE_PACKET INVALID_CO_RE_PACKET = `INVALID_EX_CO_PACKET;
+
+// typedef struct packed {
+//     // OLD
+//     logic [`XLEN-1:0] result;
+//     logic [`XLEN-1:0] NPC;
+//     logic [4:0]       dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
+//     logic             take_branch;
+//     logic             halt;    // not used by wb stage
+//     logic             illegal; // not used by wb stage
+//     logic             valid;
+
+//     logic [$clog2(`ROB_SZ)-1:0] rob_index; // this index is to indicate which instrction we should retire
+// } CO_RE_PACKET;
+
+
 
 /**
  * EX_MEM Packet:
@@ -330,13 +717,16 @@ typedef struct packed {
     logic [`XLEN-1:0] rs2_value;
     logic             rd_mem;
     logic             wr_mem;
-    logic [4:0]       dest_reg_idx;
+    logic [`PHYS_REG_IDX_SZ:0]       dest_reg_idx;
     logic             halt;
     logic             illegal;
     logic             csr_op;
     logic             rd_unsigned; // Whether proc2Dmem_data is signed or unsigned
     MEM_SIZE          mem_size;
     logic             valid;
+
+     
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
 } EX_MEM_PACKET;
 
 /**
@@ -348,11 +738,13 @@ typedef struct packed {
 typedef struct packed {
     logic [`XLEN-1:0] result;
     logic [`XLEN-1:0] NPC;
-    logic [4:0]       dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
+    logic [`PHYS_REG_IDX_SZ:0]       dest_reg_idx; // writeback destination (ZERO_REG if no writeback)
     logic             take_branch;
     logic             halt;    // not used by wb stage
     logic             illegal; // not used by wb stage
     logic             valid;
+
+    logic [`REG_IDX_SZ:0] arch_dest_reg_num; // purely for final wb output, to avoid map table access
 } MEM_WB_PACKET;
 
 /**
@@ -363,34 +755,123 @@ typedef struct packed {
  * Reservation station stuff
 */
 
-typedef enum logic [1:0] {
-    ALU = 2'b00,
-    MULT = 2'b01,
-    LOAD = 2'b10,
-    STORE = 2'b11
-} FUNIT;
 
+/* OLD Output of the reservation station */
+// typedef struct packed {
+//     FUNIT funit;
+//    INST inst; 
+//     PREG dest_reg;
+//     PREG src1_reg;
+//     PREG src2_reg;
+// } RS_PACKET; // TODO should this have a valid bit?
+
+// An entry in the reservation station, with all information about an instruction
+// to be issued
 typedef struct packed {
-    logic [`PHYS_REG_SZ:0] reg_num;
-    logic ready;
-} PREG;
-
-/* Output of the reservation station */
-typedef struct packed {
-    FUNIT funit;
-    INST inst;
-    PREG dest_reg;
-    PREG src1_reg;
-    PREG src2_reg;
-} RS_PACKET; // TODO should this have a valid bit?
-
-
-typedef struct packed {
-    RS_PACKET packet;
+    ID_IS_PACKET packet;
     logic busy;
-    logic valid;
     logic issued;
 } RS_ENTRY;
+
+typedef struct packed {
+    PREG T,Told;
+    INST inst;
+    logic [`XLEN-1:0] PC;
+    // logic done;
+} ROB_ENTRY;
+
+
+
+// typedef struct packed {
+//     logic [`REG_IDX_SZ:0] rd; /* Architectural register */
+//     PREG T; /* Could switch with index to not carry ready bit */
+// } ROB_PACKET;
+
+/**
+ * Branch Target Buffer:
+ * 
+ * TODO ADD DESCRIPTION
+ * 
+ */
+
+// entries are written to using the write_entry struct
+
+`define BTB_TAG_LEN 4
+`define BTB_ENTRIES 16 // 2^`BTB_TAG_LEN
+
+// entries are accessed using index
+typedef struct packed {
+    logic [`XLEN-1:0] target_pc;
+    logic valid;
+} BTB_ENTRY;
+
+/**
+ * Branch Predictor:
+ * 
+ * TODO ADD DESCRIPTION
+ * 
+ */
+
+`define BP_TAG_LEN 4
+`define BP_ENTRIES 16 // 2^`BP_TAG_LEN
+
+typedef enum logic [1:0] {
+    SNT  = 2'b00, // strongly not taken
+    WNT  = 2'b01, // weakly not taken
+    WT = 2'b11, // weakly taken
+    ST = 2'b10 // strongly taken
+} BP_ENTRY_STATE;
+
+typedef struct packed {
+    BP_ENTRY_STATE state; 
+    logic valid;
+} BP_ENTRY;
+
+
+/**
+ * Mem Controller:
+ * 
+ * TODO ADD DESCRIPTION
+ * 
+ */
+
+typedef enum logic [1:0] {
+    NONE = 2'b00,
+    ICACHE  = 2'b10,
+    DCACHE  = 2'b01
+} DEST_CACHE;
+
+// dcache and icache should be ready to receive the tag of the next request
+typedef enum logic [1:0] {
+    NO_REQUEST = 2'b00,
+    AWAIT_TAG_ICACHE = 2'b10,
+    AWAIT_TAG_DCACHE = 2'b01,
+    TAG_AVAILABLE = 2'b11
+} REQ_STATUS;
+
+typedef union packed {
+    logic [7:0][7:0]  byte_level;
+    logic [3:0][15:0] half_level;
+    logic [1:0][31:0] word_level;
+} MEM_RETURN;
+
+typedef struct packed {
+    INST              inst;
+    logic [3:0]       completed_insts;
+    logic [`XLEN-1:0] PC;
+    logic [`XLEN-1:0] NPC;
+    EXCEPTION_CODE    error_status;
+    logic             regfile_en;   // register write enable
+    logic [`PHYS_REG_IDX_SZ:0]  regfile_idx;  // register write index
+    logic [`XLEN-1:0] regfile_data; // register write data 
+    logic             valid;
+    FUNIT 	      function_type;
+    MEM_SIZE          mem_size;
+    logic [`XLEN-1:0] rs2_value;
+    logic [`XLEN-1:0] result;
+
+    logic [63:0] prev_dword; // Only for stores
+} RETIRE_ENTRY;
 
 
 `endif // __SYS_DEFS_SVH__

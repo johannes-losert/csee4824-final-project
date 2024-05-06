@@ -9,16 +9,6 @@
 /////////////////////////////////////////////////////////////////////////
 
 `include "verilog/sys_defs.svh"
-// `include "verilog/icache.sv"
-// `include "verilog/ifetch.sv"
-// `include "verilog/dispatch.sv"
-// `include "verilog/issue.sv"
-// `include "verilog/stage_ex.sv"
-// `include "verilog/complete.sv"
-// `include "verilog/retire.sv"
-// `include "verilog/regfile.sv"
-// `include "verilog/ifetch_basic.sv"
-
 
 module pipeline (
     input        clock,             // System clock
@@ -30,9 +20,9 @@ module pipeline (
     output logic [1:0]       proc2mem_command, // Command sent to memory
     output logic [`XLEN-1:0] proc2mem_addr,    // Address sent to memory
     output logic [63:0]      proc2mem_data,    // Data sent to memory
-//`ifndef CACHE_MODE // no longer sending size to memory
+`ifndef CACHE_MODE // no longer sending size to memory
     output MEM_SIZE          proc2mem_size,    // Data size sent to memory
-//`endif
+`endif
 
     // Note: these are assigned at the very bottom of the module
     output logic [3:0]       pipeline_completed_insts,
@@ -62,7 +52,6 @@ module pipeline (
     // output logic             mem_wb_valid_dbg
 );
 
-
     //////////////////////////////////////////////////
     //                Pipeline Wires                //
     //////////////////////////////////////////////////
@@ -86,78 +75,6 @@ module pipeline (
     // Outputs from CO stage and input to RT stage
     CO_RE_PACKET co_packet, co_re_reg;
 
-    //////////////////////////////////////////////////////
-    //  communication signal between processor and mem  //
-    //////////////////////////////////////////////////////
-
-
-    /* Signals from dcache to memory, carrying load, store, or none */
-    BUS_COMMAND proc2Dmem_command;
-    logic [`XLEN-1:0] proc2Dmem_addr;
-    logic [63:0] proc2Dmem_data;
-
-    /* Signals from icache to memory carrying load or none */
-    BUS_COMMAND proc2Imem_command;
-    logic [`XLEN-1:0] proc2Imem_addr;
-
-    /* Signals from store (in retire stage) to dcache */
-    logic store_en;
-    logic [`XLEN-1:0] store2Dcache_addr;
-    logic [63:0] store2Dcache_data;
-
-    /* Signals from load (in execute stage) to dcache */
-    logic load_en;
-    logic [`XLEN-1:0] load2Dcache_addr;
-
-    /* Signals from dcache to load (in execute stage), with data */
-    logic [63:0] Dcache_data_out;
-    logic Dcache_valid_out;
-
-    /* Assign either dmem or imem (dmem has priority) to actual memory inputs */
-    always_comb begin 
-        if (proc2Dmem_command == BUS_LOAD || proc2Dmem_command == BUS_STORE) begin 
-            proc2mem_command = proc2Dmem_command;
-            proc2mem_addr = proc2Dmem_addr;
-            proc2mem_data = proc2Dmem_data;
-        end else begin
-            proc2mem_command = proc2Imem_command;
-            proc2mem_addr = proc2Imem_addr;
-            proc2mem_data = 64'b0;
-        end
-    end
-
-    //////////////////////////////////////////////////
-    //          Data Cache                          //
-    ////////////////////////////////////////////////// 
-    dcache dcache_0 (
-        .clock(clock),
-        .reset(reset),
-
-        // input from data memory 
-        .Dmem2proc_response(mem2proc_response), 
-        .Dmem2proc_data(mem2proc_data),
-        .Dmem2proc_tag(mem2proc_tag),
-
-        // Input from store command (retire stage)
-        .store_en(store_en),
-        .store2Dcache_addr(store2Dcache_addr),
-        .store2Dcache_data(store2Dcache_data),
-
-        // Input from load command (execute stage)
-        .load_en(load_en),
-        .load2Dcache_addr(load2Dcache_addr),
-        
-        // Output to selector (then memory)
-        .proc2Dmem_command(proc2Dmem_command),
-        .proc2Dmem_addr(proc2Dmem_addr),
-        .proc2Dmem_data(proc2Dmem_data),
-
-        // Output to load (stage ex)
-        .Dcache_data_out(Dcache_data_out),
-        .Dcache_valid_out(Dcache_valid_out)        
-    );
-    
-
     //////////////////////////////////////////////////
     //          Instruction Fetch Signals           //
     //////////////////////////////////////////////////
@@ -172,14 +89,10 @@ module pipeline (
 
     // Ifetch input signals
     logic if_valid;
-    logic [`XLEN-1:0] certain_branch_pc, branch_pred_pc;
-    logic certain_branch_req, branch_pred_req;
+    logic [`XLEN-1:0] certain_branch_pc, rob_target_pc, branch_pred_pc;
+    logic certain_branch_req, rob_target_req, branch_pred_req;
 
-    //////////////////////////////////////////////////
-    //          Branch Predictor Signals            //
-    //////////////////////////////////////////////////
-    logic branch_predictor_hit; 
-    logic predict_branch_taken;
+    // TODO debug signals?
 
     //////////////////////////////////////////////////
     //          Instruction Dispatch Signals        //
@@ -187,8 +100,6 @@ module pipeline (
 
     // Rollback signals 
     logic id_rollback; // TODO probably more
-    logic ex_rollback;
-    logic co_rollback;
 
    // TODO incorperate retire entirely into 'dispatch'? Maybe move all this into the pipeline?
 
@@ -203,11 +114,6 @@ module pipeline (
     // Stall output signal
     // TODO branch addresses?
     logic id_needs_stall;
-
-    logic branch_decoded;
-    logic branch_resolved;
-    logic branch_lock;
-    logic n_branch_lock;
 
     // output to retire stage
     logic [$clog2(`ROB_SZ)-1:0] rob_head_idx;
@@ -235,9 +141,6 @@ module pipeline (
     logic [`NUM_FU_STORE-1:0] ex_free_store;
     logic [`NUM_FU_BRANCH-1:0] ex_free_branch;
 
-    logic take_branch;
-    logic [`XLEN-1:0] branch_target;
-
 
     //////////////////////////////////////////////////
     //          Complete Signals                    //
@@ -255,7 +158,6 @@ module pipeline (
     //////////////////////////////////////////////////
 
     logic re_rollback;
-    logic re_free_store;
 
     //////////////////////////////////////////////////
     //          Common Data Bus Signals             //
@@ -273,9 +175,8 @@ module pipeline (
     logic if_stall, id_stall, is_stall, ex_stall, co_stall, rt_stall;
 
 
-    /* if valid unless id needs stall, or we are taking a branch */
-    assign if_valid = ~id_needs_stall; // && ~branch_lock && ~branch_decoded || branch_resolved; 
-    assign branch_resolved = ex_packet.cond_branch || ex_packet.uncond_branch;
+    // TODO implement logic: if stalls if id stage can't accept a new instruction
+    assign if_stall = id_needs_stall;
 
     // TODO these can prbably all stay zero, id stage 'stalls' are handled by RS signals
     assign id_stall = 0;
@@ -288,37 +189,15 @@ module pipeline (
     //                Brach/Interrupt Logic         //
     //////////////////////////////////////////////////
     // TODO do this 
-    assign take_branch = ex_packet.valid & (ex_packet.take_branch) ;
-    assign branch_target = ex_packet.result;
+    // TODO also make 'arch free list'
+    assign id_rollback = 0;
+    assign re_rollback = 0;
 
-    assign id_rollback = take_branch;
-    assign re_rollback = take_branch;
-    assign ex_rollback = take_branch;
-    assign co_rollback = take_branch;
-
-    assign certain_branch_req = take_branch;
-    assign certain_branch_pc = branch_target; 
-
-    // always_comb begin 
-    //     if (branch_lock) begin
-    //         if (branch_resolved) begin 
-    //             n_branch_lock = 0;
-    //         end else begin 
-    //             n_branch_lock = 1;
-    //         end
-    //     end else begin 
-    //         if (branch_decoded) begin 
-    //             n_branch_lock = 1;
-    //         end else begin 
-    //             n_branch_lock = 0;
-    //         end
-    //     end
-    // end
-    assign branch_pred_req = 0; // commented out for branch prediction 
-    
     //////////////////////////////////////////////////
     //          Instruction Fetch Modules           //
     //////////////////////////////////////////////////
+
+    logic [`XLEN-1:0] if_PC_reg;
 
     icache icache_0 (
         .clock(clock),
@@ -333,15 +212,18 @@ module pipeline (
         .proc2Icache_addr(icache_input_addr),
 
         // To memory
-        .proc2Imem_command(proc2Imem_command),
-        .proc2Imem_addr(proc2Imem_addr),
+        .proc2Imem_command(proc2mem_command),
+        .proc2Imem_addr(proc2mem_addr),
 
         // To fetch stage
         .Icache_data_out(icache_data_out),
         .Icache_valid_out(icache_data_out_valid)
     );
 
-    ifetch_basic ifetch_0 (
+    logic [`XLEN-1:0] btb_target_pc;
+    logic btb_target_pc_valid;
+
+    ifetch ifetch_0 (
         .clock(clock),
         .reset(reset),
 
@@ -350,12 +232,16 @@ module pipeline (
         .certain_branch_pc(certain_branch_pc),
         .certain_branch_req(certain_branch_req),
 
-        .branch_pred_pc(branch_pred_pc),
-        .branch_pred_req(branch_pred_req),
+        .rob_target_pc(rob_target_pc),
+        .rob_target_req(rob_target_req),
+
+        .branch_pred_pc(btb_target_pc),
+        .branch_pred_req(btb_target_pc_valid),
 
         // from icache
         .Icache2proc_data(icache_data_out),
         .Icache2proc_data_valid(icache_data_out_valid),
+        .if_PC_reg(if_PC_reg),
 
         // to icache
         .proc2Icache_addr(icache_input_addr),
@@ -363,9 +249,52 @@ module pipeline (
         // output packet
         .if_packet(if_packet)       
     );
+    
     //////////////////////////////////////////////////
     //              Branch Modules                  //
-    //////////////////////////////////////////////////    
+    //////////////////////////////////////////////////
+
+    logic branch_out, ex_is_branch_taken; // whether a FU is outputting a branch out
+    logic [`XLEN-1:0] branch_source_pc, branch_dest_pc;
+    assign branch_out = ex_packet.cond_branch;
+    assign branch_source_pc = ex_packet.PC;
+    assing branch_dest_pc = ex_packet.result;
+
+
+    branch_predictor branch_predictor_0 (
+        .clock(clock), 
+        .reset(reset), 
+        
+        // TODO figure out if it is if or id 
+        .if_pc(if_PC_reg),
+
+        // from branch functional unit 
+        .ex_pc(branch_source_pc),
+        .ex_is_branch_taken(),
+        .ex_is_branch_not_taken(),
+
+        // the module predicts the branch to be taken when this is high
+        .predict_branch_taken(), 
+        .hit()
+    );
+
+    btb btb_0(
+        .clock(clock),
+        .reset(reset),
+
+        // from branch functional unit
+        .write_enable(btb_write_enable),
+        .write_source_pc(btb_write_source_pc),
+        .write_dest_pc(btb_write_dest_pc),
+
+        .query_pc(if_PC_reg), // the pc at which the current branch is 
+
+        .hit(btb_target_pc_valid), // tells us if the target pc is valid
+        .target_pc(btb_target_pc),
+
+        .debug_buffer()
+    );
+
 
     //////////////////////////////////////////////////
     //          IF ID Pipeline Register             //
@@ -374,17 +303,13 @@ module pipeline (
     // TODO write if_id_enable logic 
     assign if_id_enable = 1;
     always_ff @(posedge clock) begin
-      //  $display("New cycle -----------");
-        if (reset || id_rollback) begin // TODO make sure these are correct
+        if (reset) begin // TODO make sure these are correct
             if_id_reg.inst  <= `NOP;
             if_id_reg.valid <= `FALSE;
             if_id_reg.NPC   <= 0;
             if_id_reg.PC    <= 0;
         end else if (if_id_enable) begin
-            if (id_needs_stall)
-                if_id_reg <= if_id_reg;
-            else
-                if_id_reg <= if_packet;
+            if_id_reg <= if_packet;
         end
     end
 
@@ -403,7 +328,7 @@ module pipeline (
     assign rs_free_alu = co_free_alu;
     assign rs_free_mult = co_free_mult;
     assign rs_free_load = co_free_load;
-    assign rs_free_store = re_free_store;
+    assign rs_free_store = co_free_store;
     assign rs_free_branch = co_free_branch;
 
     dispatch dispatch_0 (
@@ -411,7 +336,7 @@ module pipeline (
         .clock(clock),
         .reset(reset),
 
-        .if_id_packet(if_id_reg), // From pipeline reg
+        .if_id_packet(if_id_packet), // From pipeline reg
 
         // from CDB
         .cdb_broadcast_en(cdb_broadcast_en),
@@ -424,15 +349,14 @@ module pipeline (
         .retire_move_head(retire_move_head), 
 
         // from either EX or CO stage? 
-        .free_alu(rs_free_alu),
-        .free_mult(rs_free_mult),
-        .free_load(rs_free_load),
-        .free_store(rs_free_store),
-        .free_branch(rs_free_branch),
+        .rs_free_alu(rs_free_alu),
+        .rs_free_mult(rs_free_mult),
+        .rs_free_load(rs_free_load),
+        .rs_free_store(rs_free_store),
+        .rs_free_branch(rs_free_branch),
 
         // Outputs
         .stall(id_needs_stall),
-        .branch_decoded(branch_decoded),
 
         .rob_head_idx(rob_head_idx),
 
@@ -447,12 +371,10 @@ module pipeline (
     // TODO figure out this logic 
     assign id_is_enable = 1'b1; 
     always_ff @(posedge clock) begin
-        if (reset || id_rollback) begin   
+        if (reset) begin   
             id_is_reg <= INVALID_ID_IS_PACKET;
-            branch_lock <= 0;
         end else if (id_is_enable) begin
             id_is_reg <= id_packet;
-            branch_lock = n_branch_lock;
         end
     end
 
@@ -470,7 +392,7 @@ module pipeline (
 
     regfile regfile_0 (
         .clock(clock),
-      //  .reset(reset),
+        .reset(reset),
 
         // from issue stage
         .read_idx_1(rf_read_idx1),
@@ -489,23 +411,14 @@ module pipeline (
     issue issue_0 ( 
         .id_is_reg(id_is_reg),
 
-        .rs1_preg_data(rf_read_data1),
-        .rs2_preg_data(rf_read_data2),
+        .opa_preg_data(rf_read_data1),
+        .opb_preg_data(rf_read_data2),
 
-        .rs1_preg_idx(rf_read_idx1),
-        .rs2_preg_idx(rf_read_idx2),
+        .opa_preg_idx(rf_read_idx1),
+        .opb_preg_idx(rf_read_idx2),
 
         .is_packet(is_packet)
     );
-
-    function void print_is_ex();
-        if (is_packet.valid) begin 
-            $write("[IS] Issuing instruction: ");
-            print_inst(is_packet.inst, is_packet.PC, is_packet.valid);
-            $display(" rs1: %0d, rs2: %0d, dest: %0d", is_packet.rs1_value, is_packet.rs2_value, is_packet.dest_reg_idx);
-        end else
-            $display("[IS] No valid instruction to issue");
-    endfunction
 
     //////////////////////////////////////////////////
     //          IS EX Pipeline Register             //
@@ -513,9 +426,6 @@ module pipeline (
     // TODO figure out this logic 
     assign is_ex_enable = 1'b1; 
     always_ff @(posedge clock) begin
-        `ifdef DEBUG_PRINT
-        print_is_ex();
-        `endif
         if (reset) begin   
             is_ex_reg <= INVALID_ID_IS_PACKET;
         end else if (id_is_enable) begin
@@ -526,13 +436,6 @@ module pipeline (
     //////////////////////////////////////////////////
     //          Execution Stage                     //
     //////////////////////////////////////////////////
-
-    // Outputs from MEM-Stage to memory
-    // logic [`XLEN-1:0] proc2Dmem_addr;
-    // logic [`XLEN-1:0] proc2Dmem_data;
-    // logic [1:0]       proc2Dmem_command;
-    // MEM_SIZE          proc2Dmem_size;
-
     // TODO move each FU to just be in the pipeline? probably not
     stage_ex stage_ex_0 (
         .clock(clock),
@@ -540,41 +443,15 @@ module pipeline (
 
         .is_ex_reg(is_ex_reg),
 
-
-        /* Input from dcache */
-        .Dcache_data_out(Dcache_data_out),
-        .Dcache_valid_out(Dcache_valid_out),
-
-        /* output to dcache*/
-        .ex_load_en(load_en),
-        .ex_load2Dcache_addr(load2Dcache_addr),    // Address sent to Data memory
-
         // outputs
         .ex_packet(ex_packet),
 
-        .free_alu(ex_free_alu),
-        .free_mult(ex_free_mult),
-        .free_load(ex_free_load),
-        .free_store(ex_free_store),
-        .free_branch(ex_free_branch),
-
-        .rollback(ex_rollback)
-        
-
-        // .proc2Dmem_command (ex_proc2mem_command),
-        // .proc2Dmem_size (ex_proc2mem_size),
-        // .proc2Dmem_addr (ex_proc2mem_addr),
-        // .proc2Dmem_data (ex_proc2mem_data)
+        .ex_free_alu(ex_free_alu),
+        .ex_free_mult(ex_free_mult),
+        .ex_free_load(ex_free_load),
+        .ex_free_store(ex_free_store),
+        .ex_free_branch(ex_free_branch)
     );
-
-    function void print_ex_co();
-        if (ex_packet.valid) begin 
-            $write("[EX] Executed instruction: ");
-            print_inst(ex_packet.inst, ex_packet.PC, ex_packet.valid);
-            $display(" rs1: %0d, rs2: %0d, dest: %0d, result=%h", ex_packet.rs1_value, ex_packet.rs2_value, ex_packet.dest_reg_idx, ex_packet.result);
-        end else
-            $display("[EX] No valid instruction to execute");
-    endfunction
 
     //////////////////////////////////////////////////
     //          EX CO Pipeline Register             //
@@ -583,9 +460,6 @@ module pipeline (
     assign ex_co_enable = 1'b1; // always enabled
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
-        `ifdef DEBUG_PRINT
-        print_ex_co();
-        `endif
         if (reset) begin
             ex_co_reg      <= INVALID_EX_CO_PACKET;
         end else if (ex_co_enable) begin
@@ -603,21 +477,17 @@ module pipeline (
         .ex_co_reg(ex_co_reg),
         .co_packet(co_packet),
 
-        .rollback(co_rollback),
-
         // CDB output
         .co_output_en(cdb_broadcast_en),
         .co_output_idx(cdb_ready_reg),
         .co_output_data(cdb_data),
 
-        .free_alu(co_free_alu),
-        .free_mult(co_free_mult),
-        .free_branch(co_free_branch),
-        .free_load(co_free_load),
-        .free_store(co_free_store)
+        .co_free_alu(co_free_alu),
+        .co_free_mult(co_free_mult),
+        .co_free_branch(co_free_branch),
+        .co_free_load(co_free_load),
+        .co_free_store(co_free_store)
     );
-
-    
 
     //////////////////////////////////////////////////
     //          CO RE Pipeline Register             //
@@ -634,24 +504,18 @@ module pipeline (
         end
     end
 
-
-
     //////////////////////////////////////////////////
     //          Retire Stage                        //
     //////////////////////////////////////////////////
     // TODO could extract this into the pipeline?
     retire retire_0 (
-        .clock(clock),
-        .reset(reset),
-   
-        .co_packet(co_re_reg),
+        .co_packet(co_packet),
 
-        //.mem2proc_response(mem2proc_response),
+        .mem2proc_response(mem2proc_response),
         .rob_head(rob_head_idx),
         .clear_retire_buffer(re_rollback),
 
         .move_head(retire_move_head),
-	    .free_store(re_free_store),
 
         // pipeline output
         .pipeline_completed_insts(pipeline_completed_insts),
@@ -659,112 +523,9 @@ module pipeline (
         .pipeline_commit_wr_idx(pipeline_commit_wr_idx),
         .pipeline_commit_wr_data(pipeline_commit_wr_data),
         .pipeline_commit_wr_en(pipeline_commit_wr_en),
-        .pipeline_commit_NPC(pipeline_commit_NPC),
-
-	    // output to data cache
-        .store_en(store_en),
-        .store2Dcache_addr(store2Dcache_addr),
-        .store2Dcache_data(store2Dcache_data)
-
-	// .proc2Dmem_command (re_proc2mem_command),
-    //     .proc2Dmem_size (re_proc2mem_size),
-    //     .proc2Dmem_addr (re_proc2mem_addr),
-    //     .proc2Dmem_data (re_proc2mem_data)
+        .pipeline_commit_NPC(pipeline_commit_NPC)
     );
 
-
-
-
-
-    function void print_instruction_line();
-
-        print_inst(if_packet.inst, if_packet.PC, if_packet.valid);
-        $write("\t|");
-        print_inst(id_packet.inst, id_packet.PC, id_packet.valid);
-        $write("\t|");
-        print_inst(is_packet.inst, is_packet.PC, is_packet.valid);
-        $write("\t|");
-        print_inst(ex_packet.inst, ex_packet.PC, ex_packet.valid);
-        $write("\t|");
-        print_inst(co_packet.inst, co_packet.PC, co_packet.valid);
-        $display("");
-    endfunction
-
-    function void print_reg_lines();
-
-        $write("-\t\t"); // IF
-
-        $write("dst=");
-        print_preg(id_packet.dest_reg);
-        $write("\t");
-
-        $write("\tds=%0d\t", is_packet.dest_reg_idx);
-        $write("\tds=%0d\t", ex_packet.dest_reg_idx);
-        $write("\tds=%0d\t", co_packet.dest_reg_idx);
-
-        $display(""); 
-
-        $write("-\t\t");
-
-        $write("s1=");
-        print_preg(id_packet.src1_reg);
-        $write("\t");
-
-        $write("\tv1=%h", is_packet.rs1_value);
-        $write("\tv1=%h", ex_packet.rs1_value);
-        $write("\tv1=%h", co_packet.rs1_value);
-
-        $display("");
-
-        $write("-\t\t");
-
-        $write("s2=");
-        print_preg(id_packet.src2_reg);
-        $write("\t");
-
-        $write("\tv2=%h", is_packet.rs2_value);
-        $write("\tv2=%h", ex_packet.rs2_value);
-        $write("\tv2=%h", co_packet.rs2_value);
-        $display("");
-    endfunction
-
-    // function void print_reg_values();
-    //     $write("\t|");
-    //     // Print src1 value 
-    //     $write(" src1=%");
-    
-    //     $write("\t|");
-    //     // Print src2 value 
-    //     $write(" src2=");
-    //     print_reg_value(co_packet.src2_reg);
-    //     $write("\t|");
-    //     // Print dest value 
-    //     $write(" dest=");
-    //     print_reg_value(co_packet.dest_reg);
-    //     $write("\t|");
-    //     $display("");
-    // endfunction
-
-
-
-    // Function to print the contents of all pipeline registers
-    function void print_pipeline_registers();
-        $display("Pipeline Output Registers");
-        $display("---------------------------------------------------------------------------------------");
-        $display("IF PACKET \t| ID PACKET \t| IS PACKET \t| EX PACKET \t| CO PACKET");
-        $display("---------------------------------------------------------------------------------------");
-        
-        print_instruction_line();
-        print_reg_lines();
-
-     
-    endfunction
-
-    always_ff @(posedge clock) begin 
-        `ifdef DEBUG_PRINT
-        print_pipeline_registers();
-        `endif
-    end
 
 
 

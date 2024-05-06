@@ -60,38 +60,20 @@ module icache (
     output [1:0]       proc2Imem_command,
     output [`XLEN-1:0] proc2Imem_addr,
 
-    // To fetch stageproc2Icache_addr
+    // To fetch stage
     output [63:0] Icache_data_out, // Data is mem[proc2Icache_addr]
-    output Icache_valid_out, // When valid is high
-
-
-    //DEBUG 
-    output ICACHE_ENTRY [`CACHE_LINES-1:0] icache_data,
-     // Note: cache tags, not memory tags
-    output logic [12-`CACHE_LINE_BITS:0] current_tag, last_tag,
-    output logic [`CACHE_LINE_BITS - 1:0] current_index, last_index,
-    output logic [3:0] current_mem_tag, // The current memory tag we might be waiting on
-    output logic miss_outstanding, // Whether a miss has received its response tag to wait on
-
-
-    output logic got_mem_data,
-    output logic changed_addr,
-    output logic update_mem_tag,
-    output logic unanswered_miss
-
-
-
+    output Icache_valid_out // When valid is high
 );
 
     // ---- Cache data ---- //
 
-    // ICACHE_ENTRY [`CACHE_LINES-1:0] icache_data;
+    ICACHE_ENTRY [`CACHE_LINES-1:0] icache_data;
 
     // ---- Addresses and final outputs ---- //
 
-    // // Note: cache tags, not memory tags
-    // logic [12-`CACHE_LINE_BITS:0] current_tag, last_tag;
-    // logic [`CACHE_LINE_BITS - 1:0] current_index, last_index;
+    // Note: cache tags, not memory tags
+    logic [12-`CACHE_LINE_BITS:0] current_tag, last_tag;
+    logic [`CACHE_LINE_BITS - 1:0] current_index, last_index;
 
     assign {current_tag, current_index} = proc2Icache_addr[15:3];
 
@@ -101,37 +83,22 @@ module icache (
 
     // ---- Main cache logic ---- //
 
-    // logic [3:0] current_mem_tag; // The current memory tag we might be waiting on
-    // logic miss_outstanding; // Whether a miss has received its response tag to wait on
+    logic [3:0] current_mem_tag; // The current memory tag we might be waiting on
+    logic miss_outstanding; // Whether a miss has received its response tag to wait on
 
-    // wire got_mem_data = (current_mem_tag == Imem2proc_tag) && (current_mem_tag != 0);
+    wire got_mem_data = (current_mem_tag == Imem2proc_tag) && (current_mem_tag != 0);
 
-    // wire changed_addr = (current_index != last_index) || (current_tag != last_tag);
-
-    assign got_mem_data = (current_mem_tag == Imem2proc_tag) && (current_mem_tag != 0);
-
-    assign changed_addr = (current_index != last_index) || (current_tag != last_tag);
+    wire changed_addr = (current_index != last_index) || (current_tag != last_tag);
 
     // Set mem tag to zero if we changed_addr, and keep resetting while there is
     // a miss_outstanding. Then set to zero when we got_mem_data.
     // (this relies on Imem2proc_response being zero when there is no request)
-    assign update_mem_tag = changed_addr || miss_outstanding || got_mem_data;
+    wire update_mem_tag = changed_addr || miss_outstanding || got_mem_data;
 
     // If we have a new miss or still waiting for the response tag, we might
     // need to wait for the response tag because dcache has priority over icache
-    /* 'answered' means response tag recieved */
-    assign unanswered_miss = changed_addr ? !Icache_valid_out
+    wire unanswered_miss = changed_addr ? !Icache_valid_out
                                         : miss_outstanding && (Imem2proc_response == 0);
-
-    // // Set mem tag to zero if we changed_addr, and keep resetting while there is
-    // // a miss_outstanding. Then set to zero when we got_mem_data.
-    // // (this relies on Imem2proc_response being zero when there is no request)
-    // wire update_mem_tag = changed_addr || miss_outstanding || got_mem_data;
-
-    // // If we have a new miss or still waiting for the response tag, we might
-    // // need to wait for the response tag because dcache has priority over icache
-    // wire unanswered_miss = changed_addr ? !Icache_valid_out
-    //                                     : miss_outstanding && (Imem2proc_response == 0);
 
     // Keep sending memory requests until we receive a response tag or change addresses
     assign proc2Imem_command = (miss_outstanding && !changed_addr) ? BUS_LOAD : BUS_NONE;

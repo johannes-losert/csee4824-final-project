@@ -41,7 +41,7 @@ module testbench;
     logic [3:0]  mem2proc_tag;       // 0 = no value, other=tag of transaction
 
 
-    ifetch dut(
+    ifetch_basic dut(
         .clock(clock),
         .reset(reset),
         
@@ -125,7 +125,7 @@ module testbench;
 
         clock = 0;
         reset = 0;
-        if_valid = 0;
+        if_valid = 1;
 
         // Initial Reset
         reset = 1;
@@ -137,25 +137,31 @@ module testbench;
         rob_target_req = 0;
         branch_pred_req = 0;
         
-        for (int i = 0; i < 5; i++) begin
+        for (int i = 0; i < 100; i++) begin
             @(posedge if_packet.valid)
             $display("if_packet.valid = %b", if_packet.valid);
             $display("if_packet.PC = %h", if_packet.PC);
-            $display("desired_PC =%h", 4 * (i + 1));
-            assert(if_packet.PC == 4 * (i + 1)) else exit_on_error;
+            assert(if_packet.PC == 4 * i) else exit_on_error;
             assert(if_packet.valid == 1) else exit_on_error;
         end
+        
+        // \
+        // @(posedge if_packet.valid)
 
-        if_valid = 1;
-        for (int i = 4; i < 10; i++) begin
-            @(posedge if_packet.valid)
-            $display("if_packet.valid = %b", if_packet.valid);
-            $display("if_packet.PC = %h", if_packet.PC);
-            $display("desired_PC =%h", 4 * (i + 1));
-            assert(if_packet.PC == 4 * (i + 1)) else exit_on_error;
-            assert(if_packet.valid == 1) else exit_on_error;
-        end
+        // $display("if_packet.valid = %b", if_packet.valid);
+        // $display("if_packet.PC = %h", if_packet.PC);
+        // assert(if_packet.PC == 32'h0000_0004) else exit_on_error;
+        // assert(if_packet.valid == 1) else exit_on_error;
+        
+        // @(posedge if_packet.valid)
 
+        // $display("if_packet.valid = %b", if_packet.valid);
+        // $display("if_packet.PC = %h", if_packet.PC);
+        // assert(if_packet.PC == 32'h0000_0008) else exit_on_error;
+        // assert(if_packet.valid == 1) else exit_on_error;
+
+        
+        
         $display("@@@Passed");
         $finish;
     end 
