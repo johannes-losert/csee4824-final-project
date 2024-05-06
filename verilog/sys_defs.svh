@@ -46,11 +46,11 @@
 `define LSQ_SZ 1
 
 // functional units (you should decide if you want more or fewer types of FUs)
-`define NUM_FU_ALU 8
-`define NUM_FU_MULT 2
-`define NUM_FU_LOAD 2
-`define NUM_FU_STORE 2
-`define NUM_FU_BRANCH 2
+`define NUM_FU_ALU 1
+`define NUM_FU_MULT 1
+`define NUM_FU_LOAD 1
+`define NUM_FU_STORE 1
+`define NUM_FU_BRANCH 1
 
 // TODO make this automated, should equal clog2(max(NUM_FU_ALU, NUM_FU_MULT, NUM_FU_LOAD, NUM_FU_STORE))
 `define MAX_FU_INDEX 1
