@@ -1,4 +1,4 @@
-// Simple bimodal branch predictor
+// Simple bimodal branch predictor, currently ununsed
 `include "verilog/sys_defs.svh"
 
 
