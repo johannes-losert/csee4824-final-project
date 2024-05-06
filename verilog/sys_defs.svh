@@ -17,7 +17,7 @@
 //  `define DEBUG_PRINT
 // `define MAX_CYCLES 10000
 
-`define MAX_CYCLES 200000
+`define MAX_CYCLES 2000000
 
 ///////////////////////////////////
 // ---- Starting Parameters ---- //

@@ -243,8 +243,9 @@ module map_table (
                 for (int i = 0; i < `PHYS_REG_SZ; i++) begin
                     if (i == immune_reg_idx) begin
                         preg_entries[i] <= immune_preg;
+                    end else begin 
+                        preg_entries[i] <= retired_preg_entries[i];
                     end
-                    preg_entries[i] <= retired_preg_entries[i];
                 end
             end
 
