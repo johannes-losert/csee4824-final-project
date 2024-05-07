@@ -30,6 +30,7 @@ module map_table (
     // Restore operation (copies all retired_pregs back to preg)
     input logic restore_enable,
     input logic [`REG_IDX_SZ:0] immune_reg_idx, // Don't restore this register
+    input PREG immune_preg,
 
     // SET READY operation (CDB)
     input logic set_ready_enable,
@@ -241,9 +242,10 @@ module map_table (
             if (restore_enable) begin
                 for (int i = 0; i < `PHYS_REG_SZ; i++) begin
                     if (i == immune_reg_idx) begin
-                        continue;
+                        preg_entries[i] <= immune_preg;
+                    end else begin 
+                        preg_entries[i] <= retired_preg_entries[i];
                     end
-                    preg_entries[i] <= retired_preg_entries[i];
                 end
             end
 

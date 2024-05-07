@@ -39,6 +39,7 @@ module stage_ex (
     /* Input to roll back */
     input logic rollback,
     output logic [`REG_IDX_SZ:0] rollback_immune_reg,
+    output PREG rollback_immune_preg,
 
     // debug outputs
     output IS_EX_PACKET [`NUM_FU_ALU-1:0] alu_packet,
@@ -269,6 +270,7 @@ module stage_ex (
                     ex_packet.result        = tmp_alu_result[i][`XLEN-1:0];
                     ex_packet.take_branch   = 0;
                     rollback_immune_reg = 0;
+                    rollback_immune_preg = 0;
                     ex_packet.mem_size = 0;
 
                     // Pass throughs 
@@ -309,6 +311,9 @@ module stage_ex (
                 ex_packet.result        = tmp_mult_result[i];
                 ex_packet.take_branch   = 0;
                 rollback_immune_reg = 0;
+                rollback_immune_preg = 0;
+                rollback_immune_preg.reg_num = tmp_branch_packet[i].dest_reg_idx;
+                rollback_immune_preg.ready = 1;
                 ex_packet.mem_size = 0;
 
                 // Pass throughs
@@ -391,6 +396,7 @@ module stage_ex (
             ex_packet.result        = tmp_load_result;
             ex_packet.take_branch   = 0;
                  rollback_immune_reg = 0;
+                 rollback_immune_preg = 0;
 	        ex_packet.mem_size = 0;
             
             // Pass throughs
@@ -430,6 +436,7 @@ module stage_ex (
                         ex_packet.result        = tmp_store_result;
             ex_packet.take_branch   = 0;
                  rollback_immune_reg = 0;
+                 rollback_immune_preg = 0;
             
             // Pass throughs
             ex_packet.inst = tmp_store_packet.inst;

@@ -418,6 +418,8 @@ module pipeline (
     assign rs_free_branch = co_free_branch;
 
     logic [`REG_IDX_SZ:0] rollback_immune_reg;
+    PREG rollback_immune_preg;
+
 
     PREG retire_reg_preg;
     logic [`REG_IDX_SZ:0] retire_reg_arch_idx;
@@ -436,6 +438,7 @@ module pipeline (
         // from rollback logic
         .rollback(id_rollback), 
         .rollback_immune_reg(rollback_immune_reg),
+        .rollback_immune_preg(rollback_immune_preg),
 
         // from retire stage
         .retire_move_head(retire_move_head), 
@@ -582,7 +585,8 @@ module pipeline (
         .rollback(ex_rollback),
 
         // register to make immune from rollback (for jal/jalr)
-        .rollback_immune_reg(rollback_immune_reg)
+        .rollback_immune_reg(rollback_immune_reg),
+        .rollback_immune_preg(rollback_immune_preg)
         
 
         // .proc2Dmem_command (ex_proc2mem_command),

@@ -15,6 +15,7 @@ module dispatch (
     // Rollback signal (from ex stage?)
     input logic rollback,              // (new) will clear ROB and revert Map Table 
     input logic [`REG_IDX_SZ:0] rollback_immune_reg, // (new) will not clear these registers
+    input PREG rollback_immune_preg,
 
     // Input from retire stage
     input logic retire_move_head,       // (new) retire signal to move head
@@ -164,6 +165,7 @@ module dispatch (
         // inputs
         .restore_enable(rollback),
         .immune_reg_idx(rollback_immune_reg), // Set to zero for none
+        .immune_preg(rollback_immune_preg),
 
         /* SET READY operation (CDB) */
         // inputs
