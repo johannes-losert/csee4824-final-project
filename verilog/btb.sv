@@ -5,6 +5,8 @@
 // It also has outputs for commands to the memory, 
 // data from the cache, and validity of the cache data.
 
+// currently ununsed
+
 `include "verilog/sys_defs.svh"
 
 module btb (

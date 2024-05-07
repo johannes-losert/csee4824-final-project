@@ -214,8 +214,7 @@ module pipeline (
     // Stall output signal
     // TODO branch addresses?
     logic id_needs_stall;
-
-    logic branch_decoded;
+    
     logic branch_resolved;
     logic branch_lock;
     logic n_branch_lock;
@@ -455,7 +454,6 @@ module pipeline (
 
         // Outputs
         .stall(id_needs_stall),
-        .branch_decoded(branch_decoded),
 
         .rob_head_idx(rob_head_idx),
 
