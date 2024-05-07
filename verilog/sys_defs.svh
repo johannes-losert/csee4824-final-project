@@ -14,10 +14,11 @@
 `timescale 1ns/100ps
 
 /* If DEBUG_PRINT is defined, don't set MAX_CYCLES to more than ~2000 */
-//  `define DEBUG_PRINT
+`define DEBUG_PRINT 1
 // `define MAX_CYCLES 10000
+`define MAX_CYCLES 2000
 
-`define MAX_CYCLES 200000
+//`define MAX_CYCLES 200000
 
 ///////////////////////////////////
 // ---- Starting Parameters ---- //
@@ -48,8 +49,8 @@
 `define LSQ_SZ 1
 
 // functional units (you should decide if you want more or fewer types of FUs)
-`define NUM_FU_ALU 1
-`define NUM_FU_MULT 1
+`define NUM_FU_ALU 2
+`define NUM_FU_MULT 2
 `define NUM_FU_LOAD 1
 `define NUM_FU_STORE 1
 `define NUM_FU_BRANCH 1

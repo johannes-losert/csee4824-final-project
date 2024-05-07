@@ -349,7 +349,7 @@ module stage_ex (
             if(branch_done_process[i]) begin
                 ex_packet.result        = tmp_branch_result[i];
                 ex_packet.take_branch   = tmp_branch_packet[i].uncond_branch || (tmp_branch_packet[i].cond_branch && tmp_take_conditional[i]);
-                rollback_immune_reg = tmp_branch_packet.arch_dest_reg_num;
+                rollback_immune_reg = tmp_branch_packet[i].arch_dest_reg_num;
                 ex_packet.mem_size = 0;
 
                 // Pass throughs
